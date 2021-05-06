@@ -1,0 +1,1 @@
+entity classes and object models that are in use internally in the program

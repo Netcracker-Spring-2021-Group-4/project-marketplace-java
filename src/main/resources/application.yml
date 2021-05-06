@@ -1,0 +1,5 @@
+spring:
+  config:
+    import:
+      - ./sql/queries.yml
+      - secrets.yml

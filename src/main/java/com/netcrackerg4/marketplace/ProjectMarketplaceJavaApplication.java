@@ -1,0 +1,13 @@
+package com.netcrackerg4.marketplace;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class ProjectMarketplaceJavaApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ProjectMarketplaceJavaApplication.class, args);
+    }
+
+}
