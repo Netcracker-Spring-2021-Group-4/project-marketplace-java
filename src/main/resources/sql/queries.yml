@@ -1,0 +1,15 @@
+custom:
+  postgres:
+    user:
+      get-by-email: >
+        SELECT email, password, role_id
+        FROM auth_user
+        WHERE email = ?;
+      get-authorities: >
+        SELECT role_name AS authority
+        FROM user_role
+        WHERE role_id = ?
+        UNION ALL
+        SELECT permission_name AS authority
+        FROM permission INNER JOIN permission_role USING(permission_id)
+        WHERE role_id = ?;

@@ -1,15 +1,16 @@
 DROP TABLE IF EXISTS auth_user;
 DROP TABLE IF EXISTS confirmation_token;
+DROP TABLE IF EXISTS permission_role;
 DROP TABLE IF EXISTS user_role;
 DROP TABLE IF EXISTS permission;
-DROP TABLE IF EXISTS permission_role;
+
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE auth_user
 (
     user_id UUID DEFAULT uuid_generate_v1 (),
-    email VARCHAR(128) NOT NULL,
+    email VARCHAR(128) NOT NULL UNIQUE,
     password VARCHAR(96) NOT NULL,
     role_id INTEGER NOT NULL,
     CONSTRAINT auth_user_pk PRIMARY KEY (user_id)
@@ -31,7 +32,7 @@ CREATE TABLE confirmation_token
 CREATE TABLE user_role
 (
     role_id SERIAL NOT NULL,
-    role_name VARCHAR(16) NOT NULL,
+    role_name VARCHAR(32) NOT NULL,
     CONSTRAINT user_role_pk PRIMARY KEY (role_id)
 );
 

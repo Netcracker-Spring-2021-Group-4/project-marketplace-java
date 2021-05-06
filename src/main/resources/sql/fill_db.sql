@@ -1,9 +1,9 @@
 INSERT INTO user_role (role_name) VALUES
-('USER'),
-('AUTH_USER'),
-('COURIER'),
-('PRODUCT_MANAGER'),
-('ADMIN');
+('ROLE_USER'),
+('ROLE_AUTH_USER'),
+('ROLE_COURIER'),
+('ROLE_PRODUCT_MANAGER'),
+('ROLE_ADMIN');
 
 INSERT INTO permission (permission_name) VALUES
 ('user:self:w'),
@@ -38,5 +38,6 @@ INSERT INTO permission_role (role_id, permission_id) VALUES
 (5, 11),
 (5, 12);
 
+-- password for development
 INSERT INTO auth_user (email, password, role_id) VALUES
 ('netcracker_spring_2021_t4@yahoo.com', '{bcrypt}$2a$10$0nSlqxDAYjETHwDc.CNIieVv1erp3Hk6BhvA633LRJZDicfmv23HC', 5);
