@@ -52,4 +52,6 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         var token = jwtUtil.generateToken(authResult);
         response.addHeader("Authorization", "Bearer " + token);
     }
+
+    // review: unsuccessfulAuthentication?
 }

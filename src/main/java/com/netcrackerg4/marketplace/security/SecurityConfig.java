@@ -46,7 +46,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             .and()
             .addFilterBefore(exceptionHandlerFilter, JwtUsernameAndPasswordAuthenticationFilter.class)
+               // review: just LoginFilter
             .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtUtil))
+               // review: just JwtFilter (everything that comes to a server is a request, you don't eve expect it to return a jwt)
             .addFilterAfter(jwtRequestFilter, JwtUsernameAndPasswordAuthenticationFilter.class)
 
             .authorizeRequests()

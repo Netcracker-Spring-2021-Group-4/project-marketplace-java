@@ -23,6 +23,7 @@ public class AppUser implements UserDetails {
 
     public AppUser( String email, String password, int roleId) {
         // TODO change
+        // review: why to set status to terminated? why setting passed values is not enough?
         this(email, password, roleId, null, Status.TERMINATED);
     }
 

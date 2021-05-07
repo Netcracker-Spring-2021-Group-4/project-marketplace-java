@@ -29,6 +29,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDAO {
 
     @Override
     public Optional<AppUser> findByIdx(String idx) {
+        // review: why not to inject JdbcTemplate once and call it directly?
         assert getJdbcTemplate() != null;
         Optional<AppUser> user;
         try{
