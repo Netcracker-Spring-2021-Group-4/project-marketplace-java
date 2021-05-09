@@ -37,4 +37,10 @@ public class TokenDaoImpl extends JdbcDaoSupport implements ITokenDao {
                                 rs.getTimestamp("expired_at").toInstant(), rs.getBoolean("is_activated")),
                 tokenValue);
     }
+
+    @Override
+    public void setActivated(String tokenValue) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(tokenQueries.getActivateToken(), tokenValue);
+    }
 }
