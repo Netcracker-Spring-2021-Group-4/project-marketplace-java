@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -46,8 +47,11 @@ public class UserServiceImpl implements IUserService {
     @Override
     public void signupUser(SignupRequestDto signupRequest, boolean withConfirmation, UserRole role) {
         int roleId = authDao.getRoleIdByName(role.name()).orElseThrow(BadCodeError::new);
+        String email = signupRequest.getEmail();
+        userDao.findByEmail(email)
+                .ifPresent(user -> {throw new IllegalStateException("User with such email already exists.");});
         AppUserEntity userEntity = AppUserEntity.builder()
-                .email(signupRequest.getEmail())
+                .email(email)
                 .password(passwordEncoder.encode(signupRequest.getPlainPassword()))
                 .firstName(signupRequest.getFirstName())
                 .lastName(signupRequest.getLastName())
