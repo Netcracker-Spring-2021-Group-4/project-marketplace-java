@@ -3,35 +3,37 @@ package com.netcrackerg4.marketplace.security.jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class JwtUtil {
+@AllArgsConstructor
+public class JwtUtil implements IJwtService {
 
     @Value("${custom.jwt.secret}")
-    private String SECRET_KEY;
+    private final String SECRET_KEY;
 
     @Value("${custom.jwt.hours-valid}")
-    private Integer HOURS_TOKEN_VALID;
+    private final Integer HOURS_TOKEN_VALID;
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+    public String generateToken(Collection<GrantedAuthority> authorities, String subject) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("authorities", authorities);
+        return createToken(claims, subject);
     }
 
-    public UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationToken(String token) {
+    public UsernamePasswordAuthenticationToken getUserPassAuthToken(String token) {
         return extractClaim(token, claims -> {
-            var sub = claims.getSubject();
+            String sub = claims.getSubject();
             var authorities = (List<Map<String, String>>) claims.get("authorities");
             var set = authorities.stream()
                     .map(a -> new SimpleGrantedAuthority(a.get("authority")))
@@ -48,6 +50,11 @@ public class JwtUtil {
         Map<String, Object> claims = new HashMap<>();
         claims.put("authorities", authResults.getAuthorities());
         return createToken(claims, authResults.getName());
+    }
+
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
     }
 
     private String createToken(Map<String, Object> claims, String subject) {

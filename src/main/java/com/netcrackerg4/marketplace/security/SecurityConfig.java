@@ -1,8 +1,9 @@
 package com.netcrackerg4.marketplace.security;
 
 import com.netcrackerg4.marketplace.exception.ExceptionHandlerFilter;
-import com.netcrackerg4.marketplace.security.filter.JwtRequestFilter;
-import com.netcrackerg4.marketplace.security.filter.JwtUsernameAndPasswordAuthenticationFilter;
+import com.netcrackerg4.marketplace.security.filter.JwtFilter;
+import com.netcrackerg4.marketplace.security.filter.LoginFilter;
+import com.netcrackerg4.marketplace.security.jwt.IJwtService;
 import com.netcrackerg4.marketplace.security.jwt.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,35 +27,33 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private JwtRequestFilter jwtRequestFilter;
-    private JwtUtil jwtUtil;
-    private ExceptionHandlerFilter exceptionHandlerFilter;
+    private final JwtFilter jwtFilter;
+    private final IJwtService jwtUtil;
+    private final ExceptionHandlerFilter exceptionHandlerFilter;
 
     @Autowired
-    public SecurityConfig(JwtUtil jwtUtil, JwtRequestFilter jwtRequestFilter,
+    public SecurityConfig(JwtUtil jwtUtil, JwtFilter jwtFilter,
                           ExceptionHandlerFilter exceptionHandlerFilter) {
         this.jwtUtil = jwtUtil;
-        this.jwtRequestFilter = jwtRequestFilter;
+        this.jwtFilter = jwtFilter;
         this.exceptionHandlerFilter = exceptionHandlerFilter;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-       http
-            .cors().and().csrf().disable()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        http
+                .cors().and().csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
-            .and()
-            .addFilterBefore(exceptionHandlerFilter, JwtUsernameAndPasswordAuthenticationFilter.class)
-               // review: just LoginFilter
-            .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtUtil))
-               // review: just JwtFilter (everything that comes to a server is a request, you don't eve expect it to return a jwt)
-            .addFilterAfter(jwtRequestFilter, JwtUsernameAndPasswordAuthenticationFilter.class)
+                .and()
+                .addFilterBefore(exceptionHandlerFilter, LoginFilter.class)
+                .addFilter(new LoginFilter(authenticationManager(), jwtUtil))
+                .addFilterAfter(jwtFilter, LoginFilter.class)
 
-            .authorizeRequests()
-            .antMatchers("/api/v*/public/**").permitAll()
+                .authorizeRequests()
+                .antMatchers("/api/v*/public/**").permitAll()
 //            .antMatchers("/api/v1/admin/**").hasRole("ADMIN")
-            .antMatchers(HttpMethod.OPTIONS).permitAll()
+                .antMatchers(HttpMethod.OPTIONS).permitAll()
             .anyRequest().authenticated();
     }
 

@@ -1,7 +1,5 @@
 package com.netcrackerg4.marketplace.exception;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netcrackerg4.marketplace.model.domain.ErrorBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -13,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static com.netcrackerg4.marketplace.util.ManualJSONMapper.convertObjectToJson;
+import static com.netcrackerg4.marketplace.util.ManualJsonMapper.convertObjectToJson;
 
 @Component
 public class ExceptionHandlerFilter extends OncePerRequestFilter {

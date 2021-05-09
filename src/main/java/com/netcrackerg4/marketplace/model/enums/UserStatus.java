@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.model.enums;
 
-public enum Status {
+public enum UserStatus {
     ACTIVE,
     INACTIVE,
     TERMINATED,

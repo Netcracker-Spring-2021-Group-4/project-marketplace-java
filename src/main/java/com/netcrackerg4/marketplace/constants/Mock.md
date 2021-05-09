@@ -1,1 +1,0 @@
-constant defined class
