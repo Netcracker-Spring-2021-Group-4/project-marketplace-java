@@ -44,6 +44,7 @@ public class UserServiceImpl implements IUserService {
         return findByEmail(s); // mock
     }
 
+    @Transactional
     @Override
     public void signupUser(SignupRequestDto signupRequest, boolean withConfirmation, UserRole role) {
         int roleId = authDao.getRoleIdByName(role.name()).orElseThrow(BadCodeError::new);
@@ -69,6 +70,7 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    @Transactional
     @Override
     public void confirmSignup(String token) throws ActivatedTokenReuseException {
         TokenEntity tokenEntity = tokenDao.read(token);
