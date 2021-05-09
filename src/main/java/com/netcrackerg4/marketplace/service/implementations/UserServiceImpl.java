@@ -66,12 +66,13 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public void confirmSignup(String token) {
+    public void confirmSignup(String token) throws ActivatedTokenReuseException {
         TokenEntity tokenEntity = tokenDao.read(token);
         if (tokenEntity.isActivated()) throw new ActivatedTokenReuseException();
         try {
             jwtUtil.getUserPassAuthToken(token);
             userDao.setStatus(tokenEntity.getUserEmail(), UserStatus.ACTIVE);
+            tokenDao.setActivated(token);
         } catch (JwtException e) {
             throw new IllegalStateException(String.format("Token %s can not be trusted.", token));
         }

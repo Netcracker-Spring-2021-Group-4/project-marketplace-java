@@ -34,6 +34,10 @@ custom:
         INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);
       read-token: >
         SELECT token, user_email, expired_at, is_activated FROM confirmation_token WHERE token=?
+      activate-token: >
+        UPDATE confirmation_token
+        SET is_activated = true
+        WHERE token = ?;
     auth:
       role:
         find-role-id-by-role-name: >

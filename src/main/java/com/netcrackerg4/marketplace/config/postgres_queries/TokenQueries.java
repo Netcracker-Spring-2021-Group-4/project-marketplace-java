@@ -8,4 +8,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class TokenQueries {
     private String createToken;
     private String readToken;
+    private String activateToken;
 }

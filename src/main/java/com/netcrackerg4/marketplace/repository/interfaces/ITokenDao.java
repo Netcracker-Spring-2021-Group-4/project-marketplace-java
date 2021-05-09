@@ -6,4 +6,6 @@ public interface ITokenDao {
     void create(TokenEntity tokenEntity);
 
     TokenEntity read(String tokenValue);
+
+    void setActivated(String tokenValue);
 }
