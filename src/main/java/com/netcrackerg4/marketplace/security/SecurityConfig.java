@@ -52,7 +52,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .authorizeRequests()
                 .antMatchers("/api/v*/public/**").permitAll()
-//            .antMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                .antMatchers("/api/v*/admin/**").hasRole("ADMIN")
+                .antMatchers("/api/v*/courier/**").hasRole("COURIER")
+                .antMatchers("/api/v*/manager/**").hasAnyRole("PRODUCT_MGR", "ADMIN")
+                .antMatchers("/api/v*/auth-costumer/**").hasRole("CUSTOMER")
+                //maybe also auth-customer-manager branch
+                //staff branch
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
             .anyRequest().authenticated();
     }
