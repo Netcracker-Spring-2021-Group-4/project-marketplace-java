@@ -75,5 +75,3 @@ create table permission_role
         foreign key (permission_id) REFERENCES permission
             ON update CASCADE ON delete CASCADE
 );
-
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO nc_course;
