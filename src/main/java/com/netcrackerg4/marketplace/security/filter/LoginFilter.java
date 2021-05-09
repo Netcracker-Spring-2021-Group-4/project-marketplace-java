@@ -1,8 +1,8 @@
 package com.netcrackerg4.marketplace.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netcrackerg4.marketplace.security.jwt.JwtUtil;
-import com.netcrackerg4.marketplace.model.domain.UsernamePasswordDataObject;
+import com.netcrackerg4.marketplace.model.dto.user.UsernamePasswordDto;
+import com.netcrackerg4.marketplace.security.jwt.IJwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,12 +16,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
-public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+    private final IJwtService jwtUtil;
 
-    public JwtUsernameAndPasswordAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public LoginFilter(AuthenticationManager authenticationManager, IJwtService jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
     }
@@ -31,14 +31,13 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
         try {
             var usernamePasswordAuthRequest =
-                    new ObjectMapper().readValue(request.getInputStream(), UsernamePasswordDataObject.class);
+                    new ObjectMapper().readValue(request.getInputStream(), UsernamePasswordDto.class);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     usernamePasswordAuthRequest.getUsername(),
                     usernamePasswordAuthRequest.getPassword()
             );
-            var res =  authenticationManager.authenticate(authentication);
-            return res;
+            return authenticationManager.authenticate(authentication);
         } catch( IOException e ) {
             throw new RuntimeException(e);
         }

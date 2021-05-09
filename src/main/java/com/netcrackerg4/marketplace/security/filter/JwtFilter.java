@@ -1,10 +1,10 @@
 package com.netcrackerg4.marketplace.security.filter;
 
+import com.netcrackerg4.marketplace.security.jwt.IJwtService;
 import com.netcrackerg4.marketplace.security.jwt.JwtUtil;
 import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -15,19 +15,16 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
-public class JwtRequestFilter extends OncePerRequestFilter {
+public class JwtFilter extends OncePerRequestFilter {
 
-    private final UserDetailsService userDetailsService;
-    private final JwtUtil jwtUtil;
+    private final IJwtService jwtUtil;
+    private UserDetailsService userDetailsService;
 
     @Autowired
-    public JwtRequestFilter(UserDetailsService userDetailsService, JwtUtil jwtUtil) {
-        this.userDetailsService = userDetailsService;
+    public JwtFilter(/*UserDetailsService userDetailsService, */JwtUtil jwtUtil) {
+//        this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -40,16 +37,21 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
 
-        var token = header.replace("Bearer ", "");
+        String token = header.replace("Bearer ", "");
 
         try {
             var authentication =
-                    jwtUtil.getUsernamePasswordAuthenticationToken(token);
+                    jwtUtil.getUserPassAuthToken(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch(JwtException e) {
+        } catch (JwtException e) {
             throw new IllegalStateException(String.format("Token %s can not be trusted", token));
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
+    }
+
+    @Autowired
+    public void setUserDetailsService(@Qualifier("userServiceImpl") final UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
 }

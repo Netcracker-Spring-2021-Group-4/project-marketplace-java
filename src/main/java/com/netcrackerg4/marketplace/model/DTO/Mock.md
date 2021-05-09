@@ -1,1 +1,0 @@
-object models that are used to interact with the client

@@ -2,8 +2,8 @@ custom:
   postgres:
     user:
       get-by-email: >
-        SELECT email, password, role_id
-        FROM auth_user
+        SELECT user_id, email, password, first_name, last_name, status_name, role_id
+        FROM auth_user INNER JOIN user_status USING (status_id)
         WHERE email = ?;
       get-authorities: >
         SELECT role_name AS authority
@@ -13,3 +13,28 @@ custom:
         SELECT permission_name AS authority
         FROM permission INNER JOIN permission_role USING(permission_id)
         WHERE role_id = ?;
+      create-new: >
+        INSERT INTO auth_user (email, password, role_id, status_id, first_name, last_name) VALUES (?, ?, ?, ?, ?, ?);
+      find-user-by-id: >
+        SELECT email, password, first_name, last_name, status_name, role_id
+        FROM auth_user INNER JOIN user_status USING (status_id)
+        WHERE user_id = ?
+      get-permissions: >
+        SELECT permission_name
+        FROM permission INNER JOIN permission_role USING(permission_id)
+        WHERE role_id = ?;
+      update-status: >
+        UPDATE auth_user
+        SET status_id=(SELECT status_id FROM user_status WHERE status_name=?)
+        WHERE email=?;
+      find-status-id-by-name: >
+        SELECT status_id FROM user_status WHERE status_name=?;
+    token:
+      create-token: >
+        INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);
+      read-token: >
+        SELECT token, user_email, expired_at, is_activated FROM confirmation_token WHERE token=?
+    auth:
+      role:
+        find-role-id-by-role-name: >
+          SELECT role_id FROM user_role WHERE role_name=?;

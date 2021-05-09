@@ -1,34 +1,34 @@
 package com.netcrackerg4.marketplace.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.netcrackerg4.marketplace.model.enums.Status;
+import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
+@RequiredArgsConstructor
+@Builder
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AppUser implements UserDetails {
+public class AppUserEntity implements UserDetails { // not exactly an Entity
+    private final String userId;
     private final String email;
     private final String password;
+    private final String firstName;
+    private final String lastName;
+    private final UserStatus status;
     private final int roleId;
-    private Set<GrantedAuthority> authorities;
-    private Status status;
-
-    public AppUser( String email, String password, int roleId) {
-        // TODO change
-        // review: why to set status to terminated? why setting passed values is not enough?
-        this(email, password, roleId, null, Status.TERMINATED);
-    }
+    private List<GrantedAuthority> authorities;
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<GrantedAuthority> getAuthorities() {
         return authorities;
     }
 

@@ -1,8 +1,11 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
-import com.netcrackerg4.marketplace.config.PostgresUserQueries;
-import com.netcrackerg4.marketplace.model.domain.AppUser;
-import com.netcrackerg4.marketplace.repository.interfaces.UserDAO;
+import com.netcrackerg4.marketplace.config.postgres_queries.UserQueries;
+import com.netcrackerg4.marketplace.exception.BadCodeError;
+import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
+import com.netcrackerg4.marketplace.model.enums.UserStatus;
+import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
@@ -11,33 +14,34 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
-public class UserDaoImpl extends JdbcDaoSupport implements UserDAO {
+@AllArgsConstructor
+public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
-    private PostgresUserQueries postgresUserQueries;
-    private DataSource dataSource;
+    private final UserQueries userQueries;
 
     @Autowired
-    public UserDaoImpl(PostgresUserQueries postgresUserQueries, DataSource dataSource) {
-        this.postgresUserQueries = postgresUserQueries;
-        setDataSource(dataSource);
+    public void setParentDataSource(DataSource dataSource) {
+        super.setDataSource(dataSource);
     }
 
     @Override
-    public Optional<AppUser> findByIdx(String idx) {
-        // review: why not to inject JdbcTemplate once and call it directly?
+    public Optional<AppUserEntity> findByEmail(String idx) {
         assert getJdbcTemplate() != null;
-        Optional<AppUser> user;
-        try{
-            user = Optional.ofNullable(getJdbcTemplate().queryForObject(postgresUserQueries.getGetByEmail(),(rs, row) ->
-                    new AppUser(rs.getString("email"),
-                            rs.getString("password"),
-                            rs.getInt("role_id")
-                    )
+        Optional<AppUserEntity> user;
+        try {
+            user = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getGetByEmail(), (rs, row) ->
+                            new AppUserEntity(rs.getString("user_id"),
+                                    rs.getString("email"),
+                                    rs.getString("password"),
+                                    rs.getString("first_name"),
+                                    rs.getString("last_name"),
+                                    UserStatus.valueOf(rs.getString("status_name")),
+                                    rs.getInt("role_id")
+                            )
                     , idx)
             );
         } catch (EmptyResultDataAccessException e) {
@@ -47,17 +51,57 @@ public class UserDaoImpl extends JdbcDaoSupport implements UserDAO {
     }
 
     @Override
-    public Set<GrantedAuthority> getAuthorities(int roleId) {
+    public void create(AppUserEntity item) {
         assert getJdbcTemplate() != null;
-        var list = getJdbcTemplate().query(postgresUserQueries.getGetAuthorities(), (rs, row) ->
-                new SimpleGrantedAuthority(rs.getString("authority")),
-                roleId, roleId);
-        return new HashSet<>(list);
+        int statusId = findStatusIdByStatusName(item.getStatus().name()).orElseThrow(BadCodeError::new);
+        getJdbcTemplate().update(userQueries.getCreateNew(), item.getEmail(), item.getPassword(),
+                item.getRoleId(), statusId, item.getFirstName(), item.getLastName());
     }
 
-    // TODO
     @Override
-    public void create(AppUser item) {
+    public AppUserEntity read(String key) {
+        assert getJdbcTemplate() != null;
+        return getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
+                AppUserEntity.builder()
+                        .userId(rs.getString("user_id"))
+                        .email(rs.getString("email"))
+                        .password(rs.getString("password"))
+                        .firstName(rs.getString("first_name"))
+                        .lastName(rs.getString("last_name"))
+                        .status(UserStatus.valueOf(rs.getString("status_name")))
+                        .roleId(rs.getInt("role_id"))
+                        .build(), key
+        );
+    }
 
+    @Override
+    public void update(AppUserEntity updItem) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void delete(String key) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<GrantedAuthority> getAuthorities(int roleId) {
+        assert getJdbcTemplate() != null;
+        return getJdbcTemplate().query(userQueries.getGetAuthorities(), (rs, row) ->
+                        new SimpleGrantedAuthority(rs.getString("authority")),
+                roleId, roleId);
+    }
+
+    @Override
+    public void setStatus(String email, UserStatus status) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(userQueries.getUpdateStatus(), status.name(), email);
+    }
+
+    @Override
+    public Optional<Integer> findStatusIdByStatusName(String name) {
+        assert getJdbcTemplate() != null;
+        return Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getFindStatusIdByName(),
+                Integer.class, name));
     }
 }
