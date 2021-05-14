@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    platform: postgresql
+  mail:
+    host: smtp.mail.yahoo.com
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+custom:
+  jwt:
+    hours-valid: 6
+  frontend:
+    confirmation-url: /confirm-signup/

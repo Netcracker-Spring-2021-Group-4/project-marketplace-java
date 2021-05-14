@@ -14,6 +14,8 @@ public class MailServiceImpl implements IMailService {
     private final String SENDER_EMAIL;
     @Value("${custom.frontend.confirmation-url}")
     private final String CONFIRM_SIGNUP_FRONT;
+    @Value("${custom.frontend.base-url}")
+    private final String CONFIRM_SIGNUP_BASE_FRONT;
     private final JavaMailSender mailSender;
 
     @Override
@@ -24,5 +26,10 @@ public class MailServiceImpl implements IMailService {
         message.setSubject(String.format("Dear %s %s, please confirm your registration.", firstName, lastName));
         message.setText(CONFIRM_SIGNUP_FRONT + token);
         mailSender.send(message);
+    }
+
+    private String getLinkURL() {
+        System.out.println(CONFIRM_SIGNUP_BASE_FRONT);
+        return CONFIRM_SIGNUP_BASE_FRONT + CONFIRM_SIGNUP_FRONT;
     }
 }
