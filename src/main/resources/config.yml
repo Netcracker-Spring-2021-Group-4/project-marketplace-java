@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    baselineOnMigrate: true
   datasource:
     platform: postgresql
   mail:
