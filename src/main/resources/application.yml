@@ -1,5 +1,17 @@
 spring:
   config:
+    activate:
+      on-profile: default
     import:
       - ./sql/queries.yml
+      - config.yml
       - secrets.yml
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+    import:
+      - ./sql/queries.yml
+      - config.yml
