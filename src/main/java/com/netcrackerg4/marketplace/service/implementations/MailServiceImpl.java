@@ -7,6 +7,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class MailServiceImpl implements IMailService {
@@ -19,7 +21,7 @@ public class MailServiceImpl implements IMailService {
     private final JavaMailSender mailSender;
 
     @Override
-    public void sendConfirmSignupLetter(String receiver, String firstName, String lastName, String token) {
+    public void sendConfirmSignupLetter(String receiver, String firstName, String lastName, UUID token) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(SENDER_EMAIL);
         message.setTo(receiver);

@@ -2,7 +2,7 @@ custom:
   postgres:
     user:
       get-by-email: >
-        SELECT user_id, email, password, first_name, last_name, user_status_name, role_id
+        SELECT user_id, email, password, first_name, last_name, status_name, role_id
         FROM auth_user INNER JOIN user_status USING (status_id)
         WHERE email = ?;
       get-authorities: >

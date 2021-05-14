@@ -53,7 +53,7 @@ create INDEX idx_auth_user_email
 
 create TABLE confirmation_token
 (
-    token             VARCHAR(64) PRIMARY KEY,
+    token             uuid PRIMARY KEY,
     expired_at        TIMESTAMPTZ           NOT NULL,
     is_patch_password BOOLEAN DEFAULT FALSE NOT NULL,
     is_activated      BOOLEAN DEFAULT FALSE NOT NULL,
