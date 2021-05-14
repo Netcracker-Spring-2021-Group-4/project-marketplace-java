@@ -44,6 +44,10 @@ values (2, 1),
        (5, 11),
        (5, 12);
 
+insert into auth_user (email, password, first_name, phone_number, last_name, role_id, status_id)
+values ('netcracker_spring_2021_t4@yahoo.com', '{bcrypt}$2a$10$0nSlqxDAYjETHwDc.CNIieVv1erp3Hk6BhvA633LRJZDicfmv23HC',
+'380553752535', 'King', 'Yaropolkovich', 5, 2);
+
 insert into timeslot (timeslot_id, time_start, time_end)
 values (1, '10:00:00', '11:00:00'),
        (2, '11:00:00', '12:00:00'),
