@@ -49,6 +49,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
                                             FilterChain chain, Authentication authResult)
             throws IOException, ServletException {
         var token = jwtUtil.generateToken(authResult);
+        response.addHeader("access-control-expose-headers", "Authorization");
         response.addHeader("Authorization", "Bearer " + token);
     }
 
