@@ -53,6 +53,7 @@ public class UserServiceImpl implements IUserService {
                 .password(passwordEncoder.encode(signupRequest.getPlainPassword()))
                 .firstName(signupRequest.getFirstName())
                 .lastName(signupRequest.getLastName())
+                .phoneNumber(signupRequest.getPhoneNumber())
                 .status(withConfirmation ? UserStatus.UNCONFIRMED : UserStatus.ACTIVE)
                 .roleId(roleId)
                 .build();

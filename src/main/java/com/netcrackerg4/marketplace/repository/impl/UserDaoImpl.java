@@ -39,6 +39,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                                     rs.getString("password"),
                                     rs.getString("first_name"),
                                     rs.getString("last_name"),
+                                    rs.getString("phone_number"),
                                     UserStatus.valueOf(rs.getString("status_name")),
                                     rs.getInt("role_id")
                             )
@@ -54,8 +55,8 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     public void create(AppUserEntity item) {
         assert getJdbcTemplate() != null;
         int statusId = findStatusIdByStatusName(item.getStatus().name()).orElseThrow(BadCodeError::new);
-        getJdbcTemplate().update(userQueries.getCreateNew(), item.getEmail(), item.getPassword(),
-                item.getRoleId(), statusId, item.getFirstName(), item.getLastName());
+        getJdbcTemplate().update(userQueries.getCreateNew(), item.getEmail(), item.getPassword(), item.getFirstName(),
+                item.getLastName(), item.getPhoneNumber(), item.getRoleId(), statusId);
     }
 
     @Override
@@ -68,6 +69,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                         .password(rs.getString("password"))
                         .firstName(rs.getString("first_name"))
                         .lastName(rs.getString("last_name"))
+                        .phoneNumber(rs.getString("phone_number"))
                         .status(UserStatus.valueOf(rs.getString("status_name")))
                         .roleId(rs.getInt("role_id"))
                         .build(), key
