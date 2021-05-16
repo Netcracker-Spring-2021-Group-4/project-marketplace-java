@@ -7,3 +7,8 @@ deploy:
   on:
     repo: Netcracker-Spring-2021-Group-4/project-marketplace-java
     branch: deploy/travis
+notifications:
+  email:
+    recipients: netcracker_spring_2021_t4@yahoo.com
+    on_success: always
+    on_failure: always
