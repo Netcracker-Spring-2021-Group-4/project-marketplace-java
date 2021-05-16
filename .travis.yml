@@ -6,7 +6,7 @@ deploy:
     secure: StWnDKRY3sJeY1ANSAIt7Hy5vWfIuA4YYd70UzExpS1Tf328FlUFtcWPYkeABJqWqFcSLdK/DQYuGcLCIC8MFzTKUMHPNbyDR0DVlDD+Kzh7bSAP+GhEyOVbawb8hgT/8aROSG8/cq2Vkp/RcqNfimf6XQOkBz/C+TFRXUI2Q0Oq1HwX4fUedyeJtiT++tCz1MsMq4bbmrq9KEGi89gPLq7vbkSEVIFDan3EW6WW11O91epPB652Eyl84Kdhmt6l5dRw6aS8f4DQ63SCUC3fVHxbK6m7ouwUuw4RhwEsHudzS2wJZefppkrP05trOBSNWC1xWwGG/tzD464ycHdScH3fT3sXSjnMXrREJP1Y7Hb5AJKrlX+F+YSovtz6Jud25LXnSRPJyt3Ulw0CEAB5eIJFYlCGrzUFzqtS95eO86P0+lCoTTXpeExT05NInmYWDozIXHFlST/jFYj2erWKUIjV2lhMTu2AxZW4mS7yetabKDUQ3XyPCQ52YYdFfSMtVl3snz0D9Xe8xP2G0KbDDrlHNTJ6jN5d4fbfMdLxY/PUPw3jJSJDFCmfzYxIQxp4w9gBHsiRifWZbqdb5BHY5KmNp/aUYvd8Dd5xRz3i3gqDwz2xiAQD35R7RKY3tKo5N4lZtX1SGBtnkXEiONik0e4Kw8RjxRzSxepZPpJoR68=
   on:
     repo: Netcracker-Spring-2021-Group-4/project-marketplace-java
-    branch: deploy/travis
+    branch: main
 notifications:
   email:
     recipients: netcracker_spring_2021_t4@yahoo.com
