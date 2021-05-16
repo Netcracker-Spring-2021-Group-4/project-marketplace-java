@@ -26,12 +26,11 @@ public class MailServiceImpl implements IMailService {
         message.setFrom(SENDER_EMAIL);
         message.setTo(receiver);
         message.setSubject(String.format("Dear %s %s, please confirm your registration.", firstName, lastName));
-        message.setText(CONFIRM_SIGNUP_FRONT + token);
+        message.setText(getLinkURL() + token);
         mailSender.send(message);
     }
 
     private String getLinkURL() {
-        System.out.println(CONFIRM_SIGNUP_BASE_FRONT);
         return CONFIRM_SIGNUP_BASE_FRONT + CONFIRM_SIGNUP_FRONT;
     }
 }
