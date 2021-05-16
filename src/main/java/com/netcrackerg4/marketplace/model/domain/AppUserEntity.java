@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -23,6 +24,8 @@ public class AppUserEntity implements UserDetails { // not exactly an Entity
     private final String password;
     private final String firstName;
     private final String lastName;
+    @Nullable
+    private final String phoneNumber;
     private final UserStatus status;
     private final int roleId;
     private List<GrantedAuthority> authorities;

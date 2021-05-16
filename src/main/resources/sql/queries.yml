@@ -2,7 +2,7 @@ custom:
   postgres:
     user:
       get-by-email: >
-        SELECT user_id, email, password, first_name, last_name, status_name, role_id
+        SELECT user_id, email, password, first_name, last_name, phone_number, status_name, role_id
         FROM auth_user INNER JOIN user_status USING (status_id)
         WHERE email = ?;
       get-authorities: >
@@ -14,9 +14,9 @@ custom:
         FROM user_permission INNER JOIN permission_role USING(permission_id)
         WHERE role_id = ?;
       create-new: >
-        INSERT INTO auth_user (email, password, role_id, status_id, first_name, last_name) VALUES (?, ?, ?, ?, ?, ?);
+        INSERT INTO auth_user (email, password, first_name, last_name, phone_number, role_id, status_id) VALUES (?, ?, ?, ?, ?, ?, ?);
       find-user-by-id: >
-        SELECT email, password, first_name, last_name, status_name, role_id
+        SELECT email, password, first_name, last_name, phone_number, status_name, role_id
         FROM auth_user INNER JOIN user_status USING (status_id)
         WHERE user_id = ?
       get-permissions: >

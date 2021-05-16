@@ -9,11 +9,11 @@ import javax.validation.constraints.Pattern;
 
 @Data
 public class SignupRequestDto {
-    @Email(message= ValidationDefaultMessage.WRONG_FORMAT_EMAIL)
+    @Email(message = ValidationDefaultMessage.WRONG_FORMAT_EMAIL)
     private String email;
     @Pattern(
             regexp = ValidationConstants.PASSWORD_PATTERN,
-            message= ValidationDefaultMessage.WRONG_FORMAT_PASSWORD
+            message = ValidationDefaultMessage.WRONG_FORMAT_PASSWORD
     )
     private CharSequence plainPassword;
     @Pattern(
@@ -26,4 +26,10 @@ public class SignupRequestDto {
             message = ValidationDefaultMessage.WRONG_FORMAT_LAST_NAME
     )
     private String lastName;
+
+    @Pattern(
+            regexp = ValidationConstants.PHONE_PATTERN,
+            message = ValidationDefaultMessage.WRONG_FORMAT_PHONE_NUMBER
+    )
+    private String phoneNumber;
 }
