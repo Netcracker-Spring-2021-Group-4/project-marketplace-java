@@ -13,4 +13,5 @@ public interface IUserDao extends AbstractDAO<AppUserEntity, String> {
     void setStatus(String email, UserStatus status);
 
     Optional<Integer> findStatusIdByStatusName(String name);
+
 }

@@ -11,5 +11,6 @@ public class UserQueries {
     private String findUserById;
     private String createNew;
     private String updateStatus;
+    private String updatePersonInfo;
     private String findStatusIdByName;
 }

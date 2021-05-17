@@ -1,7 +1,9 @@
 package com.netcrackerg4.marketplace.controller;
 
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
+import com.netcrackerg4.marketplace.model.dto.user.StaffUpdateDto;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
+import com.netcrackerg4.marketplace.service.interfaces.IStaffService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

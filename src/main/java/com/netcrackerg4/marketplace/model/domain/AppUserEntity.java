@@ -23,6 +23,7 @@ public class AppUserEntity implements UserDetails { // not exactly an Entity
     private final String password;
     private final String firstName;
     private final String lastName;
+    private final String phone_number;
     private final UserStatus status;
     private final int roleId;
     private List<GrantedAuthority> authorities;

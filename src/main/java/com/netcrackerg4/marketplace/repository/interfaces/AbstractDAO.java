@@ -1,5 +1,7 @@
 package com.netcrackerg4.marketplace.repository.interfaces;
 
+import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
+
 import java.util.Optional;
 
 public interface AbstractDAO<T, K> {

@@ -39,6 +39,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                                     rs.getString("password"),
                                     rs.getString("first_name"),
                                     rs.getString("last_name"),
+                                    rs.getString("phone_number"),
                                     UserStatus.valueOf(rs.getString("status_name")),
                                     rs.getInt("role_id")
                             )
@@ -54,9 +55,11 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     public void create(AppUserEntity item) {
         assert getJdbcTemplate() != null;
         int statusId = findStatusIdByStatusName(item.getStatus().name()).orElseThrow(BadCodeError::new);
-        getJdbcTemplate().update(userQueries.getCreateNew(), item.getEmail(), item.getPassword(),
-                item.getRoleId(), statusId, item.getFirstName(), item.getLastName());
+        getJdbcTemplate().update(userQueries.getCreateNew(), item.getEmail(), item.getPassword(), item.getFirstName(),
+                item.getLastName(),  item.getRoleId(), statusId);
     }
+
+
 
     @Override
     public AppUserEntity read(String key) {
@@ -75,9 +78,11 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public void update(AppUserEntity updItem) {
-        throw new UnsupportedOperationException();
+    public void update(AppUserEntity item) {
+        getJdbcTemplate().update(userQueries.getUpdatePersonInfo(), item.getFirstName(), item.getLastName(), item.getPhone_number(),
+                item.getEmail());
     }
+
 
     @Override
     public void delete(String key) {
