@@ -27,6 +27,10 @@ custom:
         UPDATE auth_user
         SET status_id=(SELECT status_id FROM user_status WHERE status_name=?)
         WHERE email=?;
+      update-info: >
+        UPDATE auth_user
+        SET first_name=?, last_name=?, phone_number=?
+        WHERE email=?;
       find-status-id-by-name: >
         SELECT status_id FROM user_status WHERE status_name=?;
     token:
