@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Repository;
+
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
@@ -77,7 +78,8 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public void update(AppUserEntity item) {
-        getJdbcTemplate().update(userQueries.getUpdatePersonInfo(), item.getFirstName(), item.getLastName(), item.getPhoneNumber(),
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(userQueries.getUpdateUserInfo(), item.getFirstName(), item.getLastName(), item.getPhoneNumber(),
                 item.getEmail());
     }
 

@@ -1,12 +1,9 @@
 package com.netcrackerg4.marketplace.security.filter;
 
 import com.netcrackerg4.marketplace.security.jwt.IJwtService;
-import com.netcrackerg4.marketplace.security.jwt.JwtUtil;
 import io.jsonwebtoken.JwtException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -17,16 +14,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @Component
+@AllArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     private final IJwtService jwtUtil;
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    public JwtFilter(/*UserDetailsService userDetailsService, */JwtUtil jwtUtil) {
-//        this.userDetailsService = userDetailsService;
-        this.jwtUtil = jwtUtil;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
@@ -48,10 +39,5 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(httpServletRequest, httpServletResponse);
-    }
-
-    @Autowired
-    public void setUserDetailsService(@Qualifier("userServiceImpl") final UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
     }
 }
