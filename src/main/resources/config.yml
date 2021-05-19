@@ -20,4 +20,4 @@ custom:
   jwt:
     hours-valid: 6
   frontend:
-    confirmation-url: /confirm-token/
+    confirmation-url: /confirm-token
