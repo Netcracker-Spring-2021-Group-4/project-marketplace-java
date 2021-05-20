@@ -1,15 +1,8 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.exception.BadCodeError;
-import com.netcrackerg4.marketplace.exception.InvalidTokenException;
-import com.netcrackerg4.marketplace.exception.MissingEmailException;
-import com.netcrackerg4.marketplace.exception.WrongPasswordException;
-import com.netcrackerg4.marketplace.exception.InvalidTokenException;
-import com.netcrackerg4.marketplace.exception.MissingEmailException;
-import com.netcrackerg4.marketplace.exception.WrongPasswordException;
+import com.netcrackerg4.marketplace.exception.*;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
-import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
@@ -55,7 +48,9 @@ public class UserServiceImpl implements IUserService {
         int roleId = authDao.getRoleIdByName(role.name()).orElseThrow(BadCodeError::new);
         String email = signupRequest.getEmail();
         userDao.findByEmail(email)
-                .ifPresent(user -> {throw new IllegalStateException("User with such email already exists.");});
+                .ifPresent(user -> {
+                    throw new IllegalStateException("User with such email already exists.");
+                });
         AppUserEntity userEntity = AppUserEntity.builder()
                 .email(email)
                 .password(passwordEncoder.encode(signupRequest.getPlainPassword()))
@@ -120,6 +115,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public void resetPassword(String tokenValue, CharSequence newPassword) {
+        // should passwords be compared for reset as well??
         TokenEntity token = tokenDao.read(UUID.fromString(tokenValue));
         doTokenValidation(token);
         String enpass = passwordEncoder.encode(newPassword);
@@ -133,6 +129,8 @@ public class UserServiceImpl implements IUserService {
         AppUserEntity userEntity = userDao.findByEmail(email).orElseThrow(() -> new MissingEmailException(email));
         if (!passwordEncoder.matches(passwordUpdateDto.getCurrentPassword(), userEntity.getPassword()))
             throw new WrongPasswordException();
+        if (passwordUpdateDto.getCurrentPassword().equals(passwordUpdateDto.getNewPassword()))
+            throw new PasswordDuplicateException();
         String enpass = passwordEncoder.encode(passwordUpdateDto.getNewPassword());
         userDao.updatePassword(email, enpass);
     }
