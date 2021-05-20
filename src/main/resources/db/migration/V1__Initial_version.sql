@@ -128,7 +128,8 @@ create TABLE product_category
 create TABLE product
 (
     product_id        uuid    DEFAULT uuid_generate_v1() PRIMARY KEY,
-    product_name              VARCHAR(32)          NOT NULL,
+    product_name      VARCHAR(32)          NOT NULL,
+    image_url         VARCHAR(128)         NOT NULL,
     description       TEXT                 NULL,
     price             money                NOT NULL,
     in_stock          INTEGER              NOT NULL,
@@ -168,7 +169,7 @@ create TABLE cart_item
 
 create TABLE discount
 (
-    dateslot_id   uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
+    discount_id   uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     offered_price money       NOT NULL,
     starts_at     timestamptz NOT NULL,
     ends_at       timestamptz NOT NULL,

@@ -4,10 +4,15 @@ import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
 import com.netcrackerg4.marketplace.exception.MissingEmailException;
 import com.netcrackerg4.marketplace.exception.WrongPasswordException;
+import com.netcrackerg4.marketplace.exception.InvalidTokenException;
+import com.netcrackerg4.marketplace.exception.MissingEmailException;
+import com.netcrackerg4.marketplace.exception.WrongPasswordException;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
+import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
+import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import com.netcrackerg4.marketplace.repository.interfaces.IAuthDao;
@@ -50,9 +55,7 @@ public class UserServiceImpl implements IUserService {
         int roleId = authDao.getRoleIdByName(role.name()).orElseThrow(BadCodeError::new);
         String email = signupRequest.getEmail();
         userDao.findByEmail(email)
-                .ifPresent(user -> {
-                    throw new IllegalStateException("User with such email already exists.");
-                });
+                .ifPresent(user -> {throw new IllegalStateException("User with such email already exists.");});
         AppUserEntity userEntity = AppUserEntity.builder()
                 .email(email)
                 .password(passwordEncoder.encode(signupRequest.getPlainPassword()))
@@ -133,4 +136,26 @@ public class UserServiceImpl implements IUserService {
         String enpass = passwordEncoder.encode(passwordUpdateDto.getNewPassword());
         userDao.updatePassword(email, enpass);
     }
+
+    @Transactional
+    @Override
+    public void updateUser(UserUpdateDto staffUpdate) {
+        String email = staffUpdate.getEmail();
+
+        AppUserEntity user = userDao.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
+
+        AppUserEntity userEntity = AppUserEntity.builder()
+                .userId(user.getUserId())
+                .email(email)
+                .password(user.getPassword())
+                .firstName(staffUpdate.getFirstName() != null ? staffUpdate.getFirstName() : user.getFirstName())
+                .lastName(staffUpdate.getLastName() != null ? staffUpdate.getLastName() : user.getLastName())
+                .phoneNumber(staffUpdate.getPhoneNumber() != null ? staffUpdate.getPhoneNumber() : user.getPhoneNumber())
+                .status(user.getStatus())
+                .roleId(user.getRoleId())
+                .build();
+        userDao.update(userEntity);
+    }
 }
+

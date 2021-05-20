@@ -21,4 +21,20 @@ custom:
     hours-valid: 6
   frontend:
     confirmation-url: /confirm-token
-    password-reset: /reset-password
+    password-reset: /new-password
+
+cloud:
+  aws:
+    stack:
+      auto: false
+    region:
+      static: eu-central-1
+      auto: false
+
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: error
+
