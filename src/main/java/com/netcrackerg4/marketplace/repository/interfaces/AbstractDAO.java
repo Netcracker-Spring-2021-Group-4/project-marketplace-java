@@ -3,7 +3,7 @@ package com.netcrackerg4.marketplace.repository.interfaces;
 import java.util.Optional;
 
 public interface AbstractDAO<T, K> {
-    Optional<T> findByEmail(K idx);
+    Optional<T> findByEmail(K idx); //????
 
     void create(T item);
 

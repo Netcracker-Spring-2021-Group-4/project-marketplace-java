@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties({
         UserQueries.class,
         TokenQueries.class,
-        UserRoleQueries.class
+        UserRoleQueries.class,
+        CartQueries.class
 })
 public class DbQueryConfig {
     @Autowired
