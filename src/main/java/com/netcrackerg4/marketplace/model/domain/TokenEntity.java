@@ -13,7 +13,6 @@ import java.util.UUID;
 public class TokenEntity {
     private UUID tokenValue;
     private String userEmail;
-    //    private long issuedAt;
     private Instant expiresAt;
     private boolean isActivated;
 }

@@ -21,3 +21,4 @@ custom:
     hours-valid: 6
   frontend:
     confirmation-url: /confirm-token
+    password-reset: /reset-password

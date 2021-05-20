@@ -10,7 +10,9 @@ import java.util.Optional;
 public interface IUserDao extends AbstractDAO<AppUserEntity, String> {
     List<GrantedAuthority> getAuthorities(int roleId);
 
-    void setStatus(String email, UserStatus status);
+    void updateStatus(String email, UserStatus status);
+
+    void updatePassword(String email, String password);
 
     Optional<Integer> findStatusIdByStatusName(String name);
 }

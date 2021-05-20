@@ -34,15 +34,15 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         Optional<AppUserEntity> user;
         try {
             user = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getGetByEmail(), (rs, row) ->
-                            new AppUserEntity(rs.getString("user_id"),
-                                    rs.getString("email"),
-                                    rs.getString("password"),
-                                    rs.getString("first_name"),
-                                    rs.getString("last_name"),
-                                    rs.getString("phone_number"),
-                                    UserStatus.valueOf(rs.getString("status_name")),
-                                    rs.getInt("role_id")
-                            )
+                            AppUserEntity.builder()
+                                    .userId(rs.getString("user_id"))
+                                    .email(rs.getString("email"))
+                                    .password(rs.getString("password"))
+                                    .firstName(rs.getString("first_name"))
+                                    .lastName(rs.getString("last_name"))
+                                    .phoneNumber(rs.getString("phone_number"))
+                                    .status(UserStatus.valueOf(rs.getString("status_name")))
+                                    .roleId(rs.getInt("role_id")).build()
                     , idx)
             );
         } catch (EmptyResultDataAccessException e) {
@@ -95,9 +95,15 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public void setStatus(String email, UserStatus status) {
+    public void updateStatus(String email, UserStatus status) {
         assert getJdbcTemplate() != null;
         getJdbcTemplate().update(userQueries.getUpdateStatus(), status.name(), email);
+    }
+
+    @Override
+    public void updatePassword(String email, String password) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(userQueries.getUpdatePassword(), password, email);
     }
 
     @Override
