@@ -169,7 +169,7 @@ create TABLE cart_item
 
 create TABLE discount
 (
-    discount_id   uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
+    dateslot_id   uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     offered_price money       NOT NULL,
     starts_at     timestamptz NOT NULL,
     ends_at       timestamptz NOT NULL,
