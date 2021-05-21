@@ -128,7 +128,8 @@ create TABLE product_category
 create TABLE product
 (
     product_id        uuid    DEFAULT uuid_generate_v1() PRIMARY KEY,
-    product_name              VARCHAR(32)          NOT NULL,
+    product_name      VARCHAR(32)          NOT NULL,
+    image_url         VARCHAR(128)         NOT NULL,
     description       TEXT                 NULL,
     price             money                NOT NULL,
     in_stock          INTEGER              NOT NULL,
