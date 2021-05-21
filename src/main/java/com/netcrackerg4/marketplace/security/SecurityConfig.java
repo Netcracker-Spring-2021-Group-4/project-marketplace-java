@@ -60,9 +60,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 //maybe also auth-customer-manager branch
                 //staff branch
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**")
+                .antMatchers("/api/v2/api-docs", "/v2/api-docs",
+                        "/api/configuration/**", "/configuration/**",
+                        "/api/swagger*/**", "/swagger*/**",
+                        "/api/webjars/**", "/webjars/**")
                 .permitAll()
-            .anyRequest().authenticated();
+                .anyRequest().authenticated();
     }
 
     @Bean
