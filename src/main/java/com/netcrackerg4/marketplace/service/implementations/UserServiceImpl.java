@@ -1,6 +1,9 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.exception.*;
+import com.netcrackerg4.marketplace.exception.InvalidTokenException;
+import com.netcrackerg4.marketplace.exception.MissingEmailException;
+import com.netcrackerg4.marketplace.exception.PasswordDuplicateException;
+import com.netcrackerg4.marketplace.exception.WrongPasswordException;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
@@ -8,7 +11,6 @@ import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
-import com.netcrackerg4.marketplace.repository.interfaces.IAuthDao;
 import com.netcrackerg4.marketplace.repository.interfaces.ITokenDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
@@ -32,7 +34,6 @@ public class UserServiceImpl implements IUserService {
     private final Integer HOURS_TOKEN_VALID;
     private final IUserDao userDao;
     private final PasswordEncoder passwordEncoder;
-    private final IAuthDao authDao;
     private final IMailService mailService;
     private final ITokenDao tokenDao;
 
@@ -45,7 +46,6 @@ public class UserServiceImpl implements IUserService {
     @Transactional
     @Override
     public void signupUser(SignupRequestDto signupRequest, boolean withConfirmation, UserRole role) {
-        int roleId = authDao.getRoleIdByName(role.name()).orElseThrow(BadCodeError::new);
         String email = signupRequest.getEmail();
         userDao.findByEmail(email)
                 .ifPresent(user -> {
@@ -58,7 +58,7 @@ public class UserServiceImpl implements IUserService {
                 .lastName(signupRequest.getLastName())
                 .phoneNumber(signupRequest.getPhoneNumber())
                 .status(withConfirmation ? UserStatus.UNCONFIRMED : UserStatus.ACTIVE)
-                .roleId(roleId)
+                .role(role)
                 .build();
         userDao.create(userEntity);
         if (withConfirmation) {
@@ -89,7 +89,7 @@ public class UserServiceImpl implements IUserService {
     public AppUserEntity findByEmail(String email) {
         AppUserEntity user = userDao.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
-        user.setAuthorities(userDao.getAuthorities(user.getRoleId()));
+        user.setAuthorities(userDao.getAuthorities(userDao.findRoleIdByRoleName(user.getRole().name())));
         return user;
     }
 
@@ -151,7 +151,7 @@ public class UserServiceImpl implements IUserService {
                 .lastName(staffUpdate.getLastName() != null ? staffUpdate.getLastName() : user.getLastName())
                 .phoneNumber(staffUpdate.getPhoneNumber() != null ? staffUpdate.getPhoneNumber() : user.getPhoneNumber())
                 .status(user.getStatus())
-                .roleId(user.getRoleId())
+                .role(user.getRole())
                 .build();
         userDao.update(userEntity);
     }

@@ -5,7 +5,6 @@ import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IUserDao extends AbstractDAO<AppUserEntity, String> {
     List<GrantedAuthority> getAuthorities(int roleId);
@@ -14,5 +13,8 @@ public interface IUserDao extends AbstractDAO<AppUserEntity, String> {
 
     void updatePassword(String email, String password);
 
-    Optional<Integer> findStatusIdByStatusName(String name);
+    Integer findStatusIdByStatusName(String name);
+
+    Integer findRoleIdByRoleName(String roleName);
+
 }

@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,7 +27,8 @@ public class AppUserEntity implements UserDetails { // not exactly an Entity
     @Nullable
     private String phoneNumber;
     private UserStatus status;
-    private final int roleId;
+    private final UserRole role;
+
     private List<GrantedAuthority> authorities;
 
     @Override

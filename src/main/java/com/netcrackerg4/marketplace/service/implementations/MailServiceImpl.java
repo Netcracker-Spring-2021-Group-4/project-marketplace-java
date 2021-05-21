@@ -30,7 +30,6 @@ public class MailServiceImpl implements IMailService {
         String confirmUri = UriComponentsBuilder.fromUriString(FRONT_BASE_URL)
                 .path(CONFIRM_SIGNUP_URL)
                 .pathSegment(token.toString())
-                .queryParam("requiredPwd", 1)
                 .build()
                 .encode()
                 .toUriString();
