@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.service.interfaces;
 
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
+import com.netcrackerg4.marketplace.model.dto.user.ChangeStatusDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
@@ -14,4 +15,6 @@ public interface IUserService extends UserDetailsService {
     AppUserEntity findByEmail(String email);
 
     void updateUser(UserUpdateDto staffUpdate);
+
+    void updateStatus(ChangeStatusDto changeStatus);
 }

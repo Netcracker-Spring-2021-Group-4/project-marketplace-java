@@ -4,6 +4,7 @@ import com.netcrackerg4.marketplace.exception.ActivatedTokenReuseException;
 import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
+import com.netcrackerg4.marketplace.model.dto.user.ChangeStatusDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
@@ -110,5 +111,14 @@ public class UserServiceImpl implements IUserService {
                 .roleId(user.getRoleId())
                 .build();
         userDao.update(userEntity);
+    }
+
+    @Transactional
+    @Override
+    public void updateStatus(ChangeStatusDto changeStatus) {
+        String email = changeStatus.getEmail();
+        userDao.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
+        userDao.setStatus(email,changeStatus.getUserStatus());
     }
 }
