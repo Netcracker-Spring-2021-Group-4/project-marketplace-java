@@ -12,11 +12,11 @@ import javax.validation.Valid;
 @RequestMapping("/api/v1/admin/staff")
 @RequiredArgsConstructor
 public class StaffController {
-    private final IUserService staffService;
+    private final IUserService userService;
 
     @PutMapping("/edit")
     public void updateStaff(@Valid @RequestBody UserUpdateDto userUpdateDto) {
-        staffService.updateUser(userUpdateDto);
+        userService.updateUser(userUpdateDto);
     }
 
     @PatchMapping("/change-status")
