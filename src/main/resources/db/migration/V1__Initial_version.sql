@@ -1,25 +1,25 @@
 create EXTENSION IF NOT EXISTS "uuid-ossp";
 -- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO nc_course;
 
-create TABLE user_status
+CREATE TABLE IF NOT EXISTS user_status
 (
     status_id INTEGER PRIMARY KEY,
     status_name      VARCHAR(32) NOT NULL UNIQUE
 );
 
-create TABLE user_role
+CREATE TABLE IF NOT EXISTS user_role
 (
     role_id   INTEGER PRIMARY KEY,
     role_name VARCHAR(32) NOT NULL UNIQUE
 );
 
-create TABLE user_permission
+CREATE TABLE IF NOT EXISTS user_permission
 (
     permission_id   INTEGER PRIMARY KEY,
     permission_name VARCHAR(32) NOT NULL UNIQUE
 );
 
-create TABLE permission_role
+CREATE TABLE IF NOT EXISTS permission_role
 (
     permission_id INTEGER,
     role_id       INTEGER,
@@ -32,7 +32,7 @@ create TABLE permission_role
             ON update RESTRICT ON delete RESTRICT
 );
 
-create TABLE auth_user
+CREATE TABLE IF NOT EXISTS auth_user
 (
     user_id      uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     email        VARCHAR(128) NOT NULL UNIQUE,
@@ -51,7 +51,7 @@ create TABLE auth_user
 create INDEX idx_auth_user_email
     ON auth_user (email);
 
-create TABLE confirmation_token
+CREATE TABLE IF NOT EXISTS confirmation_token
 (
     token             uuid PRIMARY KEY,
     expired_at        TIMESTAMPTZ           NOT NULL,
@@ -62,7 +62,7 @@ create TABLE confirmation_token
         ON update RESTRICT ON delete CASCADE
 );
 
-create TABLE address
+CREATE TABLE IF NOT EXISTS address
 (
     address_id  uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     city        VARCHAR(64) NOT NULL,
@@ -74,20 +74,20 @@ create TABLE address
         ON update CASCADE ON delete CASCADE
 );
 
-create TABLE timeslot
+CREATE TABLE IF NOT EXISTS timeslot
 (
     timeslot_id INTEGER PRIMARY KEY,
     time_start  TIME NOT NULL UNIQUE,
     time_end    TIME NOT NULL UNIQUE
 );
 
-create TABLE order_status
+CREATE TABLE IF NOT EXISTS order_status
 (
     status_id INTEGER PRIMARY KEY,
     status_name      VARCHAR(32) NOT NULL UNIQUE
 );
 
-create TABLE prod_order
+CREATE TABLE IF NOT EXISTS prod_order
 (
     order_id     uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     placed_at    timestamptz NOT NULL,
@@ -104,7 +104,7 @@ create TABLE prod_order
         ON update RESTRICT ON delete SET NULL
 );
 
-create TABLE dateslot
+CREATE TABLE IF NOT EXISTS dateslot
 (
     dateslot_id uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     datestamp   DATE    NOT NULL,
@@ -119,19 +119,19 @@ create TABLE dateslot
         ON update RESTRICT ON delete CASCADE
 );
 
-create TABLE product_category
+CREATE TABLE IF NOT EXISTS product_category
 (
     category_id INTEGER PRIMARY KEY,
     product_category_name        VARCHAR(64) NOT NULL UNIQUE
 );
 
-create TABLE product
+create TABLE IF NOT EXISTS product
 (
     product_id        uuid    DEFAULT uuid_generate_v1() PRIMARY KEY,
     product_name      VARCHAR(32)          NOT NULL,
     image_url         VARCHAR(128)         NOT NULL,
     description       TEXT                 NULL,
-    price             money                NOT NULL,
+    price             INTEGER                NOT NULL,
     in_stock          INTEGER              NOT NULL,
     reserved          INTEGER              NOT NULL,
     availability_date DATE                 NOT NULL,
@@ -141,11 +141,11 @@ create TABLE product
         ON update RESTRICT ON delete RESTRICT
 );
 
-create TABLE order_item
+CREATE TABLE IF NOT EXISTS order_item
 (
     order_item_id uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     quantity      INTEGER NOT NULL,
-    price         money   NOT NULL,
+    price         INTEGER   NOT NULL,
     order_id      uuid    NOT NULL,
     product_id    uuid    NOT NULL,
     CONSTRAINT order_item_order_fk FOREIGN KEY (order_id) REFERENCES prod_order (order_id)
@@ -154,7 +154,7 @@ create TABLE order_item
         ON update RESTRICT ON delete CASCADE
 );
 
-create TABLE cart_item
+CREATE TABLE IF NOT EXISTS cart_item
 (
     cart_item_id uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     quantity     INTEGER NOT NULL,
@@ -167,27 +167,27 @@ create TABLE cart_item
         ON update RESTRICT ON delete RESTRICT
 );
 
-create TABLE discount
+CREATE TABLE IF NOT EXISTS discount
 (
     dateslot_id   uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
-    offered_price money       NOT NULL,
+    offered_price INTEGER       NOT NULL,
     starts_at     timestamptz NOT NULL,
     ends_at       timestamptz NOT NULL,
     product_id    uuid        NOT NULL REFERENCES product (product_id)
         ON update RESTRICT ON delete CASCADE
 );
 
-create TABLE auction_type
+CREATE TABLE IF NOT EXISTS auction_type
 (
     type_id INTEGER PRIMARY KEY,
     auction_type_name    VARCHAR(32) NOT NULL UNIQUE
 );
 
-create TABLE auction
+CREATE TABLE IF NOT EXISTS auction
 (
     auction_id       uuid    DEFAULT uuid_generate_v1() PRIMARY KEY,
     stars_at         timestamptz          NOT NULL,
-    start_price      money                NOT NULL,
+    start_price      INTEGER                NOT NULL,
     product_quantity INTEGER              NOT NULL,
     product_id       uuid                 NOT NULL,
     json_details     JSON                 NOT NULL,
@@ -199,11 +199,11 @@ create TABLE auction
         ON update RESTRICT ON delete RESTRICT
 );
 
-create TABLE bid
+CREATE TABLE IF NOT EXISTS bid
 (
     bid_id      uuid DEFAULT uuid_generate_v1() PRIMARY KEY,
     made_at     timestamptz NOT NULL,
-    price       money       NOT NULL,
+    price       INTEGER       NOT NULL,
     auction_id  uuid        NOT NULL,
     customer_id uuid        NOT NULL,
     CONSTRAINT bid_auth_user_fk FOREIGN KEY (customer_id) REFERENCES auth_user (user_id)

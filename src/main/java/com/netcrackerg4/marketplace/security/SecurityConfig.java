@@ -55,6 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/v*/admin/**").hasRole("ADMIN")
                 .antMatchers("/api/v*/courier/**").hasRole("COURIER")
                 .antMatchers("/api/v*/manager/**").hasAnyRole("PRODUCT_MGR", "ADMIN")
+                .antMatchers("/api/v*/auth-store/**").hasAnyRole("PRODUCT_MGR", "ADMIN", "COURIER", "CUSTOMER")
                 .antMatchers("/api/v*/auth-costumer/**").hasRole("CUSTOMER")
                 //maybe also auth-customer-manager branch
                 //staff branch
