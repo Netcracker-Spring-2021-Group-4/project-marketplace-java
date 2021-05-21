@@ -1,9 +1,6 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
-import com.netcrackerg4.marketplace.exception.MissingEmailException;
-import com.netcrackerg4.marketplace.exception.PasswordDuplicateException;
-import com.netcrackerg4.marketplace.exception.WrongPasswordException;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
@@ -93,7 +90,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public AppUserEntity findByEmail(String email) {
         AppUserEntity user = userDao.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
+                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
         user.setAuthorities(userDao.getAuthorities(userDao.findRoleIdByRoleName(user.getRole().name())));
         return user;
     }
@@ -127,9 +124,9 @@ public class UserServiceImpl implements IUserService {
         TokenEntity token = tokenDao.read(UUID.fromString(tokenValue));
         doTokenValidation(token);
         AppUserEntity userEntity = userDao.findByEmail(token.getUserEmail())
-                .orElseThrow(() -> new MissingEmailException(token.getUserEmail()));
+                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
         String oldEnpass = userEntity.getPassword();
-        if (passwordEncoder.matches(newPassword, oldEnpass)) throw new PasswordDuplicateException();
+        if (passwordEncoder.matches(newPassword, oldEnpass)) throw new IllegalStateException("Your previous password is the same");
         String enpass = passwordEncoder.encode(newPassword);
         userDao.updatePassword(token.getUserEmail(), enpass);
         tokenDao.setActivated(token.getTokenValue());
@@ -146,11 +143,12 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public void changePassword(String email, PasswordUpdateDto passwordUpdateDto) {
-        AppUserEntity userEntity = userDao.findByEmail(email).orElseThrow(() -> new MissingEmailException(email));
+        AppUserEntity userEntity = userDao.findByEmail(email).orElseThrow(() ->
+                new IllegalStateException("There is no user with such email:" + email));
         if (!passwordEncoder.matches(passwordUpdateDto.getCurrentPassword(), userEntity.getPassword()))
-            throw new WrongPasswordException();
+            throw new IllegalStateException("Your current password is filled wrong");
         if (passwordUpdateDto.getCurrentPassword().equals(passwordUpdateDto.getNewPassword()))
-            throw new PasswordDuplicateException();
+            throw new IllegalStateException("Your previous password is the same");
         String enpass = passwordEncoder.encode(passwordUpdateDto.getNewPassword());
         userDao.updatePassword(email, enpass);
     }
@@ -162,7 +160,7 @@ public class UserServiceImpl implements IUserService {
         String email = staffUpdate.getEmail();
 
         AppUserEntity user = userDao.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
+                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
 
         AppUserEntity userEntity = AppUserEntity.builder()
                 .userId(user.getUserId())

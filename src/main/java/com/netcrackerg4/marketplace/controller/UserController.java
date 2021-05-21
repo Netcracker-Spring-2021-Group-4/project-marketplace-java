@@ -33,7 +33,7 @@ public class UserController {
     }
 
     // request email for password reset
-    @GetMapping("/password-reset/{email}")
+    @PostMapping("/password-reset/{email}")
     void requestResetPassword(@PathVariable String email) {
         userService.requestPasswordReset(email);
     }
