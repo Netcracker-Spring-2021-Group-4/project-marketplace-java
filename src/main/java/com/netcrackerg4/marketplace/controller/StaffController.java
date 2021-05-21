@@ -3,10 +3,7 @@ package com.netcrackerg4.marketplace.controller;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -19,5 +16,10 @@ public class StaffController {
     @PutMapping("/edit")
     public void updateStaff(@Valid @RequestBody UserUpdateDto userUpdateDto) {
         staffService.updateUser(userUpdateDto);
+    }
+
+    @PatchMapping("/change-status")
+    public void updateStatus(@Valid @RequestBody ChangeStatusDto changeStatusDto) {
+        userService.updateStatus(changeStatusDto);
     }
 }
