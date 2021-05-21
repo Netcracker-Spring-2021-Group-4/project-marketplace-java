@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @AllArgsConstructor
@@ -34,7 +35,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         Optional<AppUserEntity> user;
         try {
             user = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getGetByEmail(), (rs, row) ->
-                            new AppUserEntity(rs.getString("user_id"),
+                            new AppUserEntity(UUID.fromString(rs.getString("user_id")),
                                     rs.getString("email"),
                                     rs.getString("password"),
                                     rs.getString("first_name"),
@@ -64,7 +65,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         assert getJdbcTemplate() != null;
         return getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
                 AppUserEntity.builder()
-                        .userId(rs.getString("user_id"))
+                        .userId(UUID.fromString(rs.getString("user_id")))
                         .email(rs.getString("email"))
                         .password(rs.getString("password"))
                         .firstName(rs.getString("first_name"))

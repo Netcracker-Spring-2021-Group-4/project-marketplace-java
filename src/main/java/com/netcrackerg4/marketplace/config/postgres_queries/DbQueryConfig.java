@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
         UserQueries.class,
         TokenQueries.class,
         UserRoleQueries.class,
-        CartQueries.class
+        CartQueries.class,
+        ProductQueries.class
 })
 public class DbQueryConfig {
     @Autowired
