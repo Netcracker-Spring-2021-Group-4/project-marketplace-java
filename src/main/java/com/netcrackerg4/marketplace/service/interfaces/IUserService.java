@@ -5,11 +5,12 @@ import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
+import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface IUserService extends UserDetailsService {
-    void signupUser(SignupRequestDto signupRequest, boolean withConfirmation, UserRole role);
+    void signupUser(SignupRequestDto signupRequest, AccountActivation activationType, UserRole role);
 
     void confirmSignup(String token);
 
@@ -24,4 +25,6 @@ public interface IUserService extends UserDetailsService {
     void resetPassword(String token, CharSequence newPassword);
 
     void changePassword(String email, PasswordUpdateDto passwordUpdateDto);
+
+    void confirmPasswordSignup(String tokenValue, CharSequence newPassword);
 }

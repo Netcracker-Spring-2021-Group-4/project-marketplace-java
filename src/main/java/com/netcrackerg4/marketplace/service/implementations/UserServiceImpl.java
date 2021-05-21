@@ -9,13 +9,13 @@ import com.netcrackerg4.marketplace.model.domain.TokenEntity;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
+import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import com.netcrackerg4.marketplace.repository.interfaces.ITokenDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
-import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,28 +45,37 @@ public class UserServiceImpl implements IUserService {
 
     @Transactional
     @Override
-    public void signupUser(SignupRequestDto signupRequest, boolean withConfirmation, UserRole role) {
+    public void signupUser(SignupRequestDto signupRequest, AccountActivation activationType, UserRole role) {
         String email = signupRequest.getEmail();
-        userDao.findByEmail(email)
-                .ifPresent(user -> {
-                    throw new IllegalStateException("User with such email already exists.");
-                });
+        if (userDao.findByEmail(email).isPresent())
+            throw new IllegalStateException("User with such email already exists.");
         AppUserEntity userEntity = AppUserEntity.builder()
                 .email(email)
                 .password(passwordEncoder.encode(signupRequest.getPlainPassword()))
                 .firstName(signupRequest.getFirstName())
                 .lastName(signupRequest.getLastName())
                 .phoneNumber(signupRequest.getPhoneNumber())
-                .status(withConfirmation ? UserStatus.UNCONFIRMED : UserStatus.ACTIVE)
+                .status(activationType == AccountActivation.NONE ? UserStatus.ACTIVE : UserStatus.UNCONFIRMED)
                 .role(role)
                 .build();
         userDao.create(userEntity);
-        if (withConfirmation) {
-            UUID token = UUID.randomUUID();
-            tokenDao.create(new TokenEntity(token, signupRequest.getEmail(),
-                    Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false));
-            mailService.sendConfirmSignupLetter(signupRequest.getEmail(), signupRequest.getFirstName(),
-                    signupRequest.getLastName(), token);
+        switch (activationType) {
+            case EMAIL: {
+                UUID token = UUID.randomUUID();
+                tokenDao.create(new TokenEntity(token, signupRequest.getEmail(),
+                        Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false));
+                mailService.sendConfirmSignupLetter(signupRequest.getEmail(), signupRequest.getFirstName(),
+                        signupRequest.getLastName(), token, AccountActivation.EMAIL);
+                break;
+            }
+            case PASSWORD_RESET: {
+                UUID token = UUID.randomUUID();
+                tokenDao.create(new TokenEntity(token, signupRequest.getEmail(),
+                        Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false));
+                mailService.sendConfirmSignupLetter(signupRequest.getEmail(), signupRequest.getFirstName(),
+                        signupRequest.getLastName(), token, AccountActivation.PASSWORD_RESET);
+                break;
+            }
         }
     }
 
@@ -76,12 +85,8 @@ public class UserServiceImpl implements IUserService {
         UUID token = UUID.fromString(tokenValue);
         TokenEntity tokenEntity = tokenDao.read(token);
         if (tokenEntity.isActivated()) throw new InvalidTokenException("Attempt to reuse activated token.");
-        try {
-            userDao.updateStatus(tokenEntity.getUserEmail(), UserStatus.ACTIVE);
-            tokenDao.setActivated(token);
-        } catch (JwtException e) {
-            throw new IllegalStateException(String.format("Token %s can not be trusted.", token));
-        }
+        userDao.updateStatus(tokenEntity.getUserEmail(), UserStatus.ACTIVE);
+        tokenDao.setActivated(token);
     }
 
     // should return fully initialized AppUserEntity
@@ -98,7 +103,7 @@ public class UserServiceImpl implements IUserService {
         TokenEntity resetToken = new TokenEntity(UUID.randomUUID(), email,
                 Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false);
         tokenDao.create(resetToken);
-        mailService.sendPasswordResetEmail(email, resetToken);
+        mailService.sendPasswordResetEmail(email, resetToken.getTokenValue());
     }
 
     @Override
@@ -115,12 +120,27 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional
     public void resetPassword(String tokenValue, CharSequence newPassword) {
-        // should passwords be compared for reset as well??
+        doResetPassword(tokenValue, newPassword);
+    }
+
+    private String doResetPassword(String tokenValue, CharSequence newPassword) {
         TokenEntity token = tokenDao.read(UUID.fromString(tokenValue));
         doTokenValidation(token);
+        AppUserEntity userEntity = userDao.findByEmail(token.getUserEmail())
+                .orElseThrow(() -> new MissingEmailException(token.getUserEmail()));
+        String oldEnpass = userEntity.getPassword();
+        if (passwordEncoder.matches(newPassword, oldEnpass)) throw new PasswordDuplicateException();
         String enpass = passwordEncoder.encode(newPassword);
         userDao.updatePassword(token.getUserEmail(), enpass);
         tokenDao.setActivated(token.getTokenValue());
+        return userEntity.getEmail();
+    }
+
+    @Override
+    @Transactional
+    public void confirmPasswordSignup(String tokenValue, CharSequence newPassword) {
+        String userEmail = doResetPassword(tokenValue, newPassword);
+        userDao.updateStatus(userEmail, UserStatus.ACTIVE);
     }
 
     @Override
@@ -134,6 +154,7 @@ public class UserServiceImpl implements IUserService {
         String enpass = passwordEncoder.encode(passwordUpdateDto.getNewPassword());
         userDao.updatePassword(email, enpass);
     }
+
 
     @Transactional
     @Override

@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.domain.TokenEntity;
+import com.netcrackerg4.marketplace.exception.BadCodeError;
+import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,17 +19,20 @@ public class MailServiceImpl implements IMailService {
     private final String SENDER_EMAIL;
     @Value("${custom.frontend.base-url}")
     private final String FRONT_BASE_URL;
-    @Value("${custom.frontend.confirmation-url}")
-    private final String CONFIRM_SIGNUP_URL;
-    @Value("${custom.frontend.password-reset}")
+    @Value("${custom.frontend.email-confirmation-url}")
+    private final String CONFIRM_EMAIL_SIGNUP_URL;
+    @Value("${custom.frontend.password-confirmation-url}")
+    private final String CONFIRM_PASSWORD_SIGNUP_URL;
+    @Value("${custom.frontend.password-reset-url}")
     private final String RESET_PASSWORD_URL;
     private final JavaMailSender mailSender;
 
     @Override
-    public void sendConfirmSignupLetter(String receiver, String firstName, String lastName, UUID token) {
+    public void sendConfirmSignupLetter(String receiver, String firstName, String lastName,
+                                        UUID token, AccountActivation activationType) {
         SimpleMailMessage message = new SimpleMailMessage();
         String confirmUri = UriComponentsBuilder.fromUriString(FRONT_BASE_URL)
-                .path(CONFIRM_SIGNUP_URL)
+                .path(getConfirmUrl(activationType))
                 .pathSegment(token.toString())
                 .build()
                 .encode()
@@ -41,12 +45,18 @@ public class MailServiceImpl implements IMailService {
         mailSender.send(message);
     }
 
+    private String getConfirmUrl(AccountActivation activationType) {
+        if (activationType == AccountActivation.EMAIL) return CONFIRM_EMAIL_SIGNUP_URL;
+        if (activationType == AccountActivation.PASSWORD_RESET) return CONFIRM_PASSWORD_SIGNUP_URL;
+        else throw new BadCodeError();
+    }
+
     @Override
-    public void sendPasswordResetEmail(String receiver, TokenEntity token) {
+    public void sendPasswordResetEmail(String receiver, UUID token) {
         SimpleMailMessage message = new SimpleMailMessage();
         String resetUrl = UriComponentsBuilder.fromUriString(FRONT_BASE_URL)
                 .path(RESET_PASSWORD_URL)
-                .pathSegment(token.getTokenValue().toString())
+                .pathSegment(token.toString())
                 .build()
                 .encode()
                 .toUriString();

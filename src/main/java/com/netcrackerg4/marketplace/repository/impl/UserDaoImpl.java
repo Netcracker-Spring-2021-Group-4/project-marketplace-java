@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @AllArgsConstructor
@@ -66,7 +67,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         assert getJdbcTemplate() != null;
         return getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
                 AppUserEntity.builder()
-                        .userId(rs.getString("user_id"))
+                        .userId(key)
                         .email(rs.getString("email"))
                         .password(rs.getString("password"))
                         .firstName(rs.getString("first_name"))
@@ -74,7 +75,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                         .phoneNumber(rs.getString("phone_number"))
                         .status(UserStatus.valueOf(rs.getString("status_name")))
                         .role(UserRole.valueOf(rs.getString("role_name")))
-                        .build(), key
+                        .build(), UUID.fromString(key)
         );
     }
 
