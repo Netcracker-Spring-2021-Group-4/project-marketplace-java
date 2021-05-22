@@ -20,7 +20,9 @@ custom:
   jwt:
     hours-valid: 6
   frontend:
-    confirmation-url: /confirm-token/
+    email-confirmation-url: /confirm-token
+    password-confirmation-url: /first-password
+    password-reset-url: /new-password
 
 cloud:
   aws:
@@ -36,4 +38,3 @@ logging:
       amazonaws:
         util:
           EC2MetadataUtils: error
-

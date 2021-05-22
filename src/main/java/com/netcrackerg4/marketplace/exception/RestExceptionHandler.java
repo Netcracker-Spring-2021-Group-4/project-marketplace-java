@@ -20,14 +20,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleIllegalStateConflict(IllegalStateException ex, WebRequest req) {
         var body =
                 ErrorBody.builder()
-                .message(ex.getMessage())
-                .description("talk to devs")
-                .build();
+                        .message(ex.getMessage())
+                        .description("talk to devs")
+                        .build();
         return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, req);
     }
 
-    @ExceptionHandler(value = {ActivatedTokenReuseException.class})
-    public ResponseEntity<Object> HandleActivatedTokenReuseConflict(ActivatedTokenReuseException ex, WebRequest req) {
+    @ExceptionHandler(value = {InvalidTokenException.class})
+    public ResponseEntity<Object> HandleActivatedTokenReuseConflict(InvalidTokenException ex, WebRequest req) {
         var body =
                 ErrorBody.builder()
                         .message("Token already used")

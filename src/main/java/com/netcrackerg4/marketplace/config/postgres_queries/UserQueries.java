@@ -12,5 +12,7 @@ public class UserQueries {
     private String createNew;
     private String updateStatus;
     private String findStatusIdByName;
+    private String findRoleIdByName;
     private String updateUserInfo;
+    private String updatePassword;
 }
