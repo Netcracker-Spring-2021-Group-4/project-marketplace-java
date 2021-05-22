@@ -5,11 +5,12 @@ import com.netcrackerg4.marketplace.model.dto.product.ProductDto;
 import com.netcrackerg4.marketplace.model.dto.product.mapper.ProductRowMapper;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.stereotype.Repository;
 
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -43,8 +44,14 @@ public class ProductDaoImpl  implements IProductDao {
     }
 
     @Override
-    public ProductDto read(UUID key) {
-        return jdbcTemplate.queryForObject(queries.getFindProductById(), new ProductRowMapper(),key);
+    public Optional<ProductDto> read(UUID key) {
+        Optional <ProductDto> product;
+        try{
+        product = Optional.ofNullable(jdbcTemplate.queryForObject(queries.getFindProductById(), new ProductRowMapper(),key));
+    }catch(EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+        return product;
     }
 
     @Override

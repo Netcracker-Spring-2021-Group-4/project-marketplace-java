@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
+import com.netcrackerg4.marketplace.exception.productExceptions.ProductNotFoundException;
 import com.netcrackerg4.marketplace.model.dto.product.ProductDto;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
@@ -25,6 +26,6 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductDto findProductById(UUID id) {
-        return repository.read(id);
+        return repository.read(id).orElseThrow(ProductNotFoundException::new);
     }
 }

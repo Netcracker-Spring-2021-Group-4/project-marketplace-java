@@ -34,10 +34,8 @@ private final IProductService productService;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         cardItem.setCustomerId(userService.findByEmail(email).getUserId());
-        cardItem.setDateAdded(LocalDateTime.now());
 
-        cartService.addToCart(cardItem);
-        return "product was added";
+        return cartService.addToCart(cardItem);
     }
 
     @PostMapping("add-product")

@@ -4,5 +4,5 @@ import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 
 public interface ICartService {
 
-    void addToCart(CartItemDto item);
+    String addToCart(CartItemDto item);
 }
