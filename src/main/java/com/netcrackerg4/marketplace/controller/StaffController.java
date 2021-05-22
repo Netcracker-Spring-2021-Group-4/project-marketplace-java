@@ -16,7 +16,6 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class StaffController {
     private final IUserService userService;
-    private final IUserService staffService;
 
     @PostMapping("/courier")
     public void createCourier(@RequestBody SignupRequestDto courierSignup) {

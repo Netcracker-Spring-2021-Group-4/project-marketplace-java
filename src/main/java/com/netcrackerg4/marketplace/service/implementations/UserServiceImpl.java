@@ -184,7 +184,7 @@ public class UserServiceImpl implements IUserService {
         String email = changeStatus.getEmail();
         userDao.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
-        userDao.setStatus(email,changeStatus.getUserStatus());
+        userDao.updateStatus(email,changeStatus.getUserStatus());
     }
 }
 
