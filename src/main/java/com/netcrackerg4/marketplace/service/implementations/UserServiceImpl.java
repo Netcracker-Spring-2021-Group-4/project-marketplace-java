@@ -97,6 +97,8 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public void requestPasswordReset(String email) {
+        if (userDao.findByEmail(email).isEmpty())
+            throw new IllegalStateException("There is no user with such email: " + email);
         TokenEntity resetToken = new TokenEntity(UUID.randomUUID(), email,
                 Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false);
         tokenDao.create(resetToken);
