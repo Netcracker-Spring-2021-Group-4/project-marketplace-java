@@ -27,7 +27,7 @@ public class CartServiceImpl implements ICartService {
         try {
             ProductDto product = productService.findProductById(item.getProductId());
             if(product.getInStock()< item.getQuantity())
-                return "There is only "+item.getQuantity()+" products in stock! Try buying less ;)";
+                return "There is only "+product.getInStock()+" products in stock! Try buying less ;)";
         }catch(ProductNotFoundException e){
             return "Can not find this product in the database!";
         }
