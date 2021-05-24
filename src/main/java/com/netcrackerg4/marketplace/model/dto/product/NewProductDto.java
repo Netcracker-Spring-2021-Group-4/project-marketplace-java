@@ -1,9 +1,8 @@
-package com.netcrackerg4.marketplace.model.dto.user;
+package com.netcrackerg4.marketplace.model.dto.product;
 
 import com.netcrackerg4.marketplace.constants.ValidationConstants;
 import com.netcrackerg4.marketplace.constants.ValidationDefaultMessage;
 import com.netcrackerg4.marketplace.model.enums.ProductCategory;
-import com.netcrackerg4.marketplace.validation.ProductCategoryTypeSubset;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
