@@ -1,11 +1,13 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
+import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.config.postgres_queries.UserQueries;
 import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
+import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     private final UserQueries userQueries;
+    private final ProductQueries productQueries;
 
     @Autowired
     public void setParentDataSource(DataSource dataSource) {
@@ -62,15 +65,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         getJdbcTemplate().update(userQueries.getCreateNew(), item.getEmail(), item.getPassword(), item.getFirstName(),
                 item.getLastName(), item.getPhoneNumber(), roleId, statusId);
     }
-
-//    @Override
-//    public void createProduct(AppProductEntity item) {
-//        assert getJdbcTemplate() != null;
-//        int categoryId = findCategoryIdByCategoryName(item.getCategory().name());
-//        getJdbcTemplate().update(userQueries.getCreateProduct(), item.getName(), item.getImageUrl(),item.getDescription(),
-//                item.getPrice(),item.getInStock(),item.getReserved(),item.getAvailabilityDate(),item.getIsActive(),
-//                categoryId);
-//    }
 
     @Override
     public AppUserEntity read(String key) {
@@ -129,14 +123,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         if (statusId == null) throw new BadCodeError();
         return statusId;
     }
-
-//    @Override
-//    public Integer findCategoryIdByCategoryName(String name) {
-//        assert getJdbcTemplate() != null;
-//        Integer categoryId = getJdbcTemplate().queryForObject(userQueries.getFindCategoryIdByName(), Integer.class, name);
-//        if (categoryId == null) throw new BadCodeError();
-//        return categoryId;
-//    }
 
     @Override
     public Integer findRoleIdByRoleName(String roleName) {
