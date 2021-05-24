@@ -21,8 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -151,6 +151,14 @@ public class UserServiceImpl implements IUserService {
         String firstName = searchFilter.getFirstNameSequence() != null ? searchFilter.getFirstNameSequence() : "";
         String lastName = searchFilter.getLastNameSequence() != null ? searchFilter.getLastNameSequence() : "";
         return userDao.findUsersByFilter(roles, statuses, firstName, lastName, SEARCH_PAGE_SIZE, page);
+    }
+
+    @Override
+    public Map<String, List<String>> getAllRolesAndStatuses() {
+        return new HashMap<>() {{
+            put("roles", Arrays.stream(UserRole.values()).map(UserRole::toString).collect(Collectors.toList()));
+            put("statuses", Arrays.stream(UserStatus.values()).map(UserStatus::toString).collect(Collectors.toList()));
+        }};
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.netcrackerg4.marketplace.model.enums.UserRole;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IUserService extends UserDetailsService {
     void signupUser(SignupRequestDto signupRequest, AccountActivation activationType, UserRole role);
@@ -32,4 +33,6 @@ public interface IUserService extends UserDetailsService {
     void confirmPasswordSignup(String tokenValue, CharSequence newPassword);
 
     List<UserAdminView> findUsers(UserSearchFilter searchFilter, int page);
+
+    Map<String, List<String>> getAllRolesAndStatuses();
 }

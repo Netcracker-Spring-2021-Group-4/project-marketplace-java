@@ -45,6 +45,6 @@ public class StaffController {
 
     @GetMapping("/search-details")
     Map<String, List<String>> getAllRolesAndStatuses() {
-        throw new UnsupportedOperationException();
+        return userService.getAllRolesAndStatuses();
     }
 }
