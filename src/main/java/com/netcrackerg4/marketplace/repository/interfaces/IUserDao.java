@@ -13,13 +13,10 @@ public interface IUserDao extends AbstractDAO<AppUserEntity, String> {
 
     void updateStatus(String email, UserStatus status);
 
-     void createProduct(AppProductEntity item);
-
     void updatePassword(String email, String password);
 
     Integer findStatusIdByStatusName(String name);
 
     Integer findRoleIdByRoleName(String roleName);
 
-    Integer findCategoryIdByCategoryName(String name);
 }

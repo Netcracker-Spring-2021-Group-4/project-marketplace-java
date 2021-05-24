@@ -63,14 +63,14 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                 item.getLastName(), item.getPhoneNumber(), roleId, statusId);
     }
 
-    @Override
-    public void createProduct(AppProductEntity item) {
-        assert getJdbcTemplate() != null;
-        int categoryId = findCategoryIdByCategoryName(item.getCategory().name());
-        getJdbcTemplate().update(userQueries.getCreateProduct(), item.getName(), item.getImageUrl(),item.getDescription(),
-                item.getPrice(),item.getInStock(),item.getReserved(),item.getAvailabilityDate(),item.getIsActive(),
-                categoryId);
-    }
+//    @Override
+//    public void createProduct(AppProductEntity item) {
+//        assert getJdbcTemplate() != null;
+//        int categoryId = findCategoryIdByCategoryName(item.getCategory().name());
+//        getJdbcTemplate().update(userQueries.getCreateProduct(), item.getName(), item.getImageUrl(),item.getDescription(),
+//                item.getPrice(),item.getInStock(),item.getReserved(),item.getAvailabilityDate(),item.getIsActive(),
+//                categoryId);
+//    }
 
     @Override
     public AppUserEntity read(String key) {
@@ -130,13 +130,13 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         return statusId;
     }
 
-    @Override
-    public Integer findCategoryIdByCategoryName(String name) {
-        assert getJdbcTemplate() != null;
-        Integer categoryId = getJdbcTemplate().queryForObject(userQueries.getFindCategoryIdByName(), Integer.class, name);
-        if (categoryId == null) throw new BadCodeError();
-        return categoryId;
-    }
+//    @Override
+//    public Integer findCategoryIdByCategoryName(String name) {
+//        assert getJdbcTemplate() != null;
+//        Integer categoryId = getJdbcTemplate().queryForObject(userQueries.getFindCategoryIdByName(), Integer.class, name);
+//        if (categoryId == null) throw new BadCodeError();
+//        return categoryId;
+//    }
 
     @Override
     public Integer findRoleIdByRoleName(String roleName) {
