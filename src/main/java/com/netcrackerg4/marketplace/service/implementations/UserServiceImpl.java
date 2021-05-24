@@ -1,12 +1,10 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
+import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
-import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
-import com.netcrackerg4.marketplace.model.dto.user.ChangeStatusDto;
-import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
-import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
+import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
@@ -186,5 +184,29 @@ public class UserServiceImpl implements IUserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
         userDao.updateStatus(email,changeStatus.getUserStatus());
     }
+
+    @Transactional
+    @Override
+    public void addProduct(String url, NewProductDto newProduct) {
+
+        AppProductEntity productEntity = AppProductEntity.builder()
+                .name(newProduct.getProductName())
+                .description(newProduct.getDescription())
+                .imageUrl(url)
+                .price(newProduct.getPrice())
+                .inStock(newProduct.getInStock())
+                .reserved(newProduct.getReserved())
+                .availabilityDate(newProduct.getDate())
+                .isActive(Boolean.TRUE)
+                .category(newProduct.getProductCategory())
+                .build();
+        userDao.createProduct(productEntity);
+
+    }
+
+
+
+
+
 }
 
