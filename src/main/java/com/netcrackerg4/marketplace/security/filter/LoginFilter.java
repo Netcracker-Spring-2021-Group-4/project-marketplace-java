@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netcrackerg4.marketplace.model.dto.user.UsernamePasswordDto;
+import com.netcrackerg4.marketplace.model.dto.password.UsernamePasswordDto;
 import com.netcrackerg4.marketplace.security.jwt.IJwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

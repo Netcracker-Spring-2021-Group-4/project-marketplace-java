@@ -3,10 +3,8 @@ package com.netcrackerg4.marketplace.service.implementations;
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
-import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
-import com.netcrackerg4.marketplace.model.dto.user.ChangeStatusDto;
-import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
-import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
+import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
+import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
@@ -23,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -30,6 +29,8 @@ import java.util.UUID;
 public class UserServiceImpl implements IUserService {
     @Value("${custom.jwt.hours-valid}")
     private final Integer HOURS_TOKEN_VALID;
+    @Value("${custom.pagination.user-search}")
+    private final int SEARCH_PAGE_SIZE;
     private final IUserDao userDao;
     private final PasswordEncoder passwordEncoder;
     private final IMailService mailService;
@@ -141,6 +142,15 @@ public class UserServiceImpl implements IUserService {
     public void confirmPasswordSignup(String tokenValue, CharSequence newPassword) {
         String userEmail = doResetPassword(tokenValue, newPassword);
         userDao.updateStatus(userEmail, UserStatus.ACTIVE);
+    }
+
+    @Override
+    public List<UserAdminView> findUsers(UserSearchFilter searchFilter, int page) {
+        List<UserRole> roles = searchFilter.getTargetRoles() != null ? searchFilter.getTargetRoles() : List.of(UserRole.values());
+        List<UserStatus> statuses = searchFilter.getTargetStatuses() != null ? searchFilter.getTargetStatuses() : List.of(UserStatus.values());
+        String firstName = searchFilter.getFirstNameSequence() != null ? searchFilter.getFirstNameSequence() : "";
+        String lastName = searchFilter.getLastNameSequence() != null ? searchFilter.getLastNameSequence() : "";
+        return userDao.findUsersByFilter(roles, statuses, firstName, lastName, SEARCH_PAGE_SIZE, page);
     }
 
     @Override

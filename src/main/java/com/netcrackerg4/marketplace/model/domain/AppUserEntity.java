@@ -17,7 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-// todo: get rid of inconsistency: enum status, but role id
 public class AppUserEntity implements UserDetails { // not exactly an Entity
     private final String userId;
     private String email;
