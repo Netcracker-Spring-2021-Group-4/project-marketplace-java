@@ -1,7 +1,6 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
-import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
 import com.netcrackerg4.marketplace.model.dto.user.*;
@@ -184,6 +183,5 @@ public class UserServiceImpl implements IUserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
         userDao.updateStatus(email,changeStatus.getUserStatus());
     }
-
 }
 

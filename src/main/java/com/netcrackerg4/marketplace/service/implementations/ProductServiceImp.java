@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImp implements IProductService {
-    private IProductDao productDao;
+    private final IProductDao productDao;
 
     @Transactional
     @Override
