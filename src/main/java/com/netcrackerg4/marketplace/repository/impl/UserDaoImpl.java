@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.UserQueries;
 import com.netcrackerg4.marketplace.exception.BadCodeError;
+import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
@@ -63,6 +64,15 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
+    public void createProduct(AppProductEntity item) {
+        assert getJdbcTemplate() != null;
+        int categoryId = findCategoryIdByCategoryName(item.getCategory().name());
+        getJdbcTemplate().update(userQueries.getCreateProduct(), item.getName(), item.getImageUrl(),item.getDescription(),
+                item.getPrice(),item.getInStock(),item.getReserved(),item.getAvailabilityDate(),item.getIsActive(),
+                categoryId);
+    }
+
+    @Override
     public AppUserEntity read(String key) {
         assert getJdbcTemplate() != null;
         return getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
@@ -118,6 +128,14 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         Integer statusId = getJdbcTemplate().queryForObject(userQueries.getFindStatusIdByName(), Integer.class, name);
         if (statusId == null) throw new BadCodeError();
         return statusId;
+    }
+
+    @Override
+    public Integer findCategoryIdByCategoryName(String name) {
+        assert getJdbcTemplate() != null;
+        Integer categoryId = getJdbcTemplate().queryForObject(userQueries.getFindCategoryIdByName(), Integer.class, name);
+        if (categoryId == null) throw new BadCodeError();
+        return categoryId;
     }
 
     @Override
