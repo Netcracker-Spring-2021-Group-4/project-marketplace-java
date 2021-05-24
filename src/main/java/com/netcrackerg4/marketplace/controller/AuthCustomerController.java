@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,7 +31,7 @@ private final IProductService productService;
 
 
     @PostMapping("/add-to-cart")
-    public String addToCard( @RequestBody CartItemDto cardItem){
+    public String addToCard(@Valid @RequestBody CartItemDto cardItem){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         cardItem.setCustomerId(userService.findByEmail(email).getUserId());
@@ -38,15 +39,6 @@ private final IProductService productService;
         return cartService.addToCart(cardItem);
     }
 
-    @PostMapping("add-product")
-    public String addProduct(@RequestBody ProductDto product){
 
-        product.setAvailabilityDate(LocalDate.now());
-        productService.addProduct(product);
-        return "product was added";
-    }
-    @GetMapping("product/{id}")
-    public ProductDto findProduct(@PathVariable String id){
-    return productService.findProductById(UUID.fromString(id));
-    }
+
 }
