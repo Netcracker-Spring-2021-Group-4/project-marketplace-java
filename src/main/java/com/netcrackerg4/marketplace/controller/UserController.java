@@ -1,24 +1,15 @@
 package com.netcrackerg4.marketplace.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordWrapperDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
-import com.netcrackerg4.marketplace.service.implementations.ProductServiceImp;
-import com.netcrackerg4.marketplace.service.interfaces.IProductService;
-import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.net.URL;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1/public/user")
