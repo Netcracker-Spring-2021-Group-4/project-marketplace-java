@@ -1,4 +1,7 @@
-package com.netcrackerg4.marketplace.service.interfaces;/**
- * @author Ivan Mordas
- */public interface IProductService {
+package com.netcrackerg4.marketplace.service.interfaces;
+
+import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+
+public interface IProductService {
+    void addProduct(String url, NewProductDto newProduct);
 }

@@ -28,5 +28,4 @@ public interface IUserService extends UserDetailsService {
 
     void confirmPasswordSignup(String tokenValue, CharSequence newPassword);
 
-    void addProduct(String url, NewProductDto newProduct);
 }

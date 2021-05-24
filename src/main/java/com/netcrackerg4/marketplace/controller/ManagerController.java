@@ -2,9 +2,9 @@ package com.netcrackerg4.marketplace.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netcrackerg4.marketplace.model.dto.user.NewProductDto;
+import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
-import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ManagerController {
     private final IS3Service s3Service;
-    private final IUserService userService;
+    private final IProductService productService;
 
     @PostMapping("/add-product")
     void createProduct(@RequestParam(value = "file") MultipartFile multipartFile,
@@ -31,6 +31,6 @@ public class ManagerController {
 
         URL url = s3Service.uploadImage(id, multipartFile);
 
-        userService.addProduct(url.toString(),newProductDto);
+        productService.addProduct(url.toString(),newProductDto);
     }
 }

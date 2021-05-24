@@ -185,25 +185,5 @@ public class UserServiceImpl implements IUserService {
         userDao.updateStatus(email,changeStatus.getUserStatus());
     }
 
-    @Transactional
-    @Override
-    public void addProduct(String url, NewProductDto newProduct) {
-
-        AppProductEntity productEntity = AppProductEntity.builder()
-                .name(newProduct.getProductName())
-                .description(newProduct.getDescription())
-                .imageUrl(url)
-                .price(newProduct.getPrice())
-                .inStock(newProduct.getInStock())
-                .reserved(newProduct.getReserved())
-                .availabilityDate(newProduct.getDate())
-                .isActive(Boolean.TRUE)
-                .category(newProduct.getProductCategory())
-                .build();
-        userDao.createProduct(productEntity);
-
-    }
-
-
 }
 
