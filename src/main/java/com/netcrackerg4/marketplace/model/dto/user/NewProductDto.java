@@ -36,15 +36,11 @@ public class NewProductDto {
     @NotNull
     @Pattern(
             regexp = ValidationConstants.DATE_PATTERN,
-            message = ValidationDefaultMessage.WRONG_FORMAT_FIRST_NAME
+            message = ValidationDefaultMessage.WRONG_FORMAT_DATE
     )
     private Date date;
 
     @NotNull
-    @ProductCategoryTypeSubset(anyOf = {ProductCategory.RED_WINE, ProductCategory.ROSE_WINE,
-            ProductCategory.WHITE_WINE,ProductCategory.DESSERT_WINE, ProductCategory.BLUE_CHEESE,ProductCategory.HARD_CHEESE,
-            ProductCategory.PASTA_FILATA_CHEESE,ProductCategory.PROCESSED_CHEESE,ProductCategory.SEMI_HARD_CHEESE,
-            ProductCategory.SEMI_SOFT_CHEESE,ProductCategory. SOFT_FRESH_CHEESE,ProductCategory.SOFT_RIPENED_CHEESE})
     private ProductCategory productCategory;
 
 
