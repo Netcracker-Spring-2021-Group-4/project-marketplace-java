@@ -78,8 +78,10 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public void update(AppUserEntity updItem) {
-        throw new UnsupportedOperationException();
+    public void update(AppUserEntity item) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(userQueries.getUpdateUserInfo(), item.getFirstName(), item.getLastName(), item.getPhoneNumber(),
+                item.getEmail());
     }
 
     @Override
