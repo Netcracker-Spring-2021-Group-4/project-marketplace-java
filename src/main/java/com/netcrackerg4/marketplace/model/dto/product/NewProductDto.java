@@ -2,14 +2,11 @@ package com.netcrackerg4.marketplace.model.dto.product;
 
 import com.netcrackerg4.marketplace.constants.ValidationConstants;
 import com.netcrackerg4.marketplace.constants.ValidationDefaultMessage;
-import com.netcrackerg4.marketplace.model.enums.ProductCategory;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-
-import java.util.Date;
 
 @Data
 public class NewProductDto {
@@ -33,7 +30,7 @@ public class NewProductDto {
     private int reserved;
 
     @NotNull
-    private ProductCategory productCategory;
+    private int categoryId;
 
 
 }

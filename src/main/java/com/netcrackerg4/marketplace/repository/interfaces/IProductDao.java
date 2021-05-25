@@ -3,8 +3,7 @@ package com.netcrackerg4.marketplace.repository.interfaces;
 
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 
-public interface IProductDao  {
-    void createProduct(AppProductEntity item);
+import java.util.UUID;
 
-    Integer findCategoryIdByCategoryName(String name);
+public interface IProductDao extends AbstractCrudRepository<AppProductEntity, UUID>{
 }

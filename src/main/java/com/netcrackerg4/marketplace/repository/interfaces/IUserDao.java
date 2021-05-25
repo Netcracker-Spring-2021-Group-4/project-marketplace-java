@@ -1,16 +1,15 @@
 package com.netcrackerg4.marketplace.repository.interfaces;
 
-import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface IUserDao extends AbstractDAO<AppUserEntity, String> {
-
-
+public interface IUserDao extends AbstractCrudRepository<AppUserEntity, UUID> {
+    Optional<AppUserEntity> findByEmail(String email);
 
     List<GrantedAuthority> getAuthorities(int roleId);
 

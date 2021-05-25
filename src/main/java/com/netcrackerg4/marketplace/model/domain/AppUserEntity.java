@@ -12,13 +12,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @Builder
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class AppUserEntity implements UserDetails { // not exactly an Entity
-    private final String userId;
+    private final UUID userId;
     private String email;
     private String password;
     private String firstName;

@@ -1,6 +1,5 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
-import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.config.postgres_queries.UserQueries;
 import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
@@ -25,7 +24,6 @@ import java.util.UUID;
 public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     private final UserQueries userQueries;
-    private final ProductQueries productQueries;
 
     @Autowired
     public void setParentDataSource(DataSource dataSource) {
@@ -33,13 +31,13 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public Optional<AppUserEntity> findByEmail(String idx) {
+    public Optional<AppUserEntity> findByEmail(String email) {
         assert getJdbcTemplate() != null;
         Optional<AppUserEntity> user;
         try {
             user = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getGetByEmail(), (rs, row) ->
                             AppUserEntity.builder()
-                                    .userId(rs.getString("user_id"))
+                                    .userId( UUID.fromString(rs.getString("user_id")))
                                     .email(rs.getString("email"))
                                     .password(rs.getString("password"))
                                     .firstName(rs.getString("first_name"))
@@ -47,7 +45,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                                     .phoneNumber(rs.getString("phone_number"))
                                     .status(UserStatus.valueOf(rs.getString("status_name")))
                                     .role(UserRole.valueOf(rs.getString("role_name"))).build()
-                    , idx)
+                    , email)
             );
         } catch (EmptyResultDataAccessException e) {
             user = Optional.empty();
@@ -65,9 +63,9 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public AppUserEntity read(String key) {
+    public Optional<AppUserEntity> read(UUID key) {
         assert getJdbcTemplate() != null;
-        return getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
+        return Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
                 AppUserEntity.builder()
                         .userId(key)
                         .email(rs.getString("email"))
@@ -77,8 +75,8 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                         .phoneNumber(rs.getString("phone_number"))
                         .status(UserStatus.valueOf(rs.getString("status_name")))
                         .role(UserRole.valueOf(rs.getString("role_name")))
-                        .build(), UUID.fromString(key)
-        );
+                        .build(), key
+        ));
     }
 
     @Override
@@ -89,7 +87,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public void delete(String key) {
+    public void delete(UUID key) {
         throw new UnsupportedOperationException();
     }
 
