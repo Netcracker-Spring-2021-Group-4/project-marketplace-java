@@ -31,6 +31,6 @@ public class ManagerController {
 
         URL url = s3Service.uploadImage(id, multipartFile);
 
-        productService.addProduct(url.toString(),newProductDto);
+        productService.addProduct(id, url, newProductDto);
     }
 }

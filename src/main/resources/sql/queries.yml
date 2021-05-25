@@ -43,8 +43,8 @@ custom:
       find-category-id-by-name: >
         SELECT category_id FROM product_category WHERE product_category_name=?;
       create-product: >
-        INSERT INTO product (product_name, image_url, description, price, in_stock, reserved, availability_date,
-        is_active,category_id) VALUES (?, ?, ?, ?, ?, ?, ?,?,?);
+        INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
+        is_active,category_id) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?);
     token:
       create-token: >
         INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);

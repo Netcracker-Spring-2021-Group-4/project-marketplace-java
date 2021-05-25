@@ -8,6 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URL;
+import java.util.Date;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImp implements IProductService {
@@ -15,16 +19,17 @@ public class ProductServiceImp implements IProductService {
 
     @Transactional
     @Override
-    public void addProduct(String url, NewProductDto newProduct) {
+    public void addProduct(UUID id, URL url, NewProductDto newProduct) {
 
         AppProductEntity productEntity = AppProductEntity.builder()
+                .productId(id)
                 .name(newProduct.getProductName())
                 .description(newProduct.getDescription())
-                .imageUrl(url)
+                .imageUrl(url.toString())
                 .price(newProduct.getPrice())
                 .inStock(newProduct.getInStock())
                 .reserved(newProduct.getReserved())
-                .availabilityDate(newProduct.getDate())
+                .availabilityDate(new Date())
                 .isActive(Boolean.TRUE)
                 .category(newProduct.getProductCategory())
                 .build();

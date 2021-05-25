@@ -33,13 +33,6 @@ public class NewProductDto {
     private int reserved;
 
     @NotNull
-    @Pattern(
-            regexp = ValidationConstants.DATE_PATTERN,
-            message = ValidationDefaultMessage.WRONG_FORMAT_DATE
-    )
-    private Date date;
-
-    @NotNull
     private ProductCategory productCategory;
 
 

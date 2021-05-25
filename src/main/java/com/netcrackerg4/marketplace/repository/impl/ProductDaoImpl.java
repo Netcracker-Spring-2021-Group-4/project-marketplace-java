@@ -32,8 +32,9 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     public void createProduct(AppProductEntity item) {
         assert getJdbcTemplate() != null;
         int categoryId = findCategoryIdByCategoryName(item.getCategory().name());
-        getJdbcTemplate().update(productQueries.getCreateProduct(), item.getName(), item.getImageUrl(),item.getDescription(),
-                item.getPrice(),item.getInStock(),item.getReserved(),item.getAvailabilityDate(),item.getIsActive(),
+        getJdbcTemplate().update(productQueries.getCreateProduct(), item.getProductId(), item.getName(),
+                item.getImageUrl(),item.getDescription(), item.getPrice(),item.getInStock(),item.getReserved(),
+                item.getAvailabilityDate(),item.getIsActive(),
                 categoryId);
     }
 }
