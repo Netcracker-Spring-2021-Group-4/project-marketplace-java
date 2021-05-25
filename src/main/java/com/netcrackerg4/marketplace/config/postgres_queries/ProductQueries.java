@@ -8,6 +8,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class ProductQueries {
     private String findProductById;
     private String findInStockById;
-    private String findCategoryIdByName;
     private String createProduct;
 }

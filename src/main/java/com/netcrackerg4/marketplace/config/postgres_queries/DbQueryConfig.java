@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties({
         UserQueries.class,
         TokenQueries.class,
-        UserRoleQueries.class,
         CartQueries.class,
         ProductQueries.class
 })
@@ -19,4 +18,6 @@ public class DbQueryConfig {
     private TokenQueries postgrestokenQueries;
     @Autowired
     private ProductQueries postgresProductQueries;
+    @Autowired
+    private CartQueries postgresCartQueries;
 }

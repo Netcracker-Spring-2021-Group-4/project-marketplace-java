@@ -40,15 +40,11 @@ custom:
       find-role-id-by-name: >
         SELECT role_id FROM user_role WHERE role_name=?;
     product:
-      find-category-id-by-name: >
-        SELECT category_id FROM product_category WHERE product_category_name=?;
       create-product: >
         INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
         is_active,category_id) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?);
-      addProduct: >
-        INSERT INTO product(product_id,product_name,description,price,in_stock,reserved,availability_date,is_active,category_id) VALUES (?,?,?,?::float8::numeric::money,?,?,?,?,?);
       findProductById: >
-        SELECT product_id,product_name,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product WHERE product_id = ?
+        SELECT product_id,product_name, image_url,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product WHERE product_id = ?
       findInStockById: >
         SELECT in_stock FROM product WHERE product_id = ?
     token:
@@ -68,3 +64,4 @@ custom:
       addToCart: >
         INSERT INTO cart_item(cart_item_id, quantity,timestamp_added,customer_id,product_id)
         VALUES (?,?,?,?,?);
+      
