@@ -10,4 +10,6 @@ public class ValidationDefaultMessage {
             "The last name must be of size between 2 and 30";
     public static final String WRONG_FORMAT_PHONE_NUMBER =
             "The phone number must contain from 12 to 16 digits only.";
+    public static final String WRONG_FORMAT_DATE =
+            "The date format must be dd-MM-yyyy.";
 }

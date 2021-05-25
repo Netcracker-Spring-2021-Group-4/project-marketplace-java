@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
+import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.config.postgres_queries.UserQueries;
 import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     private final UserQueries userQueries;
+    private final ProductQueries productQueries;
 
     @Autowired
     public void setParentDataSource(DataSource dataSource) {
