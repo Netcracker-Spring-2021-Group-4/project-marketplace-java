@@ -1,31 +1,46 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.exception.productExceptions.ProductNotFoundException;
-import com.netcrackerg4.marketplace.model.dto.product.ProductDto;
+import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
+import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URL;
+import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements IProductService {
 
-    private final IProductDao repository;
+    private final IProductDao productDao;
 
-    public ProductServiceImpl(IProductDao repository) {
-        this.repository = repository;
+    @Transactional
+    @Override
+    public void addProduct(UUID id, URL url, NewProductDto newProduct) {
+
+        AppProductEntity productEntity = AppProductEntity.builder()
+                .productId(id)
+                .name(newProduct.getProductName())
+                .description(newProduct.getDescription())
+                .imageUrl(url.toString())
+                .price(newProduct.getPrice())
+                .inStock(newProduct.getInStock())
+                .reserved(newProduct.getReserved())
+                .availabilityDate(new Date())
+                .isActive(Boolean.TRUE)
+                .categoryId(newProduct.getCategoryId())
+                .build();
+        productDao.create(productEntity);
+
     }
 
-
     @Override
-    public void addProduct(ProductDto p) {
-        p.setProductId(UUID.randomUUID());
-        repository.create(p);
-    }
-
-    @Override
-    public ProductDto findProductById(UUID id) {
-        return repository.read(id).orElseThrow(ProductNotFoundException::new);
+    public Optional<AppProductEntity> findProductById(UUID id) {
+        return productDao.read(id);
     }
 }
