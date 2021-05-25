@@ -2,8 +2,8 @@ custom:
   postgres:
     user:
       get-by-email: >
-        SELECT user_id, email, password, first_name, last_name, phone_number, status_name, role_id
-        FROM auth_user INNER JOIN user_status USING (status_id)
+        SELECT user_id, email, password, first_name, last_name, phone_number, status_name, role_name
+        FROM auth_user INNER JOIN user_status USING (status_id) INNER JOIN user_role USING (role_id)
         WHERE email = ?;
       get-authorities: >
         SELECT role_name AS authority
@@ -16,8 +16,8 @@ custom:
       create-new: >
         INSERT INTO auth_user (email, password, first_name, last_name, phone_number, role_id, status_id) VALUES (?, ?, ?, ?, ?, ?, ?);
       find-user-by-id: >
-        SELECT email, password, first_name, last_name, phone_number, status_name, role_id
-        FROM auth_user INNER JOIN user_status USING (status_id)
+        SELECT email, password, first_name, last_name, phone_number, status_name, role_name
+        FROM auth_user INNER JOIN user_status USING (status_id) INNER JOIN user_role USING (role_id)
         WHERE user_id = ?
       get-permissions: >
         SELECT permission_name
@@ -31,8 +31,26 @@ custom:
         UPDATE auth_user
         SET first_name=?, last_name=?, phone_number=?
         WHERE email=?;
+      update-password: >
+        UPDATE auth_user
+        SET password=?
+        WHERE email=?;
       find-status-id-by-name: >
         SELECT status_id FROM user_status WHERE status_name=?;
+      find-role-id-by-name: >
+        SELECT role_id FROM user_role WHERE role_name=?;
+    product:
+      find-category-id-by-name: >
+        SELECT category_id FROM product_category WHERE product_category_name=?;
+      create-product: >
+        INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
+        is_active,category_id) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?);
+      addProduct: >
+        INSERT INTO product(product_id,product_name,description,price,in_stock,reserved,availability_date,is_active,category_id) VALUES (?,?,?,?::float8::numeric::money,?,?,?,?,?);
+      findProductById: >
+        SELECT product_id,product_name,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product WHERE product_id = ?
+      findInStockById: >
+        SELECT in_stock FROM product WHERE product_id = ?
     token:
       create-token: >
         INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);
@@ -50,10 +68,3 @@ custom:
       addToCart: >
         INSERT INTO cart_item(cart_item_id, quantity,timestamp_added,customer_id,product_id)
         VALUES (?,?,?,?,?);
-    product:
-      addProduct: >
-        INSERT INTO product(product_id,product_name,description,price,in_stock,reserved,availability_date,is_active,category_id) VALUES (?,?,?,?::float8::numeric::money,?,?,?,?,?);
-      findProductById: >
-        SELECT product_id,product_name,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product WHERE product_id = ?
-      findInStockById: >
-        SELECT in_stock FROM product WHERE product_id = ?

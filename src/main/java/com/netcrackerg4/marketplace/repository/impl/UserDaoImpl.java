@@ -1,8 +1,10 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
+import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.config.postgres_queries.UserQueries;
 import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
+import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import lombok.AllArgsConstructor;
@@ -23,6 +25,7 @@ import java.util.UUID;
 public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     private final UserQueries userQueries;
+    private final ProductQueries productQueries;
 
     @Autowired
     public void setParentDataSource(DataSource dataSource) {
@@ -35,15 +38,15 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         Optional<AppUserEntity> user;
         try {
             user = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getGetByEmail(), (rs, row) ->
-                            new AppUserEntity(UUID.fromString(rs.getString("user_id")),
-                                    rs.getString("email"),
-                                    rs.getString("password"),
-                                    rs.getString("first_name"),
-                                    rs.getString("last_name"),
-                                    rs.getString("phone_number"),
-                                    UserStatus.valueOf(rs.getString("status_name")),
-                                    rs.getInt("role_id")
-                            )
+                            AppUserEntity.builder()
+                                    .userId(rs.getString("user_id"))
+                                    .email(rs.getString("email"))
+                                    .password(rs.getString("password"))
+                                    .firstName(rs.getString("first_name"))
+                                    .lastName(rs.getString("last_name"))
+                                    .phoneNumber(rs.getString("phone_number"))
+                                    .status(UserStatus.valueOf(rs.getString("status_name")))
+                                    .role(UserRole.valueOf(rs.getString("role_name"))).build()
                     , idx)
             );
         } catch (EmptyResultDataAccessException e) {
@@ -55,9 +58,10 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     @Override
     public void create(AppUserEntity item) {
         assert getJdbcTemplate() != null;
-        int statusId = findStatusIdByStatusName(item.getStatus().name()).orElseThrow(BadCodeError::new);
+        int statusId = findStatusIdByStatusName(item.getStatus().name());
+        int roleId = findRoleIdByRoleName(item.getRole().name());
         getJdbcTemplate().update(userQueries.getCreateNew(), item.getEmail(), item.getPassword(), item.getFirstName(),
-                item.getLastName(), item.getPhoneNumber(), item.getRoleId(), statusId);
+                item.getLastName(), item.getPhoneNumber(), roleId, statusId);
     }
 
     @Override
@@ -65,15 +69,15 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         assert getJdbcTemplate() != null;
         return getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
                 AppUserEntity.builder()
-                        .userId(UUID.fromString(rs.getString("user_id")))
+                        .userId(key)
                         .email(rs.getString("email"))
                         .password(rs.getString("password"))
                         .firstName(rs.getString("first_name"))
                         .lastName(rs.getString("last_name"))
                         .phoneNumber(rs.getString("phone_number"))
                         .status(UserStatus.valueOf(rs.getString("status_name")))
-                        .roleId(rs.getInt("role_id"))
-                        .build(), key
+                        .role(UserRole.valueOf(rs.getString("role_name")))
+                        .build(), UUID.fromString(key)
         );
     }
 
@@ -98,15 +102,30 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public void setStatus(String email, UserStatus status) {
+    public void updateStatus(String email, UserStatus status) {
         assert getJdbcTemplate() != null;
         getJdbcTemplate().update(userQueries.getUpdateStatus(), status.name(), email);
     }
 
     @Override
-    public Optional<Integer> findStatusIdByStatusName(String name) {
+    public void updatePassword(String email, String password) {
         assert getJdbcTemplate() != null;
-        return Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getFindStatusIdByName(),
-                Integer.class, name));
+        getJdbcTemplate().update(userQueries.getUpdatePassword(), password, email);
+    }
+
+    @Override
+    public Integer findStatusIdByStatusName(String name) {
+        assert getJdbcTemplate() != null;
+        Integer statusId = getJdbcTemplate().queryForObject(userQueries.getFindStatusIdByName(), Integer.class, name);
+        if (statusId == null) throw new BadCodeError();
+        return statusId;
+    }
+
+    @Override
+    public Integer findRoleIdByRoleName(String roleName) {
+        assert getJdbcTemplate() != null;
+        Integer roleId = getJdbcTemplate().queryForObject(userQueries.getFindRoleIdByName(), Integer.class, roleName);
+        if (roleId == null) throw new BadCodeError();
+        return roleId;
     }
 }

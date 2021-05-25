@@ -17,4 +17,6 @@ public class DbQueryConfig {
     private UserQueries postgresUserQueries;
     @Autowired
     private TokenQueries postgrestokenQueries;
+    @Autowired
+    private ProductQueries postgresProductQueries;
 }
