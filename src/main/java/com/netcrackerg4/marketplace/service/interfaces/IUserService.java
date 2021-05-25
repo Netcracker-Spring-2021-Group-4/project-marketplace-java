@@ -5,7 +5,10 @@ import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
+import com.netcrackerg4.marketplace.model.response.UserInfoResponse;
 import org.springframework.security.core.userdetails.UserDetailsService;
+
+import java.util.UUID;
 
 public interface IUserService extends UserDetailsService {
     void signupUser(SignupRequestDto signupRequest, AccountActivation activationType, UserRole role);
@@ -28,4 +31,6 @@ public interface IUserService extends UserDetailsService {
 
     void confirmPasswordSignup(String tokenValue, CharSequence newPassword);
 
+    UserInfoResponse getProfileByEmail(String email);
+    UserInfoResponse getProfileById(UUID id);
 }

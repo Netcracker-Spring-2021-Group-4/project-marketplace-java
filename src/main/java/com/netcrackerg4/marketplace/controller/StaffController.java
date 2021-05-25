@@ -5,17 +5,25 @@ import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
+import com.netcrackerg4.marketplace.model.response.UserInfoResponse;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/admin/staff")
 @RequiredArgsConstructor
 public class StaffController {
     private final IUserService userService;
+
+    @GetMapping("/{id}")
+    public UserInfoResponse getMyProfile(@PathVariable("id") UUID stafferId) {
+        return this.userService.getProfileById(stafferId);
+    }
 
     @PostMapping("/courier")
     public void createCourier(@RequestBody SignupRequestDto courierSignup) {

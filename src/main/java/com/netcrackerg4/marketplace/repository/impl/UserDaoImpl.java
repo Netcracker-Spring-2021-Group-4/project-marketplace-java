@@ -65,18 +65,25 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     @Override
     public Optional<AppUserEntity> read(UUID key) {
         assert getJdbcTemplate() != null;
-        return Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
-                AppUserEntity.builder()
-                        .userId(key)
-                        .email(rs.getString("email"))
-                        .password(rs.getString("password"))
-                        .firstName(rs.getString("first_name"))
-                        .lastName(rs.getString("last_name"))
-                        .phoneNumber(rs.getString("phone_number"))
-                        .status(UserStatus.valueOf(rs.getString("status_name")))
-                        .role(UserRole.valueOf(rs.getString("role_name")))
-                        .build(), key
-        ));
+        Optional<AppUserEntity> result;
+        try {
+            result = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
+                    AppUserEntity.builder()
+                            .userId(key)
+                            .email(rs.getString("email"))
+                            .password(rs.getString("password"))
+                            .firstName(rs.getString("first_name"))
+                            .lastName(rs.getString("last_name"))
+                            .phoneNumber(rs.getString("phone_number"))
+                            .status(UserStatus.valueOf(rs.getString("status_name")))
+                            .role(UserRole.valueOf(rs.getString("role_name")))
+                            .build(), key
+            ));
+        } catch(EmptyResultDataAccessException e) {
+            result = Optional.empty();
+        }
+
+        return result;
     }
 
     @Override

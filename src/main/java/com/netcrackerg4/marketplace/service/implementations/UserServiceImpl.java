@@ -7,6 +7,7 @@ import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
+import com.netcrackerg4.marketplace.model.response.UserInfoResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.ITokenDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
@@ -182,6 +183,20 @@ public class UserServiceImpl implements IUserService {
         userDao.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
         userDao.updateStatus(email,changeStatus.getUserStatus());
+    }
+
+    @Override
+    public UserInfoResponse getProfileByEmail(String email) {
+        AppUserEntity appUserEntity = userDao.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
+        return new UserInfoResponse(appUserEntity);
+    }
+
+    @Override
+    public UserInfoResponse getProfileById(UUID id) {
+        AppUserEntity appUserEntity = userDao.read(id)
+                .orElseThrow(() -> new IllegalStateException(String.format("User with id %s not found.", id)));
+        return new UserInfoResponse(appUserEntity);
     }
 }
 
