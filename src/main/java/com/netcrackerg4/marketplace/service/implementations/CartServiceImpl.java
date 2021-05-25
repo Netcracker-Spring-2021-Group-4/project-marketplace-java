@@ -17,8 +17,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements ICartService {
+    public static final String NOT_SO_MUCH_IN_STOCK = "There is only %d items in stock! Try buying less ;)";
 
-    private final ICartItemDao repository;
+    private final ICartItemDao cartItemDao;
     private final IProductService productService;
     private final IUserService userService;
 
@@ -30,21 +31,35 @@ public class CartServiceImpl implements ICartService {
                 .findProductById(productId)
                 .orElseThrow(() -> {
                     throw new IllegalStateException(String.format("Product with id %s not found",productId));
-                });;
-        if(product.getInStock() - product.getReserved() < item.getQuantity()) {
-            throw new IllegalStateException(
-                    String.format("There is only %d items in stock! Try buying less ;)", product.getInStock())
-            );
-        }
-        CartItemEntity cartItemEntity =
-                CartItemEntity.builder()
-                .cartItemId(UUID.randomUUID())
-                .customerId(userService.findByEmail(email).getUserId())
-                .productId(productId)
-                .quantity(item.getQuantity())
-                .timestampAdded(new Timestamp(System.currentTimeMillis()))
-                .build();
+                });
+        int amountAvailable = product.getInStock() - product.getReserved();
+        if( amountAvailable < item.getQuantity())
+            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, product.getInStock()));
 
-        repository.addToCart(cartItemEntity);
+        UUID customerId = userService.findByEmail(email).getUserId();
+        var existingCartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
+        existingCartItem
+                .ifPresentOrElse(
+                    cartItemEntity -> {
+                        UUID id = cartItemEntity.getCartItemId();
+                        int addingQuantity = cartItemEntity.getQuantity() + item.getQuantity();
+                        if(amountAvailable < addingQuantity)
+                            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, product.getInStock()));
+                        else
+                            cartItemDao.changeQuantityById(addingQuantity, id);
+                    },
+                    () -> {
+                        CartItemEntity cartItemEntity =
+                            CartItemEntity.builder()
+                                .cartItemId(UUID.randomUUID())
+                                .customerId(customerId)
+                                .productId(productId)
+                                .quantity(item.getQuantity())
+                                .timestampAdded(new Timestamp(System.currentTimeMillis()))
+                                .build();
+
+                        cartItemDao.addToCart(cartItemEntity);
+                    }
+                );
     }
 }
