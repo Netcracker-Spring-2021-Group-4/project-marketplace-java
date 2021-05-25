@@ -10,11 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class ProductServiceImp implements IProductService {
+public class ProductServiceImpl implements IProductService {
+
     private final IProductDao productDao;
 
     @Transactional
@@ -31,9 +33,14 @@ public class ProductServiceImp implements IProductService {
                 .reserved(newProduct.getReserved())
                 .availabilityDate(new Date())
                 .isActive(Boolean.TRUE)
-                .category(newProduct.getProductCategory())
+                .categoryId(newProduct.getCategoryId())
                 .build();
-        productDao.createProduct(productEntity);
+        productDao.create(productEntity);
 
+    }
+
+    @Override
+    public Optional<AppProductEntity> findProductById(UUID id) {
+        return productDao.read(id);
     }
 }

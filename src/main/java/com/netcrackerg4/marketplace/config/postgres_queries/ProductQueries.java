@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "custom.postgres.product")
 public class ProductQueries {
-    private String findCategoryIdByName;
+    private String findProductById;
+    private String findInStockById;
     private String createProduct;
 }

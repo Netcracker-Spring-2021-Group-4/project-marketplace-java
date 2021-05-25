@@ -12,23 +12,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @Builder
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-// todo: get rid of inconsistency: enum status, but role id
 public class AppUserEntity implements UserDetails { // not exactly an Entity
-    private final String userId;
+    private final UUID userId;
     private String email;
     private String password;
     private String firstName;
     private String lastName;
     @Nullable
-    private String phoneNumber;
-    private UserStatus status;
+    private final String phoneNumber;
+    private final UserStatus status;
     private final UserRole role;
-
     private List<GrantedAuthority> authorities;
 
     @Override
