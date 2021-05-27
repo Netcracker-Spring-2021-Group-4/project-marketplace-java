@@ -20,4 +20,6 @@ public interface IUserDao extends AbstractDAO<AppUserEntity, String> {
     Integer findRoleIdByRoleName(String roleName);
 
     List<UserAdminView> findUsersByFilter(List<UserRole> targetRoles, List<UserStatus> targetStatuses, String firstName, String lastName, int pageSize, int page);
+
+    int countFilteredUsers(List<UserRole> roles, List<UserStatus> statuses, String firstName, String lastName);
 }

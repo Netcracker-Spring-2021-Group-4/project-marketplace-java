@@ -161,4 +161,22 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                                 .build()
         );
     }
+
+    @Override
+    public int countFilteredUsers(List<UserRole> targetRoles, List<UserStatus> targetStatuses, String firstName, String lastName) {
+        assert getJdbcTemplate() != null;
+
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("roles", targetRoles.stream().map(UserRole::toString).collect(Collectors.toList()));
+            addValue("statuses", targetStatuses.stream().map(UserStatus::toString).collect(Collectors.toList()));
+            addValue("fst_seq", "%" + firstName + "%");
+            addValue("last_seq", "%" + lastName + "%");
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+        Integer numFound = namedParameterJdbcTemplate.queryForObject(
+                userQueries.getCountByRoleStatusNames(), namedParams, Integer.class
+        );
+        return numFound != null ? numFound : 0;
+    }
 }

@@ -45,6 +45,11 @@ custom:
         WHERE role_name IN (:roles) AND status_name IN (:statuses)
         AND first_name LIKE (:fst_seq) AND last_name LIKE (:last_seq)
         LIMIT (:limit) OFFSET (:offset);
+      count-by-role-status-names: >
+        SELECT COUNT(*) AS num_found
+        FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
+        WHERE role_name IN (:roles) AND status_name IN (:statuses)
+        AND first_name LIKE (:fst_seq) AND last_name LIKE (:last_seq);
     token:
       create-token: >
         INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);

@@ -12,6 +12,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.ITokenDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
+import com.netcrackerg4.marketplace.util.EagerContentPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -145,12 +146,14 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public List<UserAdminView> findUsers(UserSearchFilter searchFilter, int page) {
+    public EagerContentPage<UserAdminView> findUsers(UserSearchFilter searchFilter, int page) {
         List<UserRole> roles = searchFilter.getTargetRoles() != null ? searchFilter.getTargetRoles() : List.of(UserRole.values());
         List<UserStatus> statuses = searchFilter.getTargetStatuses() != null ? searchFilter.getTargetStatuses() : List.of(UserStatus.values());
         String firstName = searchFilter.getFirstNameSequence() != null ? searchFilter.getFirstNameSequence() : "";
         String lastName = searchFilter.getLastNameSequence() != null ? searchFilter.getLastNameSequence() : "";
-        return userDao.findUsersByFilter(roles, statuses, firstName, lastName, SEARCH_PAGE_SIZE, page);
+        List<UserAdminView> content = userDao.findUsersByFilter(roles, statuses, firstName, lastName, SEARCH_PAGE_SIZE, page);
+        int numPages = userDao.countFilteredUsers(roles, statuses, firstName, lastName);
+        return new EagerContentPage<>(content, numPages);
     }
 
     @Override

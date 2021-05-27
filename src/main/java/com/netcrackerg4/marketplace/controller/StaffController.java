@@ -4,6 +4,7 @@ import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
+import com.netcrackerg4.marketplace.util.EagerContentPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,8 +39,8 @@ public class StaffController {
         userService.updateStatus(changeStatusDto);
     }
 
-    @GetMapping("/find")
-    List<UserAdminView> findEmployees(@RequestBody @Valid UserSearchFilter userFilter, @RequestParam @Min(0) int page) {
+    @PostMapping("/find")
+    EagerContentPage<UserAdminView> findEmployees(@RequestBody @Valid UserSearchFilter userFilter, @RequestParam @Min(0) int page) {
         return userService.findUsers(userFilter, page);
     }
 

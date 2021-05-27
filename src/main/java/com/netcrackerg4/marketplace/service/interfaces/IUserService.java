@@ -6,6 +6,7 @@ import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
+import com.netcrackerg4.marketplace.util.EagerContentPage;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public interface IUserService extends UserDetailsService {
 
     void confirmPasswordSignup(String tokenValue, CharSequence newPassword);
 
-    List<UserAdminView> findUsers(UserSearchFilter searchFilter, int page);
+    EagerContentPage<UserAdminView> findUsers(UserSearchFilter searchFilter, int page);
 
     Map<String, List<String>> getAllRolesAndStatuses();
 }
