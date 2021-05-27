@@ -160,18 +160,11 @@ public class UserServiceImpl implements IUserService {
     public void updateUser(UserUpdateDto staffUpdate) {
         String email = staffUpdate.getEmail();
 
-        AppUserEntity user = userDao.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
-
         AppUserEntity userEntity = AppUserEntity.builder()
-                .userId(user.getUserId())
                 .email(email)
-                .password(user.getPassword())
-                .firstName(staffUpdate.getFirstName() != null ? staffUpdate.getFirstName() : user.getFirstName())
-                .lastName(staffUpdate.getLastName() != null ? staffUpdate.getLastName() : user.getLastName())
-                .phoneNumber(staffUpdate.getPhoneNumber() != null ? staffUpdate.getPhoneNumber() : user.getPhoneNumber())
-                .status(user.getStatus())
-                .role(user.getRole())
+                .firstName(staffUpdate.getFirstName())
+                .lastName(staffUpdate.getLastName())
+                .phoneNumber(staffUpdate.getPhoneNumber())
                 .build();
         userDao.update(userEntity);
     }

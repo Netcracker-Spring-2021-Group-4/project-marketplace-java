@@ -1,7 +1,9 @@
 package com.netcrackerg4.marketplace.controller;
 
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
+import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.service.interfaces.ICartService;
+import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,11 +17,17 @@ import javax.validation.Valid;
 public class AuthCustomerController {
 
     private final ICartService cartService;
+    private final IUserService userService;
 
     @PostMapping("/add-to-cart")
     public void addToCard(@Valid @RequestBody CartItemDto cartItemDto){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         cartService.addToCart(email, cartItemDto);
+    }
+
+    @PutMapping("/me/edit")
+    public void updateStaff(@Valid @RequestBody UserUpdateDto userUpdateDto) {
+        userService.updateUser(userUpdateDto);
     }
 }

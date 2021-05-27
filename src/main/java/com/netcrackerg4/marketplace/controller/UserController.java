@@ -1,6 +1,5 @@
 package com.netcrackerg4.marketplace.controller;
 
-import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.PasswordWrapperDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
@@ -48,11 +47,5 @@ public class UserController {
     @PatchMapping("/password/{token}")
     void resetPassword(@PathVariable String token, @RequestBody PasswordWrapperDto passWrapper) {
         userService.resetPassword(token, passWrapper.getPassword());
-    }
-
-    // change password without email confirmation
-    @PatchMapping("/{email}/password")
-    void changePassword(@RequestBody PasswordUpdateDto passwordData, @PathVariable String email) {
-        userService.changePassword(email, passwordData);
     }
 }
