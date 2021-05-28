@@ -62,9 +62,6 @@ public class ProductServiceImpl implements IProductService {
     @Transactional
     @Override
     public void updateProductPicture(UUID id, URL url) {
-
-        if (findProductById(id).isEmpty())
-            throw new IllegalStateException("There is no product with such id");
         productDao.updatePicture(id,url);
     }
 
