@@ -30,7 +30,7 @@ public class ManagerController {
 
     @PutMapping("/products/{id}/edit-info")
     public void updateProductInfo(@PathVariable UUID id,
-                                  @Valid  @RequestBody NewProductDto changeProductDto){
+                                  @Valid @RequestBody NewProductDto changeProductDto){
 
         productService.updateProductInfo(id,changeProductDto);
     }
