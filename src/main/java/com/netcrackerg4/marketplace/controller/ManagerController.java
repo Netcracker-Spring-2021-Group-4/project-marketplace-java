@@ -33,10 +33,8 @@ public class ManagerController {
 
     @PutMapping("/products/{id}/edit-info")
     public void updateProductInfo(@PathVariable UUID id,
-                                  @RequestParam(value = "product")  String product) throws JsonProcessingException {
+                                  @RequestBody NewProductDto changeProductDto){
 
-        ObjectMapper mapper = new ObjectMapper();
-        NewProductDto changeProductDto = mapper.readValue(product, NewProductDto.class);
         productService.updateProductInfo(id,changeProductDto);
     }
 
@@ -44,6 +42,8 @@ public class ManagerController {
     public void updateProductPicture(@PathVariable UUID id,
                                      @RequestParam(value = "file") MultipartFile multipartFile){
 
+        if (productService.findProductById(id).isEmpty())
+            throw new IllegalStateException("There is no product with such id");
         URL url = s3Service.uploadImage(id, multipartFile);
         productService.updateProductPicture(id,url);
     }
