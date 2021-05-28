@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.net.URL;
+import javax.validation.Valid;
 import java.util.UUID;
 
 
@@ -17,23 +17,21 @@ import java.util.UUID;
 @RequestMapping("/api/v1/manager")
 @AllArgsConstructor
 public class ManagerController {
-    private final IS3Service s3Service;
     private final IProductService productService;
 
     @PostMapping("/add-product")
     void createProduct(@RequestParam(value = "file") MultipartFile multipartFile,
                        @RequestParam(value = "product")  String product) throws JsonProcessingException {
 
-        UUID id = UUID.randomUUID();
         ObjectMapper mapper = new ObjectMapper();
         NewProductDto newProductDto = mapper.readValue(product, NewProductDto.class);
-        URL url = s3Service.uploadImage(id, multipartFile);
-        productService.addProduct(id, url, newProductDto);
+
+        productService.addProduct(multipartFile, newProductDto);
     }
 
     @PutMapping("/products/{id}/edit-info")
     public void updateProductInfo(@PathVariable UUID id,
-                                  @RequestBody NewProductDto changeProductDto){
+                                  @Valid  @RequestBody NewProductDto changeProductDto){
 
         productService.updateProductInfo(id,changeProductDto);
     }
@@ -42,9 +40,6 @@ public class ManagerController {
     public void updateProductPicture(@PathVariable UUID id,
                                      @RequestParam(value = "file") MultipartFile multipartFile){
 
-        if (productService.findProductById(id).isEmpty())
-            throw new IllegalStateException("There is no product with such id");
-        URL url = s3Service.uploadImage(id, multipartFile);
-        productService.updateProductPicture(id,url);
+        productService.updateProductPicture(id,multipartFile);
     }
 }
