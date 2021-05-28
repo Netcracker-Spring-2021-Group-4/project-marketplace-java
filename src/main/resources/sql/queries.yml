@@ -40,13 +40,19 @@ custom:
       find-role-id-by-name: >
         SELECT role_id FROM user_role WHERE role_name=?;
     product:
+      getAllProducts: >
+        SELECT product_id,product_name, image_url,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product;
       create-product: >
         INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
         is_active,category_id) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?);
       findProductById: >
-        SELECT product_id,product_name, image_url,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product WHERE product_id = ?
+        SELECT product_id,product_name, image_url,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active, product_category_name
+        FROM product INNER JOIN product_category USING(category_id)
+        WHERE product_id = ?;
       findInStockById: >
-        SELECT in_stock FROM product WHERE product_id = ?
+        SELECT in_stock FROM product WHERE product_id = ?;
+      deactivateProduct: >
+        UPDATE product SET is_active = CASE WHEN is_active = true THEN false ELSE true END WHERE product_id = ?;
     token:
       create-token: >
         INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);

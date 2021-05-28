@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,4 +44,15 @@ public class ProductServiceImpl implements IProductService {
     public Optional<AppProductEntity> findProductById(UUID id) {
         return productDao.read(id);
     }
+
+    @Override
+    public void deactivateProduct(UUID productId) {
+        productDao.deactivateProduct(productId);
+    }
+
+    @Override
+    public List<AppProductEntity> getAllProducts() {
+       return productDao.getAllProducts();
+    }
+
 }

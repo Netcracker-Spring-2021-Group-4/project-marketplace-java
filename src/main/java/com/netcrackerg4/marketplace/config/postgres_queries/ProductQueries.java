@@ -9,4 +9,6 @@ public class ProductQueries {
     private String findProductById;
     private String findInStockById;
     private String createProduct;
+    private String deactivateProduct;
+    private String getAllProducts;
 }

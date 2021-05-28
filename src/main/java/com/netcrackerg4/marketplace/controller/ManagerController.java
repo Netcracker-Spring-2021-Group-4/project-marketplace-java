@@ -14,7 +14,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/api/v1/manager")
+@RequestMapping("/api/v1/manager/product")
 @AllArgsConstructor
 public class ManagerController {
     private final IS3Service s3Service;
@@ -32,5 +32,10 @@ public class ManagerController {
         URL url = s3Service.uploadImage(id, multipartFile);
 
         productService.addProduct(id, url, newProductDto);
+    }
+
+    @PatchMapping("/deactivate-product/{id}")
+    void deactivateProduct(@PathVariable("id") UUID productId){
+        productService.deactivateProduct(productId);
     }
 }
