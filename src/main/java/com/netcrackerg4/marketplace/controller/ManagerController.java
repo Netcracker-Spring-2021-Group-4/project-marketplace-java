@@ -14,7 +14,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/api/v1/manager/product")
+@RequestMapping("/api/v1/manager")
 @AllArgsConstructor
 public class ManagerController {
     private final IS3Service s3Service;

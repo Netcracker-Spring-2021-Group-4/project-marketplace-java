@@ -14,18 +14,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/v1/manager/product")
+@RequestMapping("api/v1/public")
 @AllArgsConstructor
 public class ProductController {
   private final IProductService productService;
 
 
-  @GetMapping("/all")
+  @GetMapping("/product/all")
   public List<AppProductEntity> getAllProducts(){
     return productService.getAllProducts();
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/product/{id}")
   public Optional<AppProductEntity> getProductById(@PathVariable("id") UUID productId){
     return productService.findProductById(productId);
   }
