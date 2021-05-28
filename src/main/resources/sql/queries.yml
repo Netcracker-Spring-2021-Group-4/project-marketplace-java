@@ -48,11 +48,11 @@ custom:
       findInStockById: >
         SELECT in_stock FROM product WHERE product_id = ?
       update-product-info: >
-              UPDATE product
-              SET product_name = ?, description = ?, price = ?, in_stock = ?, reserved = ?, availability_date = ?,
-              category_id = ?
-              WHERE product_id = ?;
-      update-product-picture: >
+        UPDATE product
+        SET product_name = ?, description = ?, price = ?, in_stock = ?, reserved = ?, availability_date = ?,
+        category_id = ?
+        WHERE product_id = ?;
+      up:date-product-picture: >
         UPDATE product
         SET image_url = ?
         WHERE product_id = ?;
