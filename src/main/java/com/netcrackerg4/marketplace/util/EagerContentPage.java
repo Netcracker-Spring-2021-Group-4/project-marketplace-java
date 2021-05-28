@@ -8,6 +8,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class EagerContentPage<T> {
-    private List<T> pageContent;
+    private List<T> content;
     private int numPages;
 }
