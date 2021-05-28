@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface IProductService {
     void addProduct(UUID id, URL url, NewProductDto newProduct);
     Optional<AppProductEntity> findProductById(UUID id);
+     void updateProductInfo(UUID id,  NewProductDto newProduct);
+     void updateProductPicture(UUID id, URL url);
 }

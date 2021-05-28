@@ -22,15 +22,29 @@ public class ManagerController {
 
     @PostMapping("/add-product")
     void createProduct(@RequestParam(value = "file") MultipartFile multipartFile,
-                    @RequestParam(value = "product")  String product) throws JsonProcessingException {
+                       @RequestParam(value = "product")  String product) throws JsonProcessingException {
 
         UUID id = UUID.randomUUID();
-
         ObjectMapper mapper = new ObjectMapper();
         NewProductDto newProductDto = mapper.readValue(product, NewProductDto.class);
+        URL url = s3Service.uploadImage(id, multipartFile);
+        productService.addProduct(id, url, newProductDto);
+    }
+
+    @PutMapping("/products/{id}/edit-info")
+    public void updateProductInfo(@PathVariable UUID id,
+                                  @RequestParam(value = "product")  String product) throws JsonProcessingException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        NewProductDto changeProductDto = mapper.readValue(product, NewProductDto.class);
+        productService.updateProductInfo(id,changeProductDto);
+    }
+
+    @PutMapping("/products/{id}/edit-picture")
+    public void updateProductPicture(@PathVariable UUID id,
+                                     @RequestParam(value = "file") MultipartFile multipartFile){
 
         URL url = s3Service.uploadImage(id, multipartFile);
-
-        productService.addProduct(id, url, newProductDto);
+        productService.updateProductPicture(id,url);
     }
 }

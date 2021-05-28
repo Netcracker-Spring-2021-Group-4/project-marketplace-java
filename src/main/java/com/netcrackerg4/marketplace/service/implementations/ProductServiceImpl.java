@@ -39,6 +39,35 @@ public class ProductServiceImpl implements IProductService {
 
     }
 
+    @Transactional
+    @Override
+    public void updateProductInfo(UUID id,  NewProductDto newProduct) {
+
+        if (findProductById(id).isEmpty())
+            throw new IllegalStateException("There is no product with such id");
+
+        AppProductEntity productEntity = AppProductEntity.builder()
+                .productId(id)
+                .name(newProduct.getProductName())
+                .description(newProduct.getDescription())
+                .price(newProduct.getPrice())
+                .inStock(newProduct.getInStock())
+                .reserved(newProduct.getReserved())
+                .availabilityDate(new Date())
+                .categoryId(newProduct.getCategoryId())
+                .build();
+        productDao.update(productEntity);
+    }
+
+    @Transactional
+    @Override
+    public void updateProductPicture(UUID id, URL url) {
+
+        if (findProductById(id).isEmpty())
+            throw new IllegalStateException("There is no product with such id");
+        productDao.updatePicture(id,url);
+    }
+
     @Override
     public Optional<AppProductEntity> findProductById(UUID id) {
         return productDao.read(id);
