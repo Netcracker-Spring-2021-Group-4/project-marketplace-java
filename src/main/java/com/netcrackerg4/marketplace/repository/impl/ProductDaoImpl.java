@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
+import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -73,6 +75,26 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     public void updatePicture(UUID key, URL url) {
         assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getUpdateProductPicture(), url.toString(),key);
+    }
+
+    @Override
+    public List<ProductResponse> findAll() {
+        assert getJdbcTemplate() != null;
+
+        return getJdbcTemplate().query(productQueries.getActiveProductsWithDiscount(),
+                (rs, rowNum) -> ProductResponse.builder()
+                        .productId(UUID.fromString(rs.getString("product_id")))
+                        .name(rs.getString("product_name"))
+                        .description(rs.getString("description"))
+                        .imageUrl(rs.getString("image_url"))
+                        .price(rs.getInt("price"))
+                        .inStock(rs.getInt("in_stock"))
+                        .reserved(rs.getInt("reserved"))
+                        .availabilityDate(rs.getDate("availability_date"))
+                        .categoryId(rs.getInt("category_id"))
+                        .discount(rs.getInt("offered_price"))
+                        .build());
+
     }
 
     @Override

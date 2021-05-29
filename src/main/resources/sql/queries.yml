@@ -56,6 +56,14 @@ custom:
         UPDATE product
         SET image_url = ?
         WHERE product_id = ?;
+      activeProductsWithDiscount: >
+          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
+          availability_date,category_id,offered_price
+          FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+          WHERE is_active=true
+          AND ((offered_price IS NULL)
+          OR ( starts_at>now() AND ends_at <now()));
+
     token:
       create-token: >
         INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);

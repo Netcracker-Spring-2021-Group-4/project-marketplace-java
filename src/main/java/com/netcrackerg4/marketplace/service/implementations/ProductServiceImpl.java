@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -74,7 +76,14 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    public List<ProductResponse> getAll() {
+       return productDao.findAll();
+    }
+
+    @Override
     public Optional<AppProductEntity> findProductById(UUID id) {
         return productDao.read(id);
     }
+
+
 }
