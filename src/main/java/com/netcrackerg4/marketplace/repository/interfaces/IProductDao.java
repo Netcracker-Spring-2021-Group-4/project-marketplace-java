@@ -6,4 +6,6 @@ import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import java.util.UUID;
 
 public interface IProductDao extends AbstractCrudRepository<AppProductEntity, UUID>{
+
+
 }
