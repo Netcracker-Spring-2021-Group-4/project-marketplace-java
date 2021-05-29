@@ -3,7 +3,6 @@ package com.netcrackerg4.marketplace.service.implementations;
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
-import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
@@ -151,11 +150,11 @@ public class UserServiceImpl implements IUserService {
     public EagerContentPage<UserAdminView> findUsers(UserSearchFilter searchFilter, int page) {
         List<UserRole> roles = searchFilter.getTargetRoles() != null ? searchFilter.getTargetRoles() : List.of(UserRole.values());
         List<UserStatus> statuses = searchFilter.getTargetStatuses() != null ? searchFilter.getTargetStatuses() : List.of(UserStatus.values());
-        String firstName = searchFilter.getFirstNameSequence() != null ? searchFilter.getFirstNameSequence() : "";
-        String lastName = searchFilter.getLastNameSequence() != null ? searchFilter.getLastNameSequence() : "";
+        String firstName = searchFilter.getFirstNameSeq() != null ? searchFilter.getFirstNameSeq() : "";
+        String lastName = searchFilter.getLastNameSeq() != null ? searchFilter.getLastNameSeq() : "";
         List<UserAdminView> content = userDao.findUsersByFilter(roles, statuses, firstName, lastName, SEARCH_PAGE_SIZE, page);
         int numPages = userDao.countFilteredUsers(roles, statuses, firstName, lastName);
-        return new EagerContentPage<>(content, numPages);
+        return new EagerContentPage<>(content, numPages, SEARCH_PAGE_SIZE);
     }
 
     @Override

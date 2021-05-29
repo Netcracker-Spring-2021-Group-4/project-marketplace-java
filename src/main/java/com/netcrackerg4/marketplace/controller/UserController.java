@@ -1,7 +1,5 @@
 package com.netcrackerg4.marketplace.controller;
 
-import com.netcrackerg4.marketplace.model.dto.user.PasswordWrapperDto;
-import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.password.PasswordWrapperDto;
 import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;

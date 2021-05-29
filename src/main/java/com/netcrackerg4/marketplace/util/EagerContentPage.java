@@ -10,4 +10,5 @@ import java.util.List;
 public class EagerContentPage<T> {
     private List<T> content;
     private int numPages;
+    private int fullPageSize;
 }

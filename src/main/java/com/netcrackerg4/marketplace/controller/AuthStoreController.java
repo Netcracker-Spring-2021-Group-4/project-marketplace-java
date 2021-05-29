@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.controller;
 
-import com.netcrackerg4.marketplace.model.dto.user.PasswordUpdateDto;
+import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.response.UserInfoResponse;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.AllArgsConstructor;

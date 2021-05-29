@@ -18,8 +18,8 @@ public class UserSearchFilter {
     private List<UserStatus> targetStatuses;
     @Nullable
     @Size(min = 2)
-    private String firstNameSequence;
+    private String firstNameSeq;
     @Nullable
     @Size(min = 2)
-    private String lastNameSequence;
+    private String lastNameSeq;
 }
