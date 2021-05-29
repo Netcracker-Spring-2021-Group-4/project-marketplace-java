@@ -7,7 +7,6 @@ import com.netcrackerg4.marketplace.model.response.UserInfoResponse;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
