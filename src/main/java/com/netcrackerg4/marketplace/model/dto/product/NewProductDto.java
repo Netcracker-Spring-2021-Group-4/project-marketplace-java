@@ -13,8 +13,8 @@ public class NewProductDto {
 
     @NotNull
     @Pattern(
-            regexp = ValidationConstants.NAME_PATTERN,
-            message = ValidationDefaultMessage.WRONG_FORMAT_FIRST_NAME
+            regexp = ValidationConstants.DESCRIPTIVE_NAME_PATTERN,
+            message = ValidationDefaultMessage.WRONG_FORMAT_NAMING
     )
     private String productName;
 

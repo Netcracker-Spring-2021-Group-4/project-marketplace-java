@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.net.URL;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -62,7 +63,16 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public void update(AppProductEntity updItem) {
-        throw new UnsupportedOperationException();
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(productQueries.getUpdateProductInfo(), updItem.getName(),
+                updItem.getDescription(),updItem.getPrice(), updItem.getInStock(),updItem.getReserved(),
+                updItem.getCategoryId(),updItem.getProductId());
+    }
+
+    @Override
+    public void updatePicture(UUID key, URL url) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(productQueries.getUpdateProductPicture(), url.toString(),key);
     }
 
     @Override
