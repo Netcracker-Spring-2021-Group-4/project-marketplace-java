@@ -8,6 +8,8 @@ public class ValidationDefaultMessage {
             "The last name must be of size between 2 and 30";
     public static final String WRONG_FORMAT_FIRST_NAME =
             "The first name must be of size between 2 and 30";
+    public static final String WRONG_FORMAT_NAMING =
+            "The name must be of size between 2 and 30, start with 2 characters, contain only characters, spaces and numbers";
     public static final String WRONG_FORMAT_PHONE_NUMBER =
             "The phone number must contain from 12 to 16 digits only.";
 }
