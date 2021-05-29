@@ -35,13 +35,13 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public Optional<AppUserEntity> findByEmail(String idx) {
+    public Optional<AppUserEntity> findByEmail(String email) {
         assert getJdbcTemplate() != null;
         Optional<AppUserEntity> user;
         try {
             user = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getGetByEmail(), (rs, row) ->
                             AppUserEntity.builder()
-                                    .userId(rs.getString("user_id"))
+                                    .userId( UUID.fromString(rs.getString("user_id")))
                                     .email(rs.getString("email"))
                                     .password(rs.getString("password"))
                                     .firstName(rs.getString("first_name"))
@@ -49,7 +49,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                                     .phoneNumber(rs.getString("phone_number"))
                                     .status(UserStatus.valueOf(rs.getString("status_name")))
                                     .role(UserRole.valueOf(rs.getString("role_name"))).build()
-                    , idx)
+                    , email)
             );
         } catch (EmptyResultDataAccessException e) {
             user = Optional.empty();
@@ -67,20 +67,27 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public AppUserEntity read(String key) {
+    public Optional<AppUserEntity> read(UUID key) {
         assert getJdbcTemplate() != null;
-        return getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
-                AppUserEntity.builder()
-                        .userId(key)
-                        .email(rs.getString("email"))
-                        .password(rs.getString("password"))
-                        .firstName(rs.getString("first_name"))
-                        .lastName(rs.getString("last_name"))
-                        .phoneNumber(rs.getString("phone_number"))
-                        .status(UserStatus.valueOf(rs.getString("status_name")))
-                        .role(UserRole.valueOf(rs.getString("role_name")))
-                        .build(), UUID.fromString(key)
-        );
+        Optional<AppUserEntity> result;
+        try {
+            result = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
+                    AppUserEntity.builder()
+                            .userId(key)
+                            .email(rs.getString("email"))
+                            .password(rs.getString("password"))
+                            .firstName(rs.getString("first_name"))
+                            .lastName(rs.getString("last_name"))
+                            .phoneNumber(rs.getString("phone_number"))
+                            .status(UserStatus.valueOf(rs.getString("status_name")))
+                            .role(UserRole.valueOf(rs.getString("role_name")))
+                            .build(), key
+            ));
+        } catch(EmptyResultDataAccessException e) {
+            result = Optional.empty();
+        }
+
+        return result;
     }
 
     @Override
@@ -91,7 +98,7 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     }
 
     @Override
-    public void delete(String key) {
+    public void delete(UUID key) {
         throw new UnsupportedOperationException();
     }
 
@@ -102,7 +109,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
                         new SimpleGrantedAuthority(rs.getString("authority")),
                 roleId, roleId);
     }
-
 
     @Override
     public void updateStatus(String email, UserStatus status) {

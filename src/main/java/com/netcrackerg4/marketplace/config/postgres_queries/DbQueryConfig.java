@@ -7,11 +7,17 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties({
         UserQueries.class,
-        TokenQueries.class
+        TokenQueries.class,
+        CartQueries.class,
+        ProductQueries.class
 })
 public class DbQueryConfig {
     @Autowired
     private UserQueries postgresUserQueries;
     @Autowired
     private TokenQueries postgrestokenQueries;
+    @Autowired
+    private ProductQueries postgresProductQueries;
+    @Autowired
+    private CartQueries postgresCartQueries;
 }

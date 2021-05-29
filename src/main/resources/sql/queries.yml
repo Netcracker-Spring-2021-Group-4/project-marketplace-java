@@ -50,6 +50,23 @@ custom:
         FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
         WHERE role_name IN (:roles) AND status_name IN (:statuses)
         AND first_name LIKE (:fst_seq) AND last_name LIKE (:last_seq);
+    product:
+      create-product: >
+        INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
+        is_active,category_id) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?);
+      findProductById: >
+        SELECT product_id,product_name, image_url,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product WHERE product_id = ?
+      findInStockById: >
+        SELECT in_stock FROM product WHERE product_id = ?
+      update-product-info: >
+        UPDATE product
+        SET product_name = ?, description = ?, price = ?, in_stock = ?, reserved = ?,
+        category_id = ?
+        WHERE product_id = ?;
+      up:date-product-picture: >
+        UPDATE product
+        SET image_url = ?
+        WHERE product_id = ?;
     token:
       create-token: >
         INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);
@@ -59,3 +76,20 @@ custom:
         UPDATE confirmation_token
         SET is_activated = true
         WHERE token = ?;
+
+    auth:
+      role:
+        find-role-id-by-role-name: >
+          SELECT role_id FROM user_role WHERE role_name=?;
+    cart:
+      addToCart: >
+        INSERT INTO cart_item(cart_item_id, quantity,timestamp_added,customer_id,product_id)
+        VALUES (?,?,?,?,?);
+      get-by-customer-product: >
+        SELECT cart_item_id, quantity, timestamp_added, customer_id, product_id
+        FROM cart_item
+        WHERE customer_id = ? AND product_id = ? ;
+      change-quantity-by-id: >
+        UPDATE cart_item
+        SET quantity = ?
+        WHERE cart_item_id = ?;

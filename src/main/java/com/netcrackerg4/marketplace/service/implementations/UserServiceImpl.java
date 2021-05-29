@@ -3,11 +3,13 @@ package com.netcrackerg4.marketplace.service.implementations;
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
+import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
+import com.netcrackerg4.marketplace.model.response.UserInfoResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.ITokenDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
@@ -183,18 +185,11 @@ public class UserServiceImpl implements IUserService {
     public void updateUser(UserUpdateDto staffUpdate) {
         String email = staffUpdate.getEmail();
 
-        AppUserEntity user = userDao.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
-
         AppUserEntity userEntity = AppUserEntity.builder()
-                .userId(user.getUserId())
                 .email(email)
-                .password(user.getPassword())
-                .firstName(staffUpdate.getFirstName() != null ? staffUpdate.getFirstName() : user.getFirstName())
-                .lastName(staffUpdate.getLastName() != null ? staffUpdate.getLastName() : user.getLastName())
-                .phoneNumber(staffUpdate.getPhoneNumber() != null ? staffUpdate.getPhoneNumber() : user.getPhoneNumber())
-                .status(user.getStatus())
-                .role(user.getRole())
+                .firstName(staffUpdate.getFirstName())
+                .lastName(staffUpdate.getLastName())
+                .phoneNumber(staffUpdate.getPhoneNumber())
                 .build();
         userDao.update(userEntity);
     }
@@ -206,6 +201,20 @@ public class UserServiceImpl implements IUserService {
         userDao.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
         userDao.updateStatus(email,changeStatus.getUserStatus());
+    }
+
+    @Override
+    public UserInfoResponse getProfileByEmail(String email) {
+        AppUserEntity appUserEntity = userDao.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
+        return new UserInfoResponse(appUserEntity);
+    }
+
+    @Override
+    public UserInfoResponse getProfileById(UUID id) {
+        AppUserEntity appUserEntity = userDao.read(id)
+                .orElseThrow(() -> new IllegalStateException(String.format("User with id %s not found.", id)));
+        return new UserInfoResponse(appUserEntity);
     }
 }
 
