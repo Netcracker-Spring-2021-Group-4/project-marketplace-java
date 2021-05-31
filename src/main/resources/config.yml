@@ -23,6 +23,8 @@ custom:
     email-confirmation-url: /confirm-token
     password-confirmation-url: /first-password
     password-reset-url: /new-password
+  pagination:
+    user-search: 2
 
 cloud:
   aws:

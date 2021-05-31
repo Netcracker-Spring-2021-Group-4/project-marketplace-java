@@ -1,17 +1,18 @@
 package com.netcrackerg4.marketplace.controller;
 
-import com.netcrackerg4.marketplace.model.dto.user.ChangeStatusDto;
-import com.netcrackerg4.marketplace.model.dto.user.SignupRequestDto;
-import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
+import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.response.UserInfoResponse;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
+import com.netcrackerg4.marketplace.util.EagerContentPage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -43,5 +44,15 @@ public class StaffController {
     @PatchMapping("/change-status")
     public void updateStatus(@Valid @RequestBody ChangeStatusDto changeStatusDto) {
         userService.updateStatus(changeStatusDto);
+    }
+
+    @PostMapping("/find")
+    EagerContentPage<UserAdminView> findEmployees(@RequestBody @Valid UserSearchFilter userFilter, @RequestParam @Min(0) int page) {
+        return userService.findUsers(userFilter, page);
+    }
+
+    @GetMapping("/search-details")
+    Map<String, List<String>> getAllRolesAndStatuses() {
+        return userService.getAllRolesAndStatuses();
     }
 }

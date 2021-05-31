@@ -1,4 +1,4 @@
-package com.netcrackerg4.marketplace.model.dto.user;
+package com.netcrackerg4.marketplace.model.dto.password;
 
 import com.netcrackerg4.marketplace.constants.ValidationConstants;
 import com.netcrackerg4.marketplace.constants.ValidationDefaultMessage;

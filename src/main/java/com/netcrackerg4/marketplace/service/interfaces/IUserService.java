@@ -3,12 +3,20 @@ package com.netcrackerg4.marketplace.service.interfaces;
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.user.*;
+import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
+import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.response.UserInfoResponse;
+import com.netcrackerg4.marketplace.util.EagerContentPage;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.UUID;
+
+import java.util.UUID;
+
+import java.util.List;
+import java.util.Map;
 
 public interface IUserService extends UserDetailsService {
     void signupUser(SignupRequestDto signupRequest, AccountActivation activationType, UserRole role);
@@ -31,6 +39,9 @@ public interface IUserService extends UserDetailsService {
 
     void confirmPasswordSignup(String tokenValue, CharSequence newPassword);
 
+    EagerContentPage<UserAdminView> findUsers(UserSearchFilter searchFilter, int page);
+
+    Map<String, List<String>> getAllRolesAndStatuses();
     UserInfoResponse getProfileByEmail(String email);
     UserInfoResponse getProfileById(UUID id);
 }

@@ -15,4 +15,6 @@ public class UserQueries {
     private String findRoleIdByName;
     private String updateUserInfo;
     private String updatePassword;
+    private String findByRoleStatusNames;
+    private String countByRoleStatusNames;
 }

@@ -3,6 +3,7 @@ package com.netcrackerg4.marketplace.service.implementations;
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
 import com.netcrackerg4.marketplace.model.domain.TokenEntity;
+import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
@@ -12,6 +13,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.ITokenDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
+import com.netcrackerg4.marketplace.util.EagerContentPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,13 +23,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements IUserService {
     @Value("${custom.jwt.hours-valid}")
     private final Integer HOURS_TOKEN_VALID;
+    @Value("${custom.pagination.user-search}")
+    private final int SEARCH_PAGE_SIZE;
     private final IUserDao userDao;
     private final PasswordEncoder passwordEncoder;
     private final IMailService mailService;
@@ -139,6 +144,25 @@ public class UserServiceImpl implements IUserService {
     public void confirmPasswordSignup(String tokenValue, CharSequence newPassword) {
         String userEmail = doResetPassword(tokenValue, newPassword);
         userDao.updateStatus(userEmail, UserStatus.ACTIVE);
+    }
+
+    @Override
+    public EagerContentPage<UserAdminView> findUsers(UserSearchFilter searchFilter, int page) {
+        List<UserRole> roles = searchFilter.getTargetRoles() != null ? searchFilter.getTargetRoles() : List.of(UserRole.values());
+        List<UserStatus> statuses = searchFilter.getTargetStatuses() != null ? searchFilter.getTargetStatuses() : List.of(UserStatus.values());
+        String firstName = searchFilter.getFirstNameSeq() != null ? searchFilter.getFirstNameSeq() : "";
+        String lastName = searchFilter.getLastNameSeq() != null ? searchFilter.getLastNameSeq() : "";
+        List<UserAdminView> content = userDao.findUsersByFilter(roles, statuses, firstName, lastName, SEARCH_PAGE_SIZE, page);
+        int numPages = userDao.countFilteredUsers(roles, statuses, firstName, lastName);
+        return new EagerContentPage<>(content, numPages, SEARCH_PAGE_SIZE);
+    }
+
+    @Override
+    public Map<String, List<String>> getAllRolesAndStatuses() {
+        return new HashMap<>() {{
+            put("roles", Arrays.stream(UserRole.values()).map(UserRole::toString).collect(Collectors.toList()));
+            put("statuses", Arrays.stream(UserStatus.values()).map(UserStatus::toString).collect(Collectors.toList()));
+        }};
     }
 
     @Override

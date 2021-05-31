@@ -101,7 +101,6 @@
             <artifactId>spring-context-support</artifactId>
             <version>5.1.7.RELEASE</version>
         </dependency>
-
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>

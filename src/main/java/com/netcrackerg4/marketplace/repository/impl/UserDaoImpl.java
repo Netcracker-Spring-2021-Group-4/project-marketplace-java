@@ -3,12 +3,15 @@ package com.netcrackerg4.marketplace.repository.impl;
 import com.netcrackerg4.marketplace.config.postgres_queries.UserQueries;
 import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
+import com.netcrackerg4.marketplace.model.dto.user.UserAdminView;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,6 +21,7 @@ import javax.sql.DataSource;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 @AllArgsConstructor
@@ -132,5 +136,53 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
         Integer roleId = getJdbcTemplate().queryForObject(userQueries.getFindRoleIdByName(), Integer.class, roleName);
         if (roleId == null) throw new BadCodeError();
         return roleId;
+    }
+
+    @Override
+    public List<UserAdminView> findUsersByFilter(List<UserRole> targetRoles, List<UserStatus> targetStatuses,
+                                                 String firstName, String lastName, int pageSize, int pageNo) {
+        assert getJdbcTemplate() != null;
+
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("roles", targetRoles.stream().map(UserRole::toString).collect(Collectors.toList()));
+            addValue("statuses", targetStatuses.stream().map(UserStatus::toString).collect(Collectors.toList()));
+            addValue("fst_seq", "%" + firstName + "%");
+            addValue("last_seq", "%" + lastName + "%");
+            addValue("limit", pageSize);
+            addValue("offset", pageSize * pageNo);
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+        return namedParameterJdbcTemplate.query(userQueries.getFindByRoleStatusNames(),
+                namedParams,
+                (rs, row) ->
+                        UserAdminView.builder()
+                                .userId(rs.getObject("user_id", UUID.class).toString())
+                                .email(rs.getString("email"))
+                                .firstName(rs.getString("first_name"))
+                                .lastName(rs.getString("last_name"))
+                                .phoneNumber(rs.getString("phone_number"))
+                                .status(UserStatus.valueOf(rs.getString("status_name")))
+                                .role(UserRole.valueOf(rs.getString("role_name")))
+                                .build()
+        );
+    }
+
+    @Override
+    public int countFilteredUsers(List<UserRole> targetRoles, List<UserStatus> targetStatuses, String firstName, String lastName) {
+        assert getJdbcTemplate() != null;
+
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("roles", targetRoles.stream().map(UserRole::toString).collect(Collectors.toList()));
+            addValue("statuses", targetStatuses.stream().map(UserStatus::toString).collect(Collectors.toList()));
+            addValue("fst_seq", "%" + firstName + "%");
+            addValue("last_seq", "%" + lastName + "%");
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+        Integer numFound = namedParameterJdbcTemplate.queryForObject(
+                userQueries.getCountByRoleStatusNames(), namedParams, Integer.class
+        );
+        return numFound != null ? numFound : 0;
     }
 }

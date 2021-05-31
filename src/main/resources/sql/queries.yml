@@ -39,6 +39,17 @@ custom:
         SELECT status_id FROM user_status WHERE status_name=?;
       find-role-id-by-name: >
         SELECT role_id FROM user_role WHERE role_name=?;
+      find-by-role-status-names: >
+        SELECT user_id, email, first_name, last_name, phone_number, status_name, role_name
+        FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
+        WHERE role_name IN (:roles) AND status_name IN (:statuses)
+        AND first_name LIKE (:fst_seq) AND last_name LIKE (:last_seq)
+        LIMIT (:limit) OFFSET (:offset);
+      count-by-role-status-names: >
+        SELECT COUNT(*) AS num_found
+        FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
+        WHERE role_name IN (:roles) AND status_name IN (:statuses)
+        AND first_name LIKE (:fst_seq) AND last_name LIKE (:last_seq);
     product:
       create-product: >
         INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
