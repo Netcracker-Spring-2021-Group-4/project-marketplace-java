@@ -24,17 +24,15 @@ public class CartServiceImpl implements ICartService {
     private final IUserService userService;
 
     @Override
+    public void checkAvailability(UUID id, int quantity) {
+        getAmountAvailable(id,quantity);
+    }
+
+    @Override
     @Transactional
     public void addToCart(String email, CartItemDto item) {
         UUID productId = item.getProductId();
-        AppProductEntity product = productService
-                .findProductById(productId)
-                .orElseThrow(() -> {
-                    throw new IllegalStateException(String.format("Product with id %s not found",productId));
-                });
-        int amountAvailable = product.getInStock() - product.getReserved();
-        if( amountAvailable < item.getQuantity())
-            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, product.getInStock()));
+        int amountAvailable = getAmountAvailable(item.getProductId(), item.getQuantity());
 
         UUID customerId = userService.findByEmail(email).getUserId();
         var existingCartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
@@ -44,7 +42,7 @@ public class CartServiceImpl implements ICartService {
                         UUID id = cartItemEntity.getCartItemId();
                         int addingQuantity = cartItemEntity.getQuantity() + item.getQuantity();
                         if(amountAvailable < addingQuantity)
-                            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, product.getInStock()));
+                            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
                         else
                             cartItemDao.changeQuantityById(addingQuantity, id);
                     },
@@ -61,5 +59,17 @@ public class CartServiceImpl implements ICartService {
                         cartItemDao.addToCart(cartItemEntity);
                     }
                 );
+    }
+
+    private int getAmountAvailable(UUID id, int quantity) {
+        AppProductEntity product = productService
+                .findProductById(id)
+                .orElseThrow(() -> {
+                    throw new IllegalStateException(String.format("Product with id %s not found", id));
+                });
+        int amountAvailable = product.getInStock() - product.getReserved();
+        if( amountAvailable < quantity)
+            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
+        return amountAvailable;
     }
 }
