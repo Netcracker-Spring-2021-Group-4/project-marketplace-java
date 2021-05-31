@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
+import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
@@ -68,7 +68,7 @@ public class CartServiceImpl implements ICartService {
     }
 
     private int getAmountAvailable(UUID id, int quantity) {
-        AppProductEntity product = productService
+        ProductEntity product = productService
                 .findProductById(id)
                 .orElseThrow(() -> {
                     throw new IllegalStateException(String.format("Product with id %s not found", id));

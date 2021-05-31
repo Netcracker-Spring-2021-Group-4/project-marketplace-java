@@ -1,14 +1,12 @@
 package com.netcrackerg4.marketplace.repository.interfaces;
 
 
-import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
-import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 
 import java.net.URL;
-import java.util.Optional;
 import java.util.UUID;
 
-public interface IProductDao extends AbstractCrudRepository<AppProductEntity, UUID>{
+public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID> {
      void updatePicture(UUID key, URL url);
-     Optional<DiscountEntity> findActiveProductDiscount(UUID id);
+
 }

@@ -1,8 +1,10 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
@@ -13,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,6 +25,7 @@ public class ProductServiceImpl implements IProductService {
 
     private final IProductDao productDao;
     private final IS3Service s3Service;
+    private final IDiscountDao discountDao;
 
     @Transactional
     @Override
@@ -30,7 +34,7 @@ public class ProductServiceImpl implements IProductService {
         UUID id = UUID.randomUUID();
         URL url = s3Service.uploadImage(id, multipartFile);
 
-        AppProductEntity productEntity = AppProductEntity.builder()
+        ProductEntity productEntity = ProductEntity.builder()
                 .productId(id)
                 .name(newProduct.getProductName())
                 .description(newProduct.getDescription())
@@ -46,13 +50,28 @@ public class ProductServiceImpl implements IProductService {
 
     }
 
+    @Override
+    public Optional<ProductEntity> findProductById(UUID id) {
+        return productDao.read(id);
+    }
+
     @Transactional
     @Override
-    public void updateProductInfo(UUID id,  NewProductDto newProduct) {
+    public void updateProductPicture(UUID id, MultipartFile multipartFile) {
+        findProductById(id)
+                .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
+
+        URL url = s3Service.uploadImage(id, multipartFile);
+        productDao.updatePicture(id, url);
+    }
+
+    @Transactional
+    @Override
+    public void updateProductInfo(UUID id, NewProductDto newProduct) {
 
         findProductById(id)
                 .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
-        AppProductEntity productEntity = AppProductEntity.builder()
+        ProductEntity productEntity = ProductEntity.builder()
                 .productId(id)
                 .name(newProduct.getProductName())
                 .description(newProduct.getDescription())
@@ -64,22 +83,27 @@ public class ProductServiceImpl implements IProductService {
         productDao.update(productEntity);
     }
 
-    @Transactional
-    @Override
-    public void updateProductPicture(UUID id, MultipartFile multipartFile) {
-        findProductById(id)
-                .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
-
-        URL url = s3Service.uploadImage(id, multipartFile);
-        productDao.updatePicture(id,url);
-    }
-
-    @Override
-    public Optional<AppProductEntity> findProductById(UUID id) {
-        return productDao.read(id);
-    }
-
     public Optional<DiscountEntity> findActiveProductDiscount(UUID id) {
-        return productDao.findActiveProductDiscount(id);
+        return discountDao.findActiveProductDiscount(id);
+    }
+
+    @Override
+    public List<DiscountEntity> getUnexpiredDiscounts(UUID productId) {
+        return null;
+    }
+
+    @Override
+    public void addDiscount(DiscountDto discountRequest) {
+
+    }
+
+    @Override
+    public void editDiscount(UUID discountId, DiscountDto discountDto) {
+
+    }
+
+    @Override
+    public void removeDiscount(UUID discountId) {
+
     }
 }

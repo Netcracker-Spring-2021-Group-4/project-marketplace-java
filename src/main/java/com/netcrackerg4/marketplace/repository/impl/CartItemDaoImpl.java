@@ -10,21 +10,20 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public class CartItemDAOImpl extends JdbcDaoSupport implements ICartItemDao {
+public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
 
     private final CartQueries cartQueries;
 
     @Autowired
-    public CartItemDAOImpl(DataSource ds, CartQueries cartQueries) {
+    public CartItemDaoImpl(DataSource ds, CartQueries cartQueries) {
         this.cartQueries = cartQueries;
         super.setDataSource(ds);
-            }
+    }
 
     @Override
     public void addToCart(CartItemEntity item) {
