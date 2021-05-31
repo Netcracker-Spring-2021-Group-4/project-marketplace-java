@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
@@ -78,6 +79,11 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public List<ProductResponse> getAll() {
        return productDao.findAll();
+    }
+
+    @Override
+    public List<CategoryResponse> getCategories() {
+        return productDao.findCategories();
     }
 
     @Override

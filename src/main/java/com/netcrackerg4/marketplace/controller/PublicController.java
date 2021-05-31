@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.controller;
 
+import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import lombok.AllArgsConstructor;
@@ -21,5 +22,9 @@ public class PublicController {
     public List<ProductResponse> getProductPage(){
     return  productService.getAll();
    }
+    @GetMapping("/categories")
+    public List<CategoryResponse> getCategories(){
+        return  productService.getCategories();
+    }
 
 }

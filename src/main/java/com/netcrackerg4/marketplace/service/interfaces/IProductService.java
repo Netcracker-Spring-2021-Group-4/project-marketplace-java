@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.service.interfaces;
 
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,4 +17,5 @@ public interface IProductService {
     void updateProductInfo(UUID id,  NewProductDto newProduct);
     void updateProductPicture(UUID id, MultipartFile multipartFile);
     List<ProductResponse> getAll();
+    List<CategoryResponse> getCategories();
 }
