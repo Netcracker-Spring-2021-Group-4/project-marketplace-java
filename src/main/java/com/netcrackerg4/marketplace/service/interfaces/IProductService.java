@@ -23,9 +23,9 @@ public interface IProductService {
 
     List<DiscountEntity> getUnexpiredDiscounts(UUID productId);
 
-    void addDiscount(DiscountDto discountRequest);
+    void addDiscount(UUID productId, DiscountDto discountDto);
 
-    void editDiscount(DiscountEntity discount);
+    void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto);
 
     void removeDiscount(UUID discountId);
 }

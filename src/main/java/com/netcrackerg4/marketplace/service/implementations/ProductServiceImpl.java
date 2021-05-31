@@ -96,18 +96,24 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     @Transactional
-    public void addDiscount(DiscountDto discountRequest) {
-        DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountRequest);
+    public void addDiscount(UUID productId, DiscountDto discountDto) {
+        DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountDto);
+        discountEntity.setProductId(productId);
         discountEntity.setDiscountId(UUID.randomUUID());
         discountDao.create(discountEntity);
     }
 
     @Override
-    public void editDiscount(DiscountEntity discount) {
-        discountDao.update(discount);
+    @Transactional
+    public void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto) {
+        DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountDto);
+        discountEntity.setProductId(productId);
+        discountEntity.setDiscountId(discountId);
+        discountDao.update(discountEntity);
     }
 
     @Override
+    @Transactional
     public void removeDiscount(UUID discountId) {
         discountDao.delete(discountId);
     }

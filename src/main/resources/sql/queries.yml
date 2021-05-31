@@ -85,7 +85,7 @@ custom:
       check-period-edit: >
         SELECT COUNT(discount_id)
         FROM discount
-        WHERE product_id = ? AND discount_id = ? AND starts_at <= ? AND ends_at >= ?;
+        WHERE product_id = ? AND discount_id <> ? AND starts_at <= ? AND ends_at >= ?;
       create-discount: >
         INSERT INTO discount (discount_id, offered_price, starts_at, ends_at, product_id) VALUES (?, ?, ?, ?, ?);
       read-discount: >
