@@ -2,11 +2,13 @@ package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
 import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
+import com.netcrackerg4.marketplace.util.EagerContentPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,8 +87,20 @@ public class ProductServiceImpl implements IProductService {
     public List<CategoryResponse> getCategories() {
         return productDao.findCategories();
     }
-
     @Override
+    public EagerContentPage<ProductResponse> findProducts(ProductSearchFilter searchFilter,int pageSize, int pageN) {
+        List<Integer> categoryIds = searchFilter.getCategoryIds() ;
+        Double from = searchFilter.getMinPrice() != null ? searchFilter.getMinPrice() : 0;
+        Double to = searchFilter.getMaxPrice() != null ? searchFilter.getMaxPrice() : new Double(999999999);
+        String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
+        String sortOption = searchFilter.getNameQuery() !=null? searchFilter.getSortOption():"product_name";
+        List<ProductResponse> content = productDao.findProductsWithFilters(query,categoryIds,from,to,sortOption,pageSize,pageN);
+        return new EagerContentPage<>(content, pageN, pageSize);
+
+    }
+
+
+        @Override
     public Optional<AppProductEntity> findProductById(UUID id) {
         return productDao.read(id);
     }

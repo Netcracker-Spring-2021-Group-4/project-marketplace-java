@@ -13,6 +13,9 @@ public interface IProductDao extends AbstractCrudRepository<AppProductEntity, UU
      void updatePicture(UUID key, URL url);
 
      List<ProductResponse> findAll();
+     List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories,Double from,Double to, String sortBy, int pageSize,int pageN );
 
     List<CategoryResponse> findCategories();
+
+
 }

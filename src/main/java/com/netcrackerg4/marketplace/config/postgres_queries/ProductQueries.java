@@ -13,4 +13,5 @@ public class ProductQueries {
     private String updateProductPicture;
     private String activeProductsWithDiscount;
     private String categoriesWithAmountOfProduct;
+    private String productsWithFilters;
 }
