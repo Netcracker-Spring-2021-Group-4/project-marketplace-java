@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
+import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,4 +81,26 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Optional<DiscountEntity> findActiveProductDiscount(UUID id) {
+        assert getJdbcTemplate() != null;
+        Optional<DiscountEntity> discount;
+        try{
+            discount = Optional.ofNullable(
+                    getJdbcTemplate().queryForObject(productQueries.getFindActiveProductDiscount(),
+                            (rs, row) -> DiscountEntity.builder()
+                                    .discountId(UUID.fromString(rs.getString("discount_id")))
+                                    .offeredPrice(rs.getInt("offered_price"))
+                                    .startsAt(rs.getTimestamp("starts_at"))
+                                    .endsAt(rs.getTimestamp("ends_at"))
+                                    .productId(id)
+                                    .build()
+                            , id)
+            );
+        } catch (EmptyResultDataAccessException e) {
+            discount = Optional.empty();
+        }
+
+        return discount;
+    }
 }

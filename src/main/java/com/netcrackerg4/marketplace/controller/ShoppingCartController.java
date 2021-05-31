@@ -16,4 +16,7 @@ public class ShoppingCartController {
     public void checkInStockProduct(@PathVariable("id") UUID id, @RequestParam(name = "quantity") int quantity) {
         cartService.checkAvailability(id, quantity);
     }
+
+    @GetMapping("/cart")
+    public
 }

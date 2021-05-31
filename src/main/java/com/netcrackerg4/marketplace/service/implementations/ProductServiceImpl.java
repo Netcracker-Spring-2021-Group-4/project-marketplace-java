@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
+import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
@@ -76,5 +77,9 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public Optional<AppProductEntity> findProductById(UUID id) {
         return productDao.read(id);
+    }
+
+    public Optional<DiscountEntity> findActiveProductDiscount(UUID id) {
+        return productDao.findActiveProductDiscount(id);
     }
 }

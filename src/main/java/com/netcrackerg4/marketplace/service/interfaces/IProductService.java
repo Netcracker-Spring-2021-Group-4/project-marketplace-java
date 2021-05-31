@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.service.interfaces;
 
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
+import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,4 +14,5 @@ public interface IProductService {
     Optional<AppProductEntity> findProductById(UUID id);
     void updateProductInfo(UUID id,  NewProductDto newProduct);
     void updateProductPicture(UUID id, MultipartFile multipartFile);
+    Optional<DiscountEntity> findActiveProductDiscount(UUID id);
 }

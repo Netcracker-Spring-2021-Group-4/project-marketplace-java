@@ -3,6 +3,7 @@ package com.netcrackerg4.marketplace.service.implementations;
 import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
 import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
+import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.service.interfaces.ICartService;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
@@ -22,6 +23,11 @@ public class CartServiceImpl implements ICartService {
     private final ICartItemDao cartItemDao;
     private final IProductService productService;
     private final IUserService userService;
+
+    @Override
+    public CartInfoResponse getCartInfoAuthorized(String email) {
+        return null;
+    }
 
     @Override
     public void checkAvailability(UUID id, int quantity) {
@@ -67,6 +73,7 @@ public class CartServiceImpl implements ICartService {
                 .orElseThrow(() -> {
                     throw new IllegalStateException(String.format("Product with id %s not found", id));
                 });
+        if(!product.getIsActive()) throw new IllegalStateException("Product is not available now");
         int amountAvailable = product.getInStock() - product.getReserved();
         if( amountAvailable < quantity)
             throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
