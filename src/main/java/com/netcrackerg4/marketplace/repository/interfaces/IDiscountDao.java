@@ -9,5 +9,5 @@ import java.util.UUID;
 public interface IDiscountDao extends AbstractCrudRepository<DiscountEntity, UUID> {
     Optional<DiscountEntity> findActiveProductDiscount(UUID productId);
 
-    List<DiscountEntity> readUnexpiredDiscounts(UUID productId);
+    List<DiscountEntity> findUnexpiredDiscounts(UUID productId);
 }

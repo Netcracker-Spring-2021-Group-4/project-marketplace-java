@@ -17,6 +17,4 @@ public class ShoppingCartController {
         cartService.checkAvailability(id, quantity);
     }
 
-    @GetMapping("/cart")
-    public
 }

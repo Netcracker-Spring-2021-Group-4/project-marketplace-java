@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.controller;
 
+import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import lombok.AllArgsConstructor;
@@ -37,5 +38,10 @@ public class ManagerController {
     public void updateProductPicture(@PathVariable UUID id,
                                      @RequestParam(value = "file") MultipartFile multipartFile) {
         productService.updateProductPicture(id, multipartFile);
+    }
+
+    @PostMapping("/products/discounts")
+    void createDiscount(@RequestBody DiscountDto discountDto) {
+        productService.addDiscount(discountDto);
     }
 }

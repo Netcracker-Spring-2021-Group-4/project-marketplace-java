@@ -25,7 +25,7 @@ public interface IProductService {
 
     void addDiscount(DiscountDto discountRequest);
 
-    void editDiscount(UUID discountId, DiscountDto discountDto);
+    void editDiscount(DiscountEntity discount);
 
     void removeDiscount(UUID discountId);
 }

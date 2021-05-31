@@ -8,6 +8,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
+import com.netcrackerg4.marketplace.util.mappers.DiscountEntity_Dao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class ProductServiceImpl implements IProductService {
     private final IProductDao productDao;
     private final IS3Service s3Service;
     private final IDiscountDao discountDao;
+    private final DiscountEntity_Dao discountMapper;
 
     @Transactional
     @Override
@@ -89,21 +91,24 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public List<DiscountEntity> getUnexpiredDiscounts(UUID productId) {
-        return null;
+        return discountDao.findUnexpiredDiscounts(productId);
     }
 
     @Override
+    @Transactional
     public void addDiscount(DiscountDto discountRequest) {
-
+        DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountRequest);
+        discountEntity.setDiscountId(UUID.randomUUID());
+        discountDao.create(discountEntity);
     }
 
     @Override
-    public void editDiscount(UUID discountId, DiscountDto discountDto) {
-
+    public void editDiscount(DiscountEntity discount) {
+        discountDao.update(discount);
     }
 
     @Override
     public void removeDiscount(UUID discountId) {
-
+        discountDao.delete(discountId);
     }
 }

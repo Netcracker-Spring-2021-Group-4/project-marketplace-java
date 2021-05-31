@@ -7,8 +7,8 @@ import java.util.UUID;
 
 @Data
 public class DiscountDto {
+    private UUID targetProductId;
     private int offeredPrice;
     private LocalDateTime startsAt;
     private LocalDateTime endsAt;
-    private UUID targetProduct;
 }
