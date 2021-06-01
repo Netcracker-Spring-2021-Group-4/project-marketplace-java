@@ -92,7 +92,22 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
                new ProductResponse.ProductResponseMapper());
     }
 
+    @Override
+    public List<ProductResponse> findAll(int p, int s) {
+        assert getJdbcTemplate() != null;
 
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {
+            {
+                addValue("limit", s);
+                addValue("offset", p * s);
+            }
+        };
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+        return namedParameterJdbcTemplate.query(productQueries.getProductsPage(),
+                namedParams, new ProductResponse.ProductResponseMapper()
+        );
+
+    }
 
 
     public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, Double from, Double to, String sortBy, int pageSize, int pageN) {

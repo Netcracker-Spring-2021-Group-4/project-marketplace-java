@@ -22,6 +22,6 @@ public class ProductSearchFilter {
     @Min(0)
     private Double minPrice;
     @Min(1)
-    @Nullable
+    @NotNull
     private Double maxPrice;
 }

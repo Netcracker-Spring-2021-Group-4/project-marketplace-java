@@ -5,6 +5,7 @@ import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
+import com.netcrackerg4.marketplace.util.Page;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +27,14 @@ public class PublicController {
    }
 
     @PostMapping("/products")
-    public EagerContentPage<ProductResponse> getProductPage(@RequestBody @Valid ProductSearchFilter filter, @RequestParam int pageSize, @RequestParam int pageN)
+    public Page<ProductResponse> getProductPage(@RequestBody @Valid ProductSearchFilter filter, @RequestParam int pageSize, @RequestParam int pageN)
     {
         return  productService.findProducts(filter,pageSize,pageN);
+    }
+    @GetMapping("/product-page")
+    public Page<ProductResponse> getProductPage(@RequestParam int page,@RequestParam int size)
+    {
+        return  productService.findProducts(page,size);
     }
     @GetMapping("/categories")
     public List<CategoryResponse> getCategories(){

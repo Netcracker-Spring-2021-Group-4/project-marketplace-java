@@ -14,4 +14,6 @@ public class ProductQueries {
     private String activeProductsWithDiscount;
     private String categoriesWithAmountOfProduct;
     private String productsWithFilters;
+    private String productsPage;
+
 }
