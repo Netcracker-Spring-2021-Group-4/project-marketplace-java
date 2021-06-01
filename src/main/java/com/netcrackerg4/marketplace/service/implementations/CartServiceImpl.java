@@ -129,7 +129,8 @@ public class CartServiceImpl implements ICartService {
                 .orElseThrow(() -> {
                     throw new IllegalStateException(String.format("Product with id %s not found", id));
                 });
-        if(!product.getIsActive()) throw new IllegalStateException("Product is not available now");
+        if(!product.getIsActive())
+            throw new IllegalStateException(String.format("Product with id %s is not available now", id));
         int amountAvailable = product.getInStock() - product.getReserved();
         if( amountAvailable < quantity)
             throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
