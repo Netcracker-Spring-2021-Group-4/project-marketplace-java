@@ -130,3 +130,20 @@ custom:
         SELECT product_id, quantity
         FROM cart_item
         WHERE customer_id = ?;
+    order:
+      get-taken-timeslots: >
+        SELECT COUNT(user_id) AS num_taken, time_start
+        FROM dateslot INNER JOIN timeslot USING (timeslot_id) INNER JOIN auth_user ON courier_id=user_id
+        WHERE datestamp=?
+        GROUP BY time_start;
+      count-active-couriers: >
+        SELECT COUNT(user_id)
+        FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
+        WHERE role_name='ROLE_COURIER' AND status_name='ACTIVE';
+      check-timeslot-present: >
+        SELECT COUNT(timeslot_id)
+        FROM timeslot
+        WHERE time_start=? AND time_end=?;
+      read-all-timeslots: >
+        SELECT timeslot_id, time_start, time_end
+        FROM timeslot;

@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
         TokenQueries.class,
         CartQueries.class,
         ProductQueries.class,
-        DiscountQueries.class
+        DiscountQueries.class,
+        OrderQueries.class
 })
 public class DbQueryConfig {
     @Autowired
