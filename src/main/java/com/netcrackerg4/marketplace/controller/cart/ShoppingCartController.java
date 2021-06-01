@@ -1,9 +1,13 @@
-package com.netcrackerg4.marketplace.controller;
+package com.netcrackerg4.marketplace.controller.cart;
 
+import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
+import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.service.interfaces.ICartService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -17,4 +21,8 @@ public class ShoppingCartController {
         cartService.checkAvailability(id, quantity);
     }
 
+    @GetMapping("/cart")
+    public CartInfoResponse getMyCart(@Valid @RequestBody List<CartItemDto> cartItems) {
+        return cartService.getCartInfoNonAuthorized(cartItems);
+    }
 }
