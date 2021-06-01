@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.util.mappers;
 
-import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import org.mapstruct.Mapper;
 
@@ -13,6 +13,6 @@ public interface DiscountEntity_Dao {
     DiscountEntity toDiscountEntity(DiscountDto discountDto);
 
     default Timestamp map(LocalDateTime value) {
-        return Timestamp.from(value.toInstant(ZoneOffset.UTC));
+        return Timestamp.from(value.toInstant(ZoneOffset.ofHours(3)));
     }
 }

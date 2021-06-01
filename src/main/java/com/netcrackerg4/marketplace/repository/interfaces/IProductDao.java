@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.repository.interfaces;
 
 
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 
 import java.net.URL;
 import java.util.UUID;

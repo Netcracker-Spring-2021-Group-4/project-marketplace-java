@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.exception.BadCodeError;
+import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import lombok.RequiredArgsConstructor;
@@ -66,5 +67,11 @@ public class MailServiceImpl implements IMailService {
         message.setSubject("NC-Marketplace. Password reset.");
         message.setText(resetUrl);
         mailSender.send(message);
+    }
+
+    @Override
+    public void notifyCourierGotDelivery(String courierEmail, DeliveryDetails deliveryDetails) {
+        // todo: implement
+        throw new UnsupportedOperationException();
     }
 }

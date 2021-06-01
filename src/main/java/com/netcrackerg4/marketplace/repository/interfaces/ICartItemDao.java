@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.repository.interfaces;
 
-import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
+import com.netcrackerg4.marketplace.model.domain.product.CartItemEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 
 import java.util.List;

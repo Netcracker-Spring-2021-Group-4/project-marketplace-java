@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.exception;
 
-import com.netcrackerg4.marketplace.model.domain.ErrorBody;
-import com.netcrackerg4.marketplace.model.domain.ErrorListBody;
+import com.netcrackerg4.marketplace.model.domain.error.ErrorBody;
+import com.netcrackerg4.marketplace.model.domain.error.ErrorListBody;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

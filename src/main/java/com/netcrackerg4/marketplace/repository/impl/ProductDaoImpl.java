@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.repository.interfaces;
 
-import com.netcrackerg4.marketplace.model.domain.TokenEntity;
+import com.netcrackerg4.marketplace.model.domain.user.TokenEntity;
 
 import java.util.UUID;
 

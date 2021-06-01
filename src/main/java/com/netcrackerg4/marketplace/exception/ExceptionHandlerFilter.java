@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.exception;
 
-import com.netcrackerg4.marketplace.model.domain.ErrorBody;
+import com.netcrackerg4.marketplace.model.domain.error.ErrorBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;

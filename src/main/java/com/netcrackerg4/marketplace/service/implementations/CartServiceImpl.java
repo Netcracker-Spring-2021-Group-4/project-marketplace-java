@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.CartItemEntity;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;

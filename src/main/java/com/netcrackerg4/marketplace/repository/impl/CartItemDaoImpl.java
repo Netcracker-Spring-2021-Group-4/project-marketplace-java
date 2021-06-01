@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.CartQueries;
-import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
+import com.netcrackerg4.marketplace.model.domain.product.CartItemEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import org.springframework.beans.factory.annotation.Autowired;

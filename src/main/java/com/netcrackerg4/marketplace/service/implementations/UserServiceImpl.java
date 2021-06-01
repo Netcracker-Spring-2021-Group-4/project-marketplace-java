@@ -1,8 +1,8 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.exception.InvalidTokenException;
-import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
-import com.netcrackerg4.marketplace.model.domain.TokenEntity;
+import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
+import com.netcrackerg4.marketplace.model.domain.user.TokenEntity;
 import com.netcrackerg4.marketplace.model.dto.password.PasswordUpdateDto;
 import com.netcrackerg4.marketplace.model.dto.user.*;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
