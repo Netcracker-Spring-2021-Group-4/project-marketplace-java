@@ -99,7 +99,7 @@ public class ProductServiceImpl implements IProductService {
         Double from = searchFilter.getMinPrice() != null ? searchFilter.getMinPrice() : 0;
         Double to = searchFilter.getMaxPrice() ;
         String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
-        String sortOption = searchFilter.getNameQuery() !=null? searchFilter.getSortOption():"product_name";
+        String sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():"product_name";
         List<ProductResponse> content = productDao.findProductsWithFilters(query,categoryIds,from,to,sortOption,pageSize,pageN);
         return new Page<>(content, content.size());
 
