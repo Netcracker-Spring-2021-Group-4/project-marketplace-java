@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
 import java.util.Date;
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AppProductEntity {
+public class ProductEntity {
     private final UUID productId;
     private String name;
     private String description;

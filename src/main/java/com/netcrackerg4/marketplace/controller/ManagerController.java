@@ -1,5 +1,7 @@
 package com.netcrackerg4.marketplace.controller;
 
+import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import lombok.AllArgsConstructor;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -37,5 +40,28 @@ public class ManagerController {
     public void updateProductPicture(@PathVariable UUID id,
                                      @RequestParam(value = "file") MultipartFile multipartFile) {
         productService.updateProductPicture(id, multipartFile);
+    }
+
+    @GetMapping("/products/{productId}/unexpired-discounts")
+    List<DiscountEntity> getFutureDiscounts(@PathVariable UUID productId) {
+        return productService.getUnexpiredDiscounts(productId);
+    }
+
+    @PostMapping("/products/{productId}/discounts")
+    void createDiscount(@PathVariable UUID productId, @RequestBody @Valid DiscountDto discountDto) {
+        if (discountDto.getStartsAt().isAfter(discountDto.getEndsAt()))
+            throw new IllegalStateException("start time is after end time");
+        productService.addDiscount(productId, discountDto);
+    }
+
+    @PutMapping("/products/{productId}/discounts/{discountId}")
+    void editDiscount(@PathVariable UUID productId, @PathVariable UUID discountId,
+                      @RequestBody @Valid DiscountDto discountDto) {
+        productService.editDiscount(productId, discountId, discountDto);
+    }
+
+    @DeleteMapping("/products/discounts/{discountId}")
+    void deleteDiscount(@PathVariable UUID discountId) {
+        productService.removeDiscount(discountId);
     }
 }
