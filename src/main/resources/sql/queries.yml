@@ -50,7 +50,6 @@ custom:
         FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
         WHERE role_name IN (:roles) AND status_name IN (:statuses)
         AND first_name LIKE (:fst_seq) AND last_name LIKE (:last_seq);
-
     product:
       create-product: >
         INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
@@ -64,10 +63,47 @@ custom:
         SET product_name = ?, description = ?, price = ?, in_stock = ?, reserved = ?,
         category_id = ?
         WHERE product_id = ?;
-      update-product-picture: >
+      up:date-product-picture: >
         UPDATE product
         SET image_url = ?
         WHERE product_id = ?;
+      activeProductsWithDiscount: >
+          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
+          availability_date,category_id,offered_price
+          FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+          WHERE is_active=true
+          AND ((offered_price IS NULL)
+          OR ( starts_at>now() AND ends_at <now()));
+      productsPage: >
+         SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
+               availability_date,category_id,offered_price
+               FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+               WHERE is_active=true
+               AND ((offered_price IS NULL)
+               OR ( starts_at>now() AND ends_at <now()))
+                LIMIT (:limit) OFFSET (:offset);
+      productsWithFilters: >
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
+                  availability_date,category_id,offered_price
+                  FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+                  WHERE is_active=true
+                  AND ((
+        			  offered_price IS NULL
+        			  AND price>=(:minPrice) AND price<=(:maxPrice)
+        			  )
+        				  OR ( starts_at>now() AND ends_at <now()
+        						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
+
+        				  )
+        		  AND product_name LIKE (:name_query)
+        		  AND category_id IN (:category_ids)
+
+        		  ORDER BY (:sortOption)
+        		  LIMIT (:limit) OFFSET (:offset);
+      categoriesWithAmountOfProduct: >
+        SELECT product_category.category_id, product_category_name, count(product_id) as amount_of_products
+        FROM product_category left outer join product p on product_category.category_id = p.category_id
+        group by product_category.category_id;
 
     discount:
       find-active-product-discount: >
@@ -113,7 +149,6 @@ custom:
       role:
         find-role-id-by-role-name: >
           SELECT role_id FROM user_role WHERE role_name=?;
-
     cart:
       addToCart: >
         INSERT INTO cart_item(cart_item_id, quantity,timestamp_added,customer_id,product_id)

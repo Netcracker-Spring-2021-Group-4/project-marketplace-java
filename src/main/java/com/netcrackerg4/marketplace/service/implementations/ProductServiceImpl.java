@@ -4,10 +4,14 @@ import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
+import com.netcrackerg4.marketplace.model.response.CategoryResponse;
+import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
+import com.netcrackerg4.marketplace.util.Page;
 import com.netcrackerg4.marketplace.util.mappers.DiscountEntity_Dao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,24 +56,9 @@ public class ProductServiceImpl implements IProductService {
 
     }
 
-    @Override
-    public Optional<ProductEntity> findProductById(UUID id) {
-        return productDao.read(id);
-    }
-
     @Transactional
     @Override
-    public void updateProductPicture(UUID id, MultipartFile multipartFile) {
-        findProductById(id)
-                .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
-
-        URL url = s3Service.uploadImage(id, multipartFile);
-        productDao.updatePicture(id, url);
-    }
-
-    @Transactional
-    @Override
-    public void updateProductInfo(UUID id, NewProductDto newProduct) {
+    public void updateProductInfo(UUID id,  NewProductDto newProduct) {
 
         findProductById(id)
                 .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
@@ -85,8 +74,34 @@ public class ProductServiceImpl implements IProductService {
         productDao.update(productEntity);
     }
 
-    public Optional<DiscountEntity> findActiveProductDiscount(UUID id) {
-        return discountDao.findActiveProductDiscount(id);
+    @Transactional
+    @Override
+    public void updateProductPicture(UUID id, MultipartFile multipartFile) {
+        findProductById(id)
+                .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
+
+        URL url = s3Service.uploadImage(id, multipartFile);
+        productDao.updatePicture(id,url);
+    }
+
+    @Override
+    public List<ProductResponse> getAll() {
+       return productDao.findAll();
+    }
+
+    @Override
+    public List<CategoryResponse> getCategories() {
+        return productDao.findCategories();
+    }
+
+    @Override
+    public Page<ProductResponse> findProducts(int page, int size) {
+        return new Page<>(productDao.findAll(page, size), getAll().size());
+    }
+
+    @Override
+    public Optional<DiscountEntity> findActiveProductDiscount(UUID productId) {
+        return discountDao.findActiveProductDiscount(productId);
     }
 
     @Override
@@ -117,4 +132,24 @@ public class ProductServiceImpl implements IProductService {
     public void removeDiscount(UUID discountId) {
         discountDao.delete(discountId);
     }
+
+    @Override
+    public Page<ProductResponse> findProducts(ProductSearchFilter searchFilter, int pageSize, int pageN) {
+        List<Integer> categoryIds = searchFilter.getCategoryIds() ;
+        Double from = searchFilter.getMinPrice() != null ? searchFilter.getMinPrice() : 0;
+        Double to = searchFilter.getMaxPrice() ;
+        String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
+        String sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():"product_name";
+        List<ProductResponse> content = productDao.findProductsWithFilters(query,categoryIds,from,to,sortOption,pageSize,pageN);
+        return new Page<>(content, content.size());
+
+    }
+
+
+        @Override
+    public Optional<ProductEntity> findProductById(UUID id) {
+        return productDao.read(id);
+    }
+
+
 }

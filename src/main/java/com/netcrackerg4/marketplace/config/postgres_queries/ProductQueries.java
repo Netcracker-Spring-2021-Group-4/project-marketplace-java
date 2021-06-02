@@ -11,4 +11,9 @@ public class ProductQueries {
     private String createProduct;
     private String updateProductInfo;
     private String updateProductPicture;
+    private String activeProductsWithDiscount;
+    private String categoriesWithAmountOfProduct;
+    private String productsWithFilters;
+    private String productsPage;
+
 }
