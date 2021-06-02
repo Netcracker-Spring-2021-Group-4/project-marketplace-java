@@ -1,14 +1,18 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
+import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
 import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
+import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import com.netcrackerg4.marketplace.util.Page;
+import com.netcrackerg4.marketplace.util.mappers.DiscountEntity_Dao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +30,8 @@ public class ProductServiceImpl implements IProductService {
 
     private final IProductDao productDao;
     private final IS3Service s3Service;
+    private final IDiscountDao discountDao;
+    private final DiscountEntity_Dao discountMapper;
 
     @Transactional
     @Override
@@ -34,7 +40,7 @@ public class ProductServiceImpl implements IProductService {
         UUID id = UUID.randomUUID();
         URL url = s3Service.uploadImage(id, multipartFile);
 
-        AppProductEntity productEntity = AppProductEntity.builder()
+        ProductEntity productEntity = ProductEntity.builder()
                 .productId(id)
                 .name(newProduct.getProductName())
                 .description(newProduct.getDescription())
@@ -56,7 +62,7 @@ public class ProductServiceImpl implements IProductService {
 
         findProductById(id)
                 .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
-        AppProductEntity productEntity = AppProductEntity.builder()
+        ProductEntity productEntity = ProductEntity.builder()
                 .productId(id)
                 .name(newProduct.getProductName())
                 .description(newProduct.getDescription())
@@ -94,6 +100,40 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    public Optional<DiscountEntity> findActiveProductDiscount(UUID productId) {
+        return discountDao.findActiveProductDiscount(productId);
+    }
+
+    @Override
+    public List<DiscountEntity> getUnexpiredDiscounts(UUID productId) {
+        return discountDao.findUnexpiredDiscounts(productId);
+    }
+
+    @Override
+    @Transactional
+    public void addDiscount(UUID productId, DiscountDto discountDto) {
+        DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountDto);
+        discountEntity.setProductId(productId);
+        discountEntity.setDiscountId(UUID.randomUUID());
+        discountDao.create(discountEntity);
+    }
+
+    @Override
+    @Transactional
+    public void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto) {
+        DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountDto);
+        discountEntity.setProductId(productId);
+        discountEntity.setDiscountId(discountId);
+        discountDao.update(discountEntity);
+    }
+
+    @Override
+    @Transactional
+    public void removeDiscount(UUID discountId) {
+        discountDao.delete(discountId);
+    }
+
+    @Override
     public Page<ProductResponse> findProducts(ProductSearchFilter searchFilter, int pageSize, int pageN) {
         List<Integer> categoryIds = searchFilter.getCategoryIds() ;
         Double from = searchFilter.getMinPrice() != null ? searchFilter.getMinPrice() : 0;
@@ -107,7 +147,7 @@ public class ProductServiceImpl implements IProductService {
 
 
         @Override
-    public Optional<AppProductEntity> findProductById(UUID id) {
+    public Optional<ProductEntity> findProductById(UUID id) {
         return productDao.read(id);
     }
 
