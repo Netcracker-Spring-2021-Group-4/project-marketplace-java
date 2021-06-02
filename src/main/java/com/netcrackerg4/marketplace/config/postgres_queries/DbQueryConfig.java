@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
         CartQueries.class,
         ProductQueries.class,
         DiscountQueries.class,
+        DeliverySlotQueries.class,
         OrderQueries.class
 })
 public class DbQueryConfig {

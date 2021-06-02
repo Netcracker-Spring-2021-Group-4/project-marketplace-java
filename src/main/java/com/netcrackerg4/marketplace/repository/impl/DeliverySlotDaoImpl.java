@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
-import com.netcrackerg4.marketplace.config.postgres_queries.OrderQueries;
+import com.netcrackerg4.marketplace.config.postgres_queries.DeliverySlotQueries;
 import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 import com.netcrackerg4.marketplace.repository.interfaces.IDeliverySlotDao;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Repository
 public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlotDao {
-    private final OrderQueries orderQueries;
+    private final DeliverySlotQueries deliverySlotQueries;
     private List<TimeslotEntity> timeslots;
 
     @Autowired
@@ -33,7 +33,7 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
     @PostConstruct
     private void initTimeslots() {
         assert getJdbcTemplate() != null;
-        timeslots = getJdbcTemplate().query(orderQueries.getReadAllTimeslots(),
+        timeslots = getJdbcTemplate().query(deliverySlotQueries.getReadAllTimeslots(),
                 (rs, row) -> new TimeslotEntity(rs.getInt("timeslot_id"),
                         rs.getTime("time_start"), rs.getTime("time_end")));
     }
@@ -46,7 +46,7 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
     @Override
     public Map<LocalTime, Integer> readTakenTimeslots(LocalDate date) {
         assert getJdbcTemplate() != null;
-        return getJdbcTemplate().queryForStream(orderQueries.getGetTakenTimeslots(), (rs, row) ->
+        return getJdbcTemplate().queryForStream(deliverySlotQueries.getGetTakenTimeslots(), (rs, row) ->
                         new DeliveryGrouper(rs.getTime("time_start").toLocalTime(), rs.getInt("num_taken")),
                 Date.valueOf(date)).collect(Collectors.toMap(DeliveryGrouper::getTime, DeliveryGrouper::getN));
     }
@@ -55,7 +55,7 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
     public int countActiveCouriers() {
         assert getJdbcTemplate() != null;
         try {
-            Integer n = getJdbcTemplate().queryForObject(orderQueries.getCountActiveCouriers(), Integer.class);
+            Integer n = getJdbcTemplate().queryForObject(deliverySlotQueries.getCountActiveCouriers(), Integer.class);
             return n != null ? n : 0;
         } catch (EmptyResultDataAccessException e) {
             return 0;

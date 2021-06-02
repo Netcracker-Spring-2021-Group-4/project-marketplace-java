@@ -130,7 +130,7 @@ custom:
         SELECT product_id, quantity
         FROM cart_item
         WHERE customer_id = ?;
-    order:
+    delivery-slot:
       get-taken-timeslots: >
         SELECT COUNT(user_id) AS num_taken, time_start
         FROM dateslot INNER JOIN timeslot USING (timeslot_id) INNER JOIN auth_user ON courier_id=user_id
@@ -147,3 +147,7 @@ custom:
       read-all-timeslots: >
         SELECT timeslot_id, time_start, time_end
         FROM timeslot;
+    order:
+      create-order: >
+        INSERT INTO prod_order (order_id, placed_at, phone_number, comment, status_id, address_id, customer_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
