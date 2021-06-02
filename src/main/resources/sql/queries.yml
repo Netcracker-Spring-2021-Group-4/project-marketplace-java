@@ -131,3 +131,13 @@ custom:
         UPDATE cart_item
         SET quantity = ?
         WHERE cart_item_id = ?;
+      find-auth-customer-cart-items: >
+        SELECT product_id, quantity
+        FROM cart_item
+        WHERE customer_id = ?;
+
+    category:
+      find-by-id: >
+        SELECT product_category_name
+        FROM product_category
+        WHERE category_id = ?;

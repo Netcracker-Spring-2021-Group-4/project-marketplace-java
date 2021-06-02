@@ -17,6 +17,7 @@ public class CartProductInfo {
     private String description;
     private String imageUrl;
     private int price;
+    private int quantity;
     private String category;
     private int discount;
     private int totalPriceWithoutDiscount;

@@ -10,7 +10,8 @@ import org.springframework.context.annotation.Configuration;
         TokenQueries.class,
         CartQueries.class,
         ProductQueries.class,
-        DiscountQueries.class
+        DiscountQueries.class,
+        CategoryQueries.class
 })
 public class DbQueryConfig {
     @Autowired
@@ -21,4 +22,6 @@ public class DbQueryConfig {
     private ProductQueries postgresProductQueries;
     @Autowired
     private CartQueries postgresCartQueries;
+    @Autowired
+    private CategoryQueries postgresCategoryQueries;
 }

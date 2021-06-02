@@ -4,8 +4,10 @@ import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
+import com.netcrackerg4.marketplace.model.response.CartProductInfo;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.service.interfaces.ICartService;
+import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,11 +26,19 @@ public class CartServiceImpl implements ICartService {
 
     private final ICartItemDao cartItemDao;
     private final IProductService productService;
+    private final ICategoryService categoryService;
     private final IUserService userService;
 
     @Override
     public CartInfoResponse getCartInfoAuthorized(String email) {
-        return null;
+        UUID userId = userService.findByEmail(email).getUserId();
+        List<CartItemDto> cartItems = cartItemDao.getAuthCustomerCartItems(userId);
+        return getCartInfoResponse(cartItems);
+    }
+
+    @Override
+    public CartInfoResponse getCartInfoNonAuthorized(List<CartItemDto> cartItems) {
+        return getCartInfoResponse(cartItems);
     }
 
     @Override
@@ -67,13 +79,58 @@ public class CartServiceImpl implements ICartService {
                 );
     }
 
+    private CartInfoResponse getCartInfoResponse(List<CartItemDto> cartItems) {
+        List<CartProductInfo> productInfos = cartItems.stream()
+                .map(this::CartProductInfoMapper).collect(Collectors.toList());
+        int summaryPrice = productInfos.stream().mapToInt(CartProductInfo::getTotalPrice).sum();
+        int summaryPriceWithoutDiscount = productInfos.stream().mapToInt(CartProductInfo::getTotalPriceWithoutDiscount).sum();
+
+        return CartInfoResponse.builder()
+                .content(productInfos)
+                .summaryPrice(summaryPrice)
+                .summaryPriceWithoutDiscount(summaryPriceWithoutDiscount)
+                .build();
+    }
+
+    private CartProductInfo CartProductInfoMapper(CartItemDto cartItem) {
+        UUID productId = cartItem.getProductId();
+        int quantity = cartItem.getQuantity();
+        checkAvailability(productId, cartItem.getQuantity());
+        var product = productService.findProductById(productId).get();
+        var categoryName = categoryService.findNameById(product.getCategoryId());
+        var productInfo =
+                CartProductInfo.builder()
+                        .productId(productId)
+                        .name(product.getName())
+                        .description(product.getDescription())
+                        .imageUrl(product.getImageUrl())
+                        .price(product.getPrice())
+                        .quantity(quantity)
+                        .category(categoryName);
+        int totalPriceWithoutDiscount = product.getPrice() * quantity;
+        productInfo.totalPriceWithoutDiscount(totalPriceWithoutDiscount);
+        productService.findActiveProductDiscount(cartItem.getProductId()).ifPresentOrElse(
+                discount -> {
+                    int offeredPrice = discount.getOfferedPrice();
+                    productInfo
+                            .discount(offeredPrice)
+                            .totalPrice(offeredPrice * quantity);
+                },
+                () -> productInfo
+                        .discount(-1)
+                        .totalPrice(totalPriceWithoutDiscount)
+        );
+        return productInfo.build();
+    }
+
     private int getAmountAvailable(UUID id, int quantity) {
         ProductEntity product = productService
                 .findProductById(id)
                 .orElseThrow(() -> {
                     throw new IllegalStateException(String.format("Product with id %s not found", id));
                 });
-        if(!product.getIsActive()) throw new IllegalStateException("Product is not available now");
+        if(!product.getIsActive())
+            throw new IllegalStateException(String.format("Product with id %s is not available now", id));
         int amountAvailable = product.getInStock() - product.getReserved();
         if( amountAvailable < quantity)
             throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
