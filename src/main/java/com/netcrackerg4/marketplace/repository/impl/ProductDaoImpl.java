@@ -1,11 +1,7 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
-import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
-import com.netcrackerg4.marketplace.model.dto.user.UserAdminView;
-import com.netcrackerg4.marketplace.model.enums.UserRole;
-import com.netcrackerg4.marketplace.model.enums.UserStatus;
-import com.netcrackerg4.marketplace.model.response.CategoryResponse;
+import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import lombok.AllArgsConstructor;
@@ -21,7 +17,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 @AllArgsConstructor
@@ -35,7 +30,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
 
     @Override
-    public void create(AppProductEntity item) {
+    public void create(ProductEntity item) {
         assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getCreateProduct(), item.getProductId(), item.getName(),
                 item.getImageUrl(),item.getDescription(), item.getPrice(),item.getInStock(),item.getReserved(),
@@ -44,13 +39,13 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
 
     @Override
-    public Optional<AppProductEntity> read(UUID key) {
+    public Optional<ProductEntity> read(UUID key) {
         assert getJdbcTemplate() != null;
-        Optional<AppProductEntity> product;
+        Optional<ProductEntity> product;
         try {
             product = Optional.ofNullable(
                     getJdbcTemplate().queryForObject(productQueries.getFindProductById(),
-                        (rs, rowNum) -> AppProductEntity.builder()
+                        (rs, rowNum) -> ProductEntity.builder()
                                 .productId(UUID.fromString(rs.getString("product_id")))
                                 .name(rs.getString("product_name"))
                                 .description(rs.getString("description"))
@@ -71,7 +66,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
 
     @Override
-    public void update(AppProductEntity updItem) {
+    public void update(ProductEntity updItem) {
         assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getUpdateProductInfo(), updItem.getName(),
                 updItem.getDescription(),updItem.getPrice(), updItem.getInStock(),updItem.getReserved(),
@@ -109,6 +104,17 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     }
 
+    @Override
+    public Double maxPrice() {
+        assert getJdbcTemplate() != null;
+        return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Double.class);
+    }
+
+    @Override
+    public Double minPrice() {
+        assert getJdbcTemplate() != null;
+        return getJdbcTemplate().queryForObject(productQueries.getMinPrice(),Double.class);    }
+
 
     public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, Double from, Double to, String sortBy, int pageSize, int pageN) {
         assert getJdbcTemplate() != null;
@@ -128,17 +134,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
                 namedParams, new ProductResponse.ProductResponseMapper()
         );    }
 
-    @Override
-    public List<CategoryResponse> findCategories() {
-        assert getJdbcTemplate() != null;
-
-        return getJdbcTemplate().query(productQueries.getCategoriesWithAmountOfProduct(),
-                (rs,rowNum)-> CategoryResponse.builder()
-                        .categoryId(rs.getInt("category_id"))
-                        .productCategoryName(rs.getString("product_category_name"))
-                        .productsInCategory(rs.getInt("amount_of_products"))
-                        .build());
-    }
 
     @Override
     public void delete(UUID key) {

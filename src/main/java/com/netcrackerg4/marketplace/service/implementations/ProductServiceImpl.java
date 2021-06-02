@@ -1,11 +1,13 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.domain.AppProductEntity;
+import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
-import com.netcrackerg4.marketplace.model.response.CategoryResponse;
+import com.netcrackerg4.marketplace.model.response.FilterInfo;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
+import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import com.netcrackerg4.marketplace.util.Page;
@@ -26,6 +28,7 @@ public class ProductServiceImpl implements IProductService {
 
     private final IProductDao productDao;
     private final IS3Service s3Service;
+    private final ICategoryService categoryService;
 
     @Transactional
     @Override
@@ -34,7 +37,7 @@ public class ProductServiceImpl implements IProductService {
         UUID id = UUID.randomUUID();
         URL url = s3Service.uploadImage(id, multipartFile);
 
-        AppProductEntity productEntity = AppProductEntity.builder()
+        ProductEntity productEntity = ProductEntity.builder()
                 .productId(id)
                 .name(newProduct.getProductName())
                 .description(newProduct.getDescription())
@@ -56,7 +59,7 @@ public class ProductServiceImpl implements IProductService {
 
         findProductById(id)
                 .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
-        AppProductEntity productEntity = AppProductEntity.builder()
+        ProductEntity productEntity = ProductEntity.builder()
                 .productId(id)
                 .name(newProduct.getProductName())
                 .description(newProduct.getDescription())
@@ -84,13 +87,22 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public List<CategoryResponse> getCategories() {
-        return productDao.findCategories();
+    public Page<ProductResponse> findProducts(int page, int size) {
+        return new Page<>(productDao.findAll(page, size), getAll().size());
     }
 
     @Override
-    public Page<ProductResponse> findProducts(int page, int size) {
-        return new Page<>(productDao.findAll(page, size), getAll().size());
+    public FilterInfo getFilterInfo() {
+
+        List<FilterInfo.CategoryResponse> categories = categoryService.categoriesWithAmountOfProduct();
+        Double maxPrice=productDao.maxPrice();
+
+        return new FilterInfo(categories,maxPrice);
+    }
+
+    @Override
+    public void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto) {
+
     }
 
     @Override
@@ -107,7 +119,7 @@ public class ProductServiceImpl implements IProductService {
 
 
         @Override
-    public Optional<AppProductEntity> findProductById(UUID id) {
+    public Optional<ProductEntity> findProductById(UUID id) {
         return productDao.read(id);
     }
 
