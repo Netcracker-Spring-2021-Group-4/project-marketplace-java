@@ -63,7 +63,7 @@ custom:
         SET product_name = ?, description = ?, price = ?, in_stock = ?, reserved = ?,
         category_id = ?
         WHERE product_id = ?;
-      up:date-product-picture: >
+      update-product-picture: >
         UPDATE product
         SET image_url = ?
         WHERE product_id = ?;
