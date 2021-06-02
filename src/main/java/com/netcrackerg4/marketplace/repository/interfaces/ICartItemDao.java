@@ -12,4 +12,6 @@ public interface ICartItemDao {
     Optional<CartItemEntity> getCartItemByProductAndCustomer(UUID customerId, UUID productId);
     void changeQuantityById(int quantity, UUID cartItemId);
     List<CartItemDto> getAuthCustomerCartItems(UUID id);
+    int reserveProduct(int quantity, UUID productId, int currentReserved);
+    int cancelReservation(int quantity, UUID productId, int currentReserved);
 }

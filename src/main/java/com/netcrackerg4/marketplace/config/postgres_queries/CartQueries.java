@@ -11,4 +11,6 @@ public class CartQueries {
     private String getByCustomerProduct;
     private String changeQuantityById;
     private String findAuthCustomerCartItems;
+    private String reserveProduct;
+    private String cancelReservation;
 }

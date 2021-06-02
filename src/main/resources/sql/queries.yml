@@ -130,6 +130,14 @@ custom:
         SELECT product_id, quantity
         FROM cart_item
         WHERE customer_id = ?;
+      reserve-product: >
+        UPDATE product
+        SET reserved = reserved + ?
+        WHERE product_id = ? AND reserved = ?;
+      cancel-reservation: >
+        UPDATE product
+        SET reserved = reserved - ?
+        WHERE product_id = ? AND reserved = ?;
 
     category:
       find-by-id: >

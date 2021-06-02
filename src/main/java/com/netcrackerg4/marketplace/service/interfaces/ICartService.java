@@ -11,4 +11,6 @@ public interface ICartService {
     void checkAvailability(UUID id, int quantity);
     CartInfoResponse getCartInfoAuthorized(String email);
     CartInfoResponse getCartInfoNonAuthorized(List<CartItemDto> cartItems);
+    void makeCartReservation(List<CartItemDto> cartItems);
+    void cancelCartReservation(List<CartItemDto> cartItems);
 }
