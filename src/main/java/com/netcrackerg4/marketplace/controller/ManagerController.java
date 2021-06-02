@@ -42,26 +42,11 @@ public class ManagerController {
         productService.updateProductPicture(id, multipartFile);
     }
 
-    @GetMapping("/products/{productId}/unexpired-discounts")
-    List<DiscountEntity> getFutureDiscounts(@PathVariable UUID productId) {
-        return productService.getUnexpiredDiscounts(productId);
-    }
-
-    @PostMapping("/products/{productId}/discounts")
-    void createDiscount(@PathVariable UUID productId, @RequestBody @Valid DiscountDto discountDto) {
-        if (discountDto.getStartsAt().isAfter(discountDto.getEndsAt()))
-            throw new IllegalStateException("start time is after end time");
-        productService.addDiscount(productId, discountDto);
-    }
 
     @PutMapping("/products/{productId}/discounts/{discountId}")
     void editDiscount(@PathVariable UUID productId, @PathVariable UUID discountId,
                       @RequestBody @Valid DiscountDto discountDto) {
         productService.editDiscount(productId, discountId, discountDto);
     }
-
-    @DeleteMapping("/products/discounts/{discountId}")
-    void deleteDiscount(@PathVariable UUID discountId) {
-        productService.removeDiscount(discountId);
-    }
 }
+
