@@ -169,13 +169,9 @@ custom:
         FROM cart_item
         WHERE customer_id = ?;
       reserve-product: >
-        UPDATE product
-        SET reserved = reserved + ?
-        WHERE product_id = ? AND reserved = ?;
+        CALL add_product_reservation(?, ?, ?);
       cancel-reservation: >
-        UPDATE product
-        SET reserved = reserved - ?
-        WHERE product_id = ? AND reserved = ?;
+        CALL delete_product_reservation(?, ?, ?);
 
     category:
       find-by-id: >

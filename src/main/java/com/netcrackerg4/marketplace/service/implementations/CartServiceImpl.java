@@ -32,64 +32,34 @@ public class CartServiceImpl implements ICartService {
     @Override
     @Transactional
     public void makeCartReservation(List<CartItemDto> cartItems) {
-        cartItems.forEach(i -> {
+        cartItems.stream().filter( i -> {
             var product = checkForExistenceAndReturn(i.getProductId());
             checkIfProductIsActive(product);
-        });
-        int cancellationIndex = -1;
-        UUID problematicProductId = null;
-        for(int i = 0; i < cartItems.size(); i++) {
-            var curItem = cartItems.get(i);
-            var productId = curItem.getProductId();
-            var quantity = curItem.getQuantity();
-            int affectedRows = 0;
-            boolean check = false;
-            while(affectedRows == 0) {
-                var product = productService.findProductById(productId).get();
-                check = checkAmountAvailable(product, quantity);
-                if (!check) {
-                    problematicProductId = productId;
-                    break;
-                }
-                affectedRows = cartItemDao.reserveProduct(quantity, productId, product.getReserved());
-            }
-            if(!check) cancellationIndex = i;
-        }
-        if(cancellationIndex != -1) {
-            for(int i = 0; i < cancellationIndex; i++) {
-                var curItem = cartItems.get(i);
-                var productId = curItem.getProductId();
-                var quantity = curItem.getQuantity();
-                int affectedRows = 0;
-                while(affectedRows == 0){
-                    var product = productService.findProductById(productId).get();
-                    var reserved = product.getReserved();
-                    if(reserved < quantity) break;
-                    affectedRows = cartItemDao.cancelReservation(quantity, productId, reserved);
-                }
-            }
-            throw new IllegalStateException(String.format("That quantity of product with id %s is not available", problematicProductId));
-        }
+            return product.getInStock() < i.getQuantity() + product.getReserved();
+        }).findFirst().ifPresentOrElse(
+            i ->{
+                throw new IllegalStateException(
+                        String.format("You cannot reserve %d items of product with id %s",
+                                i.getQuantity(), i.getProductId()));
+            },
+            () -> cartItems.forEach(i -> cartItemDao.reserveProduct(i.getQuantity(), i.getProductId()))
+        );
+
     }
 
     @Override
     @Transactional
     public void cancelCartReservation(List<CartItemDto> cartItems) {
-        cartItems.forEach(i -> {
+        cartItems.stream().filter(i -> {
             var product = checkForExistenceAndReturn(i.getProductId());
             checkIfProductIsActive(product);
-        });
-        for (CartItemDto curItem : cartItems) {
-            var productId = curItem.getProductId();
-            var quantity = curItem.getQuantity();
-            int affectedRows = 0;
-            while (affectedRows == 0) {
-                var product = productService.findProductById(productId).get();
-                var reserved = product.getReserved();
-                if (reserved < quantity) break;
-                affectedRows = cartItemDao.cancelReservation(quantity, productId, reserved);
-            }
-        }
+            return product.getReserved() - i.getQuantity() < 0;
+        }).findFirst().ifPresentOrElse(
+            i -> {
+                throw new IllegalStateException(String.format("Too much cancelling reservations for product with id %s", i.getProductId()));
+            },
+            () -> cartItems.forEach(i -> cartItemDao.cancelReservation(i.getQuantity(), i.getProductId()))
+        );
     }
 
     @Override
