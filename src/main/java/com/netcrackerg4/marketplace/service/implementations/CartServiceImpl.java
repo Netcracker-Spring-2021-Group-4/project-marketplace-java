@@ -3,7 +3,6 @@ package com.netcrackerg4.marketplace.service.implementations;
 import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
-import com.netcrackerg4.marketplace.model.dto.product.UpdateCartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.model.response.CartProductInfo;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
@@ -145,9 +144,9 @@ public class CartServiceImpl implements ICartService {
 
     @Transactional
     @Override
-    public void removeFromCart(String email, UpdateCartItemDto item) {
+    public void removeFromCart(String email, CartItemDto item) {
         UUID productId = item.getProductId();
-        int quantityLeft = item.getQuantity();
+        int quantityToRemove = item.getQuantity();
         UUID customerId = userService.findByEmail(email).getUserId();
         CartItemEntity cartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId)
                 .orElseThrow(() -> {
@@ -156,7 +155,8 @@ public class CartServiceImpl implements ICartService {
                     );});
         UUID cartItemId = cartItem.getCartItemId();
         int quantityInCart = cartItem.getQuantity();
-        if(quantityLeft > 0 && quantityLeft < quantityInCart) {
+        int quantityLeft = quantityInCart - quantityToRemove;
+        if(quantityLeft > 0) {
             getAmountAvailable(productId, quantityLeft);
             cartItemDao.changeQuantityById(quantityLeft, cartItemId);
         }
