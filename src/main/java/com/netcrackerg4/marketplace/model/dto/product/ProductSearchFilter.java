@@ -13,15 +13,14 @@ import java.util.List;
 public class ProductSearchFilter {
     @Nullable
     private String sortOption;
-    @NotNull
+    @Nullable
     private List<Integer> categoryIds;
     @Nullable
     @Size(min = 2)
     private String nameQuery;
-    @Nullable
     @Min(0)
-    private Double minPrice;
+    private int minPrice;
     @Min(1)
     @NotNull
-    private Double maxPrice;
+    private int maxPrice;
 }

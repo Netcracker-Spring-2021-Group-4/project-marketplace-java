@@ -9,4 +9,6 @@ public interface ICategoryDao {
     Optional<String> findNameById(int id);
 
     List<FilterInfo.CategoryResponse> findCategoriesWithAmountOfProducts();
+
+    List<Integer> findCategoriesIds();
 }

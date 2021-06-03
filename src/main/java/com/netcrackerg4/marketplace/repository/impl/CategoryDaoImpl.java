@@ -49,4 +49,11 @@ public class CategoryDaoImpl extends JdbcDaoSupport implements ICategoryDao {
                         (rs.getString("product_category_name")),
                         (rs.getInt("amount_of_products"))
                         ));    }
+
+    @Override
+    public List<Integer> findCategoriesIds() {
+        assert getJdbcTemplate() != null;
+
+        return getJdbcTemplate().queryForList(categoryQueries.getCategoriesIds(), Integer.class   )
+    ;}
 }

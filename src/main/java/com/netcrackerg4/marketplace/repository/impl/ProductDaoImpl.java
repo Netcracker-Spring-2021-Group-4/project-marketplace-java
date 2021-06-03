@@ -110,13 +110,9 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Double.class);
     }
 
-    @Override
-    public Double minPrice() {
-        assert getJdbcTemplate() != null;
-        return getJdbcTemplate().queryForObject(productQueries.getMinPrice(),Double.class);    }
 
 
-    public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, Double from, Double to, String sortBy, int pageSize, int pageN) {
+    public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, String sortBy, int pageN, int pageSize) {
         assert getJdbcTemplate() != null;
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{

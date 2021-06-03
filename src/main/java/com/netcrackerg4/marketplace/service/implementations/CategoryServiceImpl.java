@@ -24,4 +24,9 @@ public class CategoryServiceImpl implements ICategoryService {
     public List<FilterInfo.CategoryResponse> categoriesWithAmountOfProduct() {
         return categoryDao.findCategoriesWithAmountOfProducts();
     }
+
+    @Override
+    public List<Integer> getCategoriesIds() {
+        return categoryDao.findCategoriesIds();
+    }
 }

@@ -107,11 +107,11 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public Page<ProductResponse> findProducts(ProductSearchFilter searchFilter, int pageSize, int pageN) {
-        List<Integer> categoryIds = searchFilter.getCategoryIds() ;
-        Double from = searchFilter.getMinPrice() != null ? searchFilter.getMinPrice() : 0;
-        Double to = searchFilter.getMaxPrice() ;
+        List<Integer> categoryIds = searchFilter.getCategoryIds()!= null ? searchFilter.getCategoryIds():categoryService.getCategoriesIds();
+        int from = searchFilter.getMinPrice();
+        int to = searchFilter.getMaxPrice() ;
         String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
-        String sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():"product_name";
+        String sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():"price";
         List<ProductResponse> content = productDao.findProductsWithFilters(query,categoryIds,from,to,sortOption,pageSize,pageN);
         return new Page<>(content, content.size());
 
