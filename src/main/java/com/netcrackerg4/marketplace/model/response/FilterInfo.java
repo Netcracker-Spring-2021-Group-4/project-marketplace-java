@@ -14,7 +14,7 @@ import java.util.List;
 public class FilterInfo {
 
     List<CategoryResponse> categories;
-    Double maxPrice;
+    int maxPrice;
 
 
     @Data

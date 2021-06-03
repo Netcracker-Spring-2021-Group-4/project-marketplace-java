@@ -1,13 +1,12 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-<<<<<<< HEAD
-=======
+
 import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
->>>>>>> develop
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
+import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.model.response.FilterInfo;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
@@ -34,12 +33,9 @@ public class ProductServiceImpl implements IProductService {
 
     private final IProductDao productDao;
     private final IS3Service s3Service;
-<<<<<<< HEAD
     private final ICategoryService categoryService;
-=======
     private final IDiscountDao discountDao;
     private final DiscountEntity_Dao discountMapper;
->>>>>>> develop
 
     @Transactional
     @Override
@@ -106,15 +102,12 @@ public class ProductServiceImpl implements IProductService {
     public FilterInfo getFilterInfo() {
 
         List<FilterInfo.CategoryResponse> categories = categoryService.categoriesWithAmountOfProduct();
-        Double maxPrice=productDao.maxPrice();
+        int maxPrice=productDao.maxPrice();
 
         return new FilterInfo(categories,maxPrice);
     }
 
-    @Override
-    public void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto) {
 
-    }
 
     @Override
     public Optional<DiscountEntity> findActiveProductDiscount(UUID productId) {
@@ -152,11 +145,14 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public Page<ProductResponse> findProducts(ProductSearchFilter searchFilter, int pageSize, int pageN) {
+        if(searchFilter.getMinPrice()>searchFilter.getMaxPrice())
+            throw new IllegalStateException("MinPrice should be <= MaxPrice");
+
         List<Integer> categoryIds = searchFilter.getCategoryIds()!= null ? searchFilter.getCategoryIds():categoryService.getCategoriesIds();
         int from = searchFilter.getMinPrice();
-        int to = searchFilter.getMaxPrice() ;
+        int to = searchFilter.getMaxPrice()==0 ? productDao.maxPrice() : searchFilter.getMaxPrice();
         String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
-        String sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():"price";
+        SortingOptions sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():SortingOptions.DATE;
         List<ProductResponse> content = productDao.findProductsWithFilters(query,categoryIds,from,to,sortOption,pageSize,pageN);
         return new Page<>(content, content.size());
 

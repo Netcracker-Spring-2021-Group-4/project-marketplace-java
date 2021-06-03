@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import lombok.AllArgsConstructor;
@@ -105,14 +106,14 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
 
     @Override
-    public Double maxPrice() {
+    public Integer maxPrice() {
         assert getJdbcTemplate() != null;
-        return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Double.class);
+        return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
     }
 
 
 
-    public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, String sortBy, int pageN, int pageSize) {
+    public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageN, int pageSize) {
         assert getJdbcTemplate() != null;
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
@@ -120,13 +121,27 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
             addValue("minPrice", from);
             addValue("maxPrice", to);
             addValue("name_query", "%" + query + "%");
-            addValue("sortOption",sortBy);
             addValue("limit", pageSize);
             addValue("offset", pageSize * pageN);
         }};
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
-        return namedParameterJdbcTemplate.query(productQueries.getProductsWithFilters(),
+        String sqlQuery;
+        switch (sortBy){
+            case PRICE_ASC:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByPriceAsc();
+                break;
+            case PRICE_DESC:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByPriceDesc();
+                break;
+            case NAME:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByName();
+                break;
+            default:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByDate();
+        }
+
+        return namedParameterJdbcTemplate.query(sqlQuery,
                 namedParams, new ProductResponse.ProductResponseMapper()
         );    }
 

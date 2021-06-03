@@ -12,9 +12,13 @@ public class ProductQueries {
     private String updateProductInfo;
     private String updateProductPicture;
     private String activeProductsWithDiscount;
-    private String productsWithFilters;
+
+    private String productsWithFiltersOrderByPriceAsc;
+    private String productsWithFiltersOrderByPriceDesc;
+    private String productsWithFiltersOrderByName;
+    private String productsWithFiltersOrderByDate;
+
     private String productsPage;
     private String maxPrice;
-    private String minPrice;
 
 }

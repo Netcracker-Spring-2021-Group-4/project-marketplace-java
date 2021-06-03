@@ -2,6 +2,8 @@ package com.netcrackerg4.marketplace.repository.interfaces;
 
 
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+
+import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 
 import java.net.URL;
@@ -14,9 +16,9 @@ public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID>
      List<ProductResponse> findAll();
      List<ProductResponse> findAll(int p, int s);
 
-     Double maxPrice();
+     Integer maxPrice();
 
-    List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories,int from,int to, String sortBy, int pageSize,int pageN );
+    List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageSize, int pageN );
 
 
 
