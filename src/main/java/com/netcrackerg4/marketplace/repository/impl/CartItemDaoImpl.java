@@ -39,6 +39,14 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
     }
 
     @Override
+    public void removeFromCart(UUID cartItemId) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate()
+                .update(cartQueries.getRemoveFromCart(),
+                        cartItemId);
+    }
+
+    @Override
     public Optional<CartItemEntity> getCartItemByProductAndCustomer(UUID customerId, UUID productId) {
         assert getJdbcTemplate() != null;
         Optional<CartItemEntity> result;

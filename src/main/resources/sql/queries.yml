@@ -153,6 +153,9 @@ custom:
       addToCart: >
         INSERT INTO cart_item(cart_item_id, quantity,timestamp_added,customer_id,product_id)
         VALUES (?,?,?,?,?);
+      remove-from-cart: >
+        DELETE FROM cart_item
+        WHERE cart_item_id = ?;
       get-by-customer-product: >
         SELECT cart_item_id, quantity, timestamp_added, customer_id, product_id
         FROM cart_item
