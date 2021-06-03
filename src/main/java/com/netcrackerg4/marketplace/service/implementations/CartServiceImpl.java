@@ -216,6 +216,14 @@ public class CartServiceImpl implements ICartService {
         return getAmountAvailable(product, quantity);
     }
 
+    private int getAmountAvailable(ProductEntity product, int quantity) {
+        int amountAvailable = product.getInStock() - product.getReserved();
+        if (amountAvailable < quantity) {
+            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
+        }
+        return amountAvailable;
+    }
+
     private ProductEntity checkForExistenceAndReturn(UUID id) {
         return productService
                 .findProductById(id)
@@ -228,14 +236,6 @@ public class CartServiceImpl implements ICartService {
         if(!product.getIsActive())
             throw new IllegalStateException(String.format("Product with id %s is not available now",
                     product.getProductId()));
-    }
-
-    private int getAmountAvailable(ProductEntity product, int quantity) {
-        int amountAvailable = product.getInStock() - product.getReserved();
-        if (amountAvailable < quantity) {
-            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
-        }
-        return amountAvailable;
     }
 
     private boolean checkAmountAvailable(ProductEntity product, int quantity) {
