@@ -91,16 +91,18 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
     }
 
     @Override
-    public int reserveProduct(int quantity, UUID productId, int currentReserved) {
+    public int reserveProduct(int quantity, UUID productId) {
         assert getJdbcTemplate() != null;
+        long lockId = productId.getMostSignificantBits();
         return getJdbcTemplate().update(cartQueries.getReserveProduct(),
-                quantity, productId, currentReserved);
+                lockId, quantity, productId);
     }
 
     @Override
-    public int cancelReservation(int quantity, UUID productId, int currentReserved) {
+    public int cancelReservation(int quantity, UUID productId) {
         assert getJdbcTemplate() != null;
+        long lockId = productId.getMostSignificantBits();
         return getJdbcTemplate().update(cartQueries.getCancelReservation(),
-                quantity, productId, currentReserved);
+                lockId, quantity, productId);
     }
 }
