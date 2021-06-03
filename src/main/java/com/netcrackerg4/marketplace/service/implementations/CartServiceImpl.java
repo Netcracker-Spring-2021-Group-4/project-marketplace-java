@@ -3,6 +3,7 @@ package com.netcrackerg4.marketplace.service.implementations;
 import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
+import com.netcrackerg4.marketplace.model.dto.product.UpdateCartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.model.response.CartProductInfo;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
@@ -109,8 +110,8 @@ public class CartServiceImpl implements ICartService {
         getAmountAvailable(id,quantity);
     }
 
-    @Override
     @Transactional
+    @Override
     public void addToCart(String email, CartItemDto item) {
         UUID productId = item.getProductId();
         int amountAvailable = getAmountAvailable(item.getProductId(), item.getQuantity());
@@ -140,6 +141,29 @@ public class CartServiceImpl implements ICartService {
                         cartItemDao.addToCart(cartItemEntity);
                     }
                 );
+    }
+
+    @Transactional
+    @Override
+    public void removeFromCart(String email, UpdateCartItemDto item) {
+        UUID productId = item.getProductId();
+        int quantityLeft = item.getQuantity();
+        UUID customerId = userService.findByEmail(email).getUserId();
+        CartItemEntity cartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId)
+                .orElseThrow(() -> {
+                    throw new IllegalStateException(
+                            String.format("There is no product with id %s in your cart", productId)
+                    );});
+        UUID cartItemId = cartItem.getCartItemId();
+        int quantityInCart = cartItem.getQuantity();
+        if(quantityLeft > 0 && quantityLeft < quantityInCart) {
+            getAmountAvailable(productId, quantityLeft);
+            cartItemDao.changeQuantityById(quantityLeft, cartItemId);
+        }
+        else if (quantityLeft == 0) cartItemDao.removeFromCart(cartItemId);
+        else throw new IllegalStateException(
+                String.format("You have %d items of that product in cart.\nYou cannot change the quantity to %d",
+                        quantityInCart, quantityLeft));
     }
 
     private CartInfoResponse getCartInfoResponse(List<CartItemDto> cartItems) {

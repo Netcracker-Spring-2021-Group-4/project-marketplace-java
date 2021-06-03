@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.controller;
 
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
+import com.netcrackerg4.marketplace.model.dto.product.UpdateCartItemDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.service.interfaces.ICartService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
@@ -20,10 +21,16 @@ public class AuthCustomerController {
     private final IUserService userService;
 
     @PostMapping("/add-to-cart")
-    public void addToCard(@Valid @RequestBody CartItemDto cartItemDto){
+    public void addToCart(@Valid @RequestBody CartItemDto cartItemDto){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         cartService.addToCart(email, cartItemDto);
+    }
+
+    @PostMapping("/remove-from-cart")
+    public void removeFromCart(@Valid @RequestBody UpdateCartItemDto cartItemDto, Authentication auth) {
+        String email = auth.getName();
+        cartService.removeFromCart(email, cartItemDto);
     }
 
     @PutMapping("/me/edit")

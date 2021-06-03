@@ -13,4 +13,5 @@ public class CartQueries {
     private String findAuthCustomerCartItems;
     private String reserveProduct;
     private String cancelReservation;
+    private String removeFromCart;
 }
