@@ -141,4 +141,10 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public void activateDeactivateProduct(ProductEntity product) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(productQueries.getActivateDeactivateProduct(), product.getAvailabilityDate(), product.getProductId());
+    }
+
 }

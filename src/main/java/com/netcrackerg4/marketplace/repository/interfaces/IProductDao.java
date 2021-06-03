@@ -10,14 +10,16 @@ import java.util.List;
 import java.util.UUID;
 
 public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID>{
-     void updatePicture(UUID key, URL url);
+    void updatePicture(UUID key, URL url);
 
-     List<ProductResponse> findAll();
-     List<ProductResponse> findAll(int p, int s);
+    List<ProductResponse> findAll();
+    List<ProductResponse> findAll(int p, int s);
 
     List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories,Double from,Double to, String sortBy, int pageSize,int pageN );
 
     List<CategoryResponse> findCategories();
+
+    void activateDeactivateProduct(ProductEntity product);
 
 
 }

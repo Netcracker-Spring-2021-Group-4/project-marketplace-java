@@ -15,5 +15,6 @@ public class ProductQueries {
     private String categoriesWithAmountOfProduct;
     private String productsWithFilters;
     private String productsPage;
+    private String activateDeactivateProduct;
 
 }

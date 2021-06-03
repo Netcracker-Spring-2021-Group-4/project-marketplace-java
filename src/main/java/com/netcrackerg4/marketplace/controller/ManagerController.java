@@ -64,4 +64,10 @@ public class ManagerController {
     void deleteDiscount(@PathVariable UUID discountId) {
         productService.removeDiscount(discountId);
     }
+
+    @PatchMapping("/products/{productId}/activate-deactivate")
+    void activateDeactivateProduct(@PathVariable("productId") UUID productId){
+        productService.activateDeactivateProduct(productId);
+    }
 }
+
