@@ -1,8 +1,8 @@
-package com.netcrackerg4.marketplace.repository.impl;
+package com.netcrackerg4.marketplace.repository.impl.order;
 
-import com.netcrackerg4.marketplace.config.postgres_queries.DeliverySlotQueries;
+import com.netcrackerg4.marketplace.config.postgres_queries.order.DeliverySlotQueries;
 import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
-import com.netcrackerg4.marketplace.repository.interfaces.IDeliverySlotDao;
+import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;

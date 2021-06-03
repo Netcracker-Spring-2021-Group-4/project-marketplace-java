@@ -14,6 +14,5 @@ public class DeliverySlotEntity {
     private Date datestamp;
     private TimeslotEntity timeslotEntity;
     private AppUserEntity courier;
-    // todo: move ownership of datestamp to order
     private OrderEntity order;
 }

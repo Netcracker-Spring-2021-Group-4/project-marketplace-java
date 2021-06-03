@@ -1,5 +1,9 @@
 package com.netcrackerg4.marketplace.config.postgres_queries;
 
+import com.netcrackerg4.marketplace.config.postgres_queries.order.AddressQueries;
+import com.netcrackerg4.marketplace.config.postgres_queries.order.DeliverySlotQueries;
+import com.netcrackerg4.marketplace.config.postgres_queries.order.OrderItemQueries;
+import com.netcrackerg4.marketplace.config.postgres_queries.order.OrderQueries;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +16,9 @@ import org.springframework.context.annotation.Configuration;
         ProductQueries.class,
         DiscountQueries.class,
         DeliverySlotQueries.class,
-        OrderQueries.class
+        OrderQueries.class,
+        AddressQueries.class,
+        OrderItemQueries.class
 })
 public class DbQueryConfig {
     @Autowired

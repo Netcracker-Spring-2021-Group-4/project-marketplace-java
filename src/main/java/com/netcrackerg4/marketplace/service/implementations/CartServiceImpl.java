@@ -40,7 +40,7 @@ public class CartServiceImpl implements ICartService {
         UUID productId = item.getProductId();
         int amountAvailable = getAmountAvailable(item.getProductId(), item.getQuantity());
 
-        UUID customerId = userService.findByEmail(email).getUserId();
+        UUID customerId = userService.findByEmail(email).orElseThrow(() -> new IllegalStateException("User with such email not found.")).getUserId();
         var existingCartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
         existingCartItem
                 .ifPresentOrElse(

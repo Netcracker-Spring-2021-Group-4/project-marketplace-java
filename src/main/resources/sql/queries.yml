@@ -130,6 +130,10 @@ custom:
         SELECT product_id, quantity
         FROM cart_item
         WHERE customer_id = ?;
+      reset-cart: >
+        DELETE FROM cart_item
+        WHERE customer_id=?;
+
     delivery-slot:
       get-taken-timeslots: >
         SELECT COUNT(user_id) AS num_taken, time_start
@@ -151,3 +155,30 @@ custom:
       create-order: >
         INSERT INTO prod_order (order_id, placed_at, phone_number, comment, status_id, address_id, customer_id)
         VALUES (?, ?, ?, ?, ?, ?, ?);
+      read-order: >
+        SELECT placed_at, phone_number, comment, status_id, address_id, customer_id
+        FROM prod_order
+        WHERE order_id=?;
+      read-status-ids: >
+        SELECT status_id, status_name
+        FROM order_status;
+
+    order-item:
+      create-order-item: >
+        INSERT INTO order_item (order_item_id, quantity, price, order_id, product_id) VALUES (?, ?, ?, ?, ?);
+      read-order-item: >
+        SELECT quantity, price, order_id, product_id
+        FROM order_item
+        WHERE order_item_id=?;
+      read-items-of-order: >
+        SELECT order_item_id, quantity, price, product_id
+        FROM order_item
+        WHERE order_id=?;
+
+    address:
+      create-address: >
+        INSERT INTO address (address_id, city, street, building, flat, customer_id) VALUES (?, ?, ?, ?, ?, ?);
+      read-address: >
+        SELECT city, street, building, flat, customer_id
+        FROM address
+        WHERE address_id=?;

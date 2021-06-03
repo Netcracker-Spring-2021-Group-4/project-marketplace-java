@@ -74,11 +74,17 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
         List<CartItemDto> result;
 
         result = getJdbcTemplate().query(cartQueries.getFindAuthCustomerCartItems(),
-                (rs, row)-> CartItemDto.builder()
+                (rs, row) -> CartItemDto.builder()
                         .productId(UUID.fromString(rs.getString("product_id")))
                         .quantity(rs.getInt("quantity"))
                         .build(), id);
 
         return result;
+    }
+
+    @Override
+    public void resetCustomerCart(UUID customerId) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(cartQueries.getResetCart(), customerId);
     }
 }

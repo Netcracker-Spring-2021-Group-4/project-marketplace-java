@@ -1,4 +1,4 @@
-package com.netcrackerg4.marketplace.repository.interfaces;
+package com.netcrackerg4.marketplace.repository.interfaces.order;
 
 import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 

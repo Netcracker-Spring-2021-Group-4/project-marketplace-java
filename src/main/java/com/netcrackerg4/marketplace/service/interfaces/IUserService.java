@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface IUserService extends UserDetailsService {
@@ -19,7 +20,7 @@ public interface IUserService extends UserDetailsService {
 
     void confirmSignup(String token);
 
-    AppUserEntity findByEmail(String email);
+    Optional<AppUserEntity> findByEmail(String email);
 
     void updateUser(UserUpdateDto staffUpdate);
 

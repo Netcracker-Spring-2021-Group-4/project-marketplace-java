@@ -11,7 +11,6 @@ public class OrderItemEntity {
     private UUID orderItemId;
     private int quantity;
     private int pricePerProduct;
+    private UUID orderId;
     private UUID productId;
-    private String productName;
-    private String productDescription;
 }

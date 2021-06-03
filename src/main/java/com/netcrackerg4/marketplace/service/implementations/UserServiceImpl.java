@@ -41,7 +41,7 @@ public class UserServiceImpl implements IUserService {
     // should return minimal data set to build UserDetails
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        return findByEmail(s); // mock
+        return findByEmail(s).orElseThrow(() -> new IllegalStateException("User with such email not found.")); // mock
     }
 
     @Transactional
@@ -92,11 +92,11 @@ public class UserServiceImpl implements IUserService {
 
     // should return fully initialized AppUserEntity
     @Override
-    public AppUserEntity findByEmail(String email) {
-        AppUserEntity user = userDao.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
-        user.setAuthorities(userDao.getAuthorities(userDao.findRoleIdByRoleName(user.getRole().name())));
-        return user;
+    public Optional<AppUserEntity> findByEmail(String email) {
+        Optional<AppUserEntity> maybeUser = userDao.findByEmail(email);
+        maybeUser.ifPresent(user ->
+                user.setAuthorities(userDao.getAuthorities(userDao.findRoleIdByRoleName(user.getRole().name()))));
+        return maybeUser;
     }
 
     @Override

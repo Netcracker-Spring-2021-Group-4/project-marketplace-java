@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface IOrderService {
     List<StatusTimestampDto> getDayTimeslots(LocalDate date);
 
-    void makeOrder(OrderRequest orderRequest, @Nullable UUID customerId);
+    void makeOrder(OrderRequest orderRequest, UUID maybeCustomerId);
 
     void setOrderStatus(UUID orderId, OrderStatus newStatus);
 
