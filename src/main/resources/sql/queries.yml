@@ -87,41 +87,51 @@ custom:
                OR ( starts_at<now() AND ends_at>now()))
                 LIMIT (:limit) OFFSET (:offset);
       productsWithFiltersOrderByPriceAsc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-                  availability_date,category_id,offered_price
-                  FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
-                  WHERE is_active=true
-                  AND ((
-        			  offered_price IS NULL
-        			  AND price>=(:minPrice) AND price<=(:maxPrice)
-        			  )
-        				  OR ( starts_at<now() AND ends_at>now()
-        						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
+          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
+          availability_date,category_id,offered_price,
+          CASE
+          WHEN offered_price IS NULL THEN price
+          ELSE offered_price
+          END as newPrice
+          FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+          WHERE is_active=true
+          AND ((
+          offered_price IS NULL
+          AND price>=(:minPrice) AND price<=(:maxPrice)
+          )
+          OR ( starts_at<now() AND ends_at>now()
+          AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
 
-        				  )
-        		  AND product_name LIKE (:name_query)
-        		  AND category_id IN (:category_ids)
-                  ORDER BY price ASC
-        		  LIMIT (:limit) OFFSET (:offset);
+          )
+          AND product_name LIKE (:name_query)
+          AND category_id IN (:category_ids)
+          ORDER BY newPrice ASC
+          LIMIT (:limit) OFFSET (:offset);
+
 
 
       productsWithFiltersOrderByPriceDesc: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-                  availability_date,category_id,offered_price
-                  FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
-                  WHERE is_active=true
-                  AND ((
-        			  offered_price IS NULL
-        			  AND price>=(:minPrice) AND price<=(:maxPrice)
-        			  )
-        				  OR ( starts_at<now() AND ends_at>now()
-        						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
+               availability_date,category_id,offered_price,
+               CASE
+                   WHEN offered_price IS NULL THEN price
+                   ELSE offered_price
+               END as newPrice
+        FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+        WHERE is_active=true
+          AND ((
+                       offered_price IS NULL
+                       AND price>=(:minPrice) AND price<=(:maxPrice)
+                   )
+            OR ( starts_at<now() AND ends_at>now()
+                AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
 
-        				  )
-        		  AND product_name LIKE (:name_query)
-        		  AND category_id IN (:category_ids)
-                  ORDER BY price DESC
-        		  LIMIT (:limit) OFFSET (:offset);
+            )
+          AND product_name LIKE (:name_query)
+          AND category_id IN (:category_ids)
+        ORDER BY newPrice DESC
+        LIMIT (:limit) OFFSET (:offset);
+
 
 
       productsWithFiltersOrderByName: >
