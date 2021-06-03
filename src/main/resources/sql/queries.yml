@@ -63,7 +63,7 @@ custom:
         SET product_name = ?, description = ?, price = ?, in_stock = ?, reserved = ?,
         category_id = ?
         WHERE product_id = ?;
-      up:date-product-picture: >
+      update-product-picture: >
         UPDATE product
         SET image_url = ?
         WHERE product_id = ?;
@@ -107,6 +107,36 @@ custom:
         		  AND category_id IN (:category_ids)
         		  LIMIT (:limit) OFFSET (:offset);
 
+
+    discount:
+      find-active-product-discount: >
+        SELECT discount_id, offered_price, starts_at, ends_at
+        FROM discount
+        WHERE product_id = ? AND NOW() < ends_at AND NOW() > starts_at;
+      find-unexpired-discounts: >
+        SELECT discount_id, offered_price, starts_at, ends_at
+        FROM discount
+        WHERE product_id = ? AND NOW() < ends_at;
+      check-period: >
+        SELECT COUNT(discount_id)
+        FROM discount
+        WHERE product_id = ? AND starts_at <= ? AND ends_at >= ?;
+      check-period-edit: >
+        SELECT COUNT(discount_id)
+        FROM discount
+        WHERE product_id = ? AND discount_id <> ? AND starts_at <= ? AND ends_at >= ?;
+      create-discount: >
+        INSERT INTO discount (discount_id, offered_price, starts_at, ends_at, product_id) VALUES (?, ?, ?, ?, ?);
+      read-discount: >
+        SELECT offered_price, starts_at, ends_at, product_id
+        WHERE discount_id = ?;
+      update-discount: >
+        UPDATE discount
+        SET offered_price = ?, starts_at = ?, ends_at = ?
+        WHERE discount_id = ?;
+      delete-discount: >
+        DELETE FROM discount
+        WHERE discount_id = ?;
 
     token:
       create-token: >

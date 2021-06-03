@@ -1,16 +1,22 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
+<<<<<<< HEAD
+=======
+import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+>>>>>>> develop
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
 import com.netcrackerg4.marketplace.model.response.FilterInfo;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
+import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import com.netcrackerg4.marketplace.util.Page;
+import com.netcrackerg4.marketplace.util.mappers.DiscountEntity_Dao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +34,12 @@ public class ProductServiceImpl implements IProductService {
 
     private final IProductDao productDao;
     private final IS3Service s3Service;
+<<<<<<< HEAD
     private final ICategoryService categoryService;
+=======
+    private final IDiscountDao discountDao;
+    private final DiscountEntity_Dao discountMapper;
+>>>>>>> develop
 
     @Transactional
     @Override
@@ -103,6 +114,40 @@ public class ProductServiceImpl implements IProductService {
     @Override
     public void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto) {
 
+    }
+
+    @Override
+    public Optional<DiscountEntity> findActiveProductDiscount(UUID productId) {
+        return discountDao.findActiveProductDiscount(productId);
+    }
+
+    @Override
+    public List<DiscountEntity> getUnexpiredDiscounts(UUID productId) {
+        return discountDao.findUnexpiredDiscounts(productId);
+    }
+
+    @Override
+    @Transactional
+    public void addDiscount(UUID productId, DiscountDto discountDto) {
+        DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountDto);
+        discountEntity.setProductId(productId);
+        discountEntity.setDiscountId(UUID.randomUUID());
+        discountDao.create(discountEntity);
+    }
+
+    @Override
+    @Transactional
+    public void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto) {
+        DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountDto);
+        discountEntity.setProductId(productId);
+        discountEntity.setDiscountId(discountId);
+        discountDao.update(discountEntity);
+    }
+
+    @Override
+    @Transactional
+    public void removeDiscount(UUID discountId) {
+        discountDao.delete(discountId);
     }
 
     @Override
