@@ -1,8 +1,8 @@
 package com.netcrackerg4.marketplace.controller;
 
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
-import com.netcrackerg4.marketplace.model.dto.order.OrderDetailsDto;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
+import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
@@ -39,8 +39,8 @@ public class OrderController {
     }
 
     @GetMapping
-    EagerContentPage<OrderDetailsDto> getCourierOrders(@RequestParam UUID courierId) {
-        return orderService.getActiveOrders(courierId);
+    EagerContentPage<OrderResponse> getCourierOrders(@RequestParam UUID courierId) {
+        return orderService.getCourierOrders(courierId);
     }
 
 }

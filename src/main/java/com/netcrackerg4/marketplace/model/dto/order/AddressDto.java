@@ -1,11 +1,13 @@
 package com.netcrackerg4.marketplace.model.dto.order;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.NotBlank;
 
 @Data
+@NoArgsConstructor
 public class AddressDto {
     @NotBlank
     private String city;

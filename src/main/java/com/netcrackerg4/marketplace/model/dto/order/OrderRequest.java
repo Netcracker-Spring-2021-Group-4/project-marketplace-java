@@ -14,7 +14,6 @@ import java.util.List;
 
 @Data
 public class OrderRequest {
-    // todo: use phone number pattern
     @Pattern(regexp = ValidationConstants.PHONE_PATTERN, message = ValidationDefaultMessage.WRONG_FORMAT_PHONE_NUMBER)
     private String phoneNumber;
     @Future(message = "address must be specified to be in future")
@@ -24,5 +23,5 @@ public class OrderRequest {
     @Nullable
     private String comment;
     @NotEmpty(message = "no order without products possible")
-    private List<OrderedProductRequest> products;
+    private List<OrderItemRequest> products;
 }

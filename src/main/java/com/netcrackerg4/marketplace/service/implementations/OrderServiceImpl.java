@@ -9,9 +9,9 @@ import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
-import com.netcrackerg4.marketplace.model.dto.order.OrderDetailsDto;
+import com.netcrackerg4.marketplace.model.dto.order.OrderItemRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
-import com.netcrackerg4.marketplace.model.dto.order.OrderedProductRequest;
+import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
@@ -23,6 +23,9 @@ import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
+import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
+import com.netcrackerg4.marketplace.util.mappers.OrderItemMapper;
+import com.netcrackerg4.marketplace.util.mappers.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -123,9 +126,9 @@ public class OrderServiceImpl implements IOrderService {
         mailService.notifyCourierGotDelivery(deliverySlot.getCourier().getEmail(), deliveryDetails);
     }
 
-    private Map<UUID, ProductEntity> handleStocks(List<OrderedProductRequest> orderItems) {
+    private Map<UUID, ProductEntity> handleStocks(List<OrderItemRequest> orderItems) {
         Map<UUID, ProductEntity> productEntityMap = new HashMap<>(orderItems.size());
-        for (OrderedProductRequest item : orderItems) {
+        for (OrderItemRequest item : orderItems) {
             ProductEntity product = productDao.read(item.getProductId()).orElseThrow();
             productEntityMap.put(product.getProductId(), product);
             if (product.getReserved() < item.getQuantity())
@@ -149,12 +152,17 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public EagerContentPage<OrderDetailsDto> getActiveOrders(UUID courierId) {
+    public EagerContentPage<OrderResponse> getCourierOrders(UUID courierId) {
+        // map struct was not an option
         List<OrderEntity> orders = orderDao.readCourierOrders(courierId, List.of(OrderStatus.SUBMITTED));
-        List<OrderDetailsDto> orderDetailsItems = orders.stream().map(order -> {
-            OrderDetailsDto orderDetails = new OrderDetailsDto();
+        List<OrderResponse> orderDetailsItems = orders.stream().map(order -> {
+            OrderResponse orderDetails = new OrderResponse();
             BeanUtils.copyProperties(order, orderDetails);
+            orderDetails.setAddress(AddressMapper.entityToDto(order.getAddress()));
+            if (order.getCustomer() != null)
+                orderDetails.setCustomer(UserMapper.entityToCoreView(order.getCustomer()));
             orderDetails.setDateTimeSlot(deliverySlotDao.findSlotByOrder(orderDetails.getOrderId()).orElseThrow());
+            orderDetails.setOrderItems(order.getOrderItems().stream().map(OrderItemMapper::entityToResponse).collect(Collectors.toList()));
             return orderDetails;
         }).collect(Collectors.toList());
         return new EagerContentPage<>(orderDetailsItems, 0, 0);
