@@ -50,16 +50,14 @@ public class CartServiceImpl implements ICartService {
     @Override
     @Transactional
     public void cancelCartReservation(List<CartItemDto> cartItems) {
-        cartItems.stream().filter(i -> {
-            var product = checkForExistenceAndReturn(i.getProductId());
-            checkIfProductIsActive(product);
-            return product.getReserved() - i.getQuantity() < 0;
-        }).findFirst().ifPresentOrElse(
-            i -> {
-                throw new IllegalStateException(String.format("Too much cancelling reservations for product with id %s", i.getProductId()));
-            },
-            () -> cartItems.forEach(i -> cartItemDao.cancelReservation(i.getQuantity(), i.getProductId()))
-        );
+        cartItems
+                .forEach( i -> {
+                    var product = checkForExistenceAndReturn(i.getProductId());
+                    if(!product.getIsActive()) return;
+                    int setMinus = i.getQuantity();
+                    if(product.getReserved() - setMinus < 0) setMinus = product.getReserved();
+                    cartItemDao.cancelReservation(setMinus, product.getProductId());
+                });
     }
 
     @Override
