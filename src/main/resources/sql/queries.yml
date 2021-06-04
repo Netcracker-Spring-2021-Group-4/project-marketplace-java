@@ -223,6 +223,9 @@ custom:
       addToCart: >
         INSERT INTO cart_item(cart_item_id, quantity,timestamp_added,customer_id,product_id)
         VALUES (?,?,?,?,?);
+      remove-from-cart: >
+        DELETE FROM cart_item
+        WHERE cart_item_id = ?;
       get-by-customer-product: >
         SELECT cart_item_id, quantity, timestamp_added, customer_id, product_id
         FROM cart_item
@@ -235,6 +238,14 @@ custom:
         SELECT product_id, quantity
         FROM cart_item
         WHERE customer_id = ?;
+      reserve-product: >
+        UPDATE product
+        SET reserved = reserved + ?
+        WHERE product_id = ? AND reserved = ?;
+      cancel-reservation: >
+        UPDATE product
+        SET reserved = reserved - ?
+        WHERE product_id = ? AND reserved = ?;
 
     category:
       find-by-id: >
@@ -247,3 +258,6 @@ custom:
         group by product_category.category_id;
       categoriesIds: >
         SELECT category_id FROM product_category;
+      get-all: >
+        SELECT category_id, product_category_name
+        FROM product_category;

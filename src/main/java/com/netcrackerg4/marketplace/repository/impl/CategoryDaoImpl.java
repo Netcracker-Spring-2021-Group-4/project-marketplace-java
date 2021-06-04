@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.CategoryQueries;
 import com.netcrackerg4.marketplace.model.response.FilterInfo;
+import com.netcrackerg4.marketplace.model.domain.CategoryEntity;
 import com.netcrackerg4.marketplace.repository.interfaces.ICategoryDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -56,4 +58,21 @@ public class CategoryDaoImpl extends JdbcDaoSupport implements ICategoryDao {
 
         return getJdbcTemplate().queryForList(categoryQueries.getCategoriesIds(), Integer.class   )
     ;}
+
+    @Override
+    public List<CategoryEntity> getAll() {
+        assert getJdbcTemplate() != null;
+        List<CategoryEntity> list;
+        try{
+            list = getJdbcTemplate().query(categoryQueries.getGetAll(),
+                    (rs, row) -> CategoryEntity.builder()
+                            .categoryId(rs.getInt("category_id"))
+                            .categoryName(rs.getString("product_category_name"))
+                            .build());
+        } catch (EmptyResultDataAccessException e) {
+            list = new ArrayList<>();
+        }
+
+        return list;
+    }
 }

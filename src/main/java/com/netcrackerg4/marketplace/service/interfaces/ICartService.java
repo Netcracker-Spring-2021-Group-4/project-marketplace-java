@@ -8,7 +8,10 @@ import java.util.UUID;
 
 public interface ICartService {
     void addToCart(String email, CartItemDto item);
+    void removeFromCart(String email, CartItemDto item);
     void checkAvailability(UUID id, int quantity);
     CartInfoResponse getCartInfoAuthorized(String email);
     CartInfoResponse getCartInfoNonAuthorized(List<CartItemDto> cartItems);
+    void makeCartReservation(List<CartItemDto> cartItems);
+    void cancelCartReservation(List<CartItemDto> cartItems);
 }

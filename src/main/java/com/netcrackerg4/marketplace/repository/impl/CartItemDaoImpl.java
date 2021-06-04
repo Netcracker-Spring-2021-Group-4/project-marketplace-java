@@ -39,6 +39,14 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
     }
 
     @Override
+    public void removeFromCart(UUID cartItemId) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate()
+                .update(cartQueries.getRemoveFromCart(),
+                        cartItemId);
+    }
+
+    @Override
     public Optional<CartItemEntity> getCartItemByProductAndCustomer(UUID customerId, UUID productId) {
         assert getJdbcTemplate() != null;
         Optional<CartItemEntity> result;
@@ -80,5 +88,19 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
                         .build(), id);
 
         return result;
+    }
+
+    @Override
+    public int reserveProduct(int quantity, UUID productId, int currentReserved) {
+        assert getJdbcTemplate() != null;
+        return getJdbcTemplate().update(cartQueries.getReserveProduct(),
+                quantity, productId, currentReserved);
+    }
+
+    @Override
+    public int cancelReservation(int quantity, UUID productId, int currentReserved) {
+        assert getJdbcTemplate() != null;
+        return getJdbcTemplate().update(cartQueries.getCancelReservation(),
+                quantity, productId, currentReserved);
     }
 }

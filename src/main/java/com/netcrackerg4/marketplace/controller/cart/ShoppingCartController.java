@@ -25,4 +25,14 @@ public class ShoppingCartController {
     public CartInfoResponse getMyCart(@Valid @RequestBody List<CartItemDto> cartItems) {
         return cartService.getCartInfoNonAuthorized(cartItems);
     }
+
+    @PostMapping("/reserve")
+    public void setReservation(@Valid @RequestBody List<CartItemDto> cartItems) {
+        cartService.makeCartReservation(cartItems);
+    }
+
+    @PostMapping("/cancel-reservation")
+    public void cancelReservation(@Valid @RequestBody List<CartItemDto> cartItems) {
+        cartService.cancelCartReservation(cartItems);
+    }
 }

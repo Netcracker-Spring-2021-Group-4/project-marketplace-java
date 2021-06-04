@@ -10,4 +10,5 @@ public class CategoryQueries {
     private String findById;
     private String categoriesWithAmountOfProduct;
     private String categoriesIds;
+    private String getAll;
 }
