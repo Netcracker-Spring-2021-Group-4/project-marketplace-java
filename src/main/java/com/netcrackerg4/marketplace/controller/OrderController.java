@@ -6,7 +6,6 @@ import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
-import com.netcrackerg4.marketplace.util.EagerContentPage;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +38,7 @@ public class OrderController {
     }
 
     @GetMapping
-    EagerContentPage<OrderResponse> getCourierOrders(@RequestParam UUID courierId) {
+    List<OrderResponse> getCourierOrders(@RequestParam UUID courierId) {
         return orderService.getCourierOrders(courierId);
     }
 

@@ -5,7 +5,6 @@ import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
-import com.netcrackerg4.marketplace.util.EagerContentPage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,6 +17,6 @@ public interface IOrderService {
 
     void setOrderStatus(UUID orderId, OrderStatus newStatus);
 
-    EagerContentPage<OrderResponse> getCourierOrders(UUID courierId);
+    List<OrderResponse> getCourierOrders(UUID courierId);
 
 }

@@ -22,7 +22,6 @@ import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
-import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
 import com.netcrackerg4.marketplace.util.mappers.OrderItemMapper;
 import com.netcrackerg4.marketplace.util.mappers.UserMapper;
@@ -152,8 +151,7 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public EagerContentPage<OrderResponse> getCourierOrders(UUID courierId) {
-        // map struct was not an option
+    public List<OrderResponse> getCourierOrders(UUID courierId) {
         List<OrderEntity> orders = orderDao.readCourierOrders(courierId, List.of(OrderStatus.SUBMITTED));
         List<OrderResponse> orderDetailsItems = orders.stream().map(order -> {
             OrderResponse orderDetails = new OrderResponse();
@@ -165,6 +163,6 @@ public class OrderServiceImpl implements IOrderService {
             orderDetails.setOrderItems(order.getOrderItems().stream().map(OrderItemMapper::entityToResponse).collect(Collectors.toList()));
             return orderDetails;
         }).collect(Collectors.toList());
-        return new EagerContentPage<>(orderDetailsItems, 0, 0);
+        return orderDetailsItems;
     }
 }
