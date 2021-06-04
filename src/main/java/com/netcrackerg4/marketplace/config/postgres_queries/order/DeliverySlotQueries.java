@@ -6,9 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "custom.postgres.delivery-slot")
 public class DeliverySlotQueries {
-    private String getTakenTimeslots;
+    private String readTakenTimeslots;
     private String readAllTimeslots;
     private String countActiveCouriers;
     private String createDeliverySlot;
     private String findFreeCourier;
+    private String findDeliverySlotByOrderId;
 }

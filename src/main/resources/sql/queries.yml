@@ -137,7 +137,7 @@ custom:
     delivery-slot:
       create-delivery-slot: >
         INSERT INTO dateslot (dateslot_id, datestamp, timeslot_id, courier_id, order_id) VALUES (?,?,?,?,?);
-      get-taken-timeslots: >
+      read-taken-timeslots: >
         SELECT COUNT(user_id) AS num_taken, time_start
         FROM dateslot INNER JOIN timeslot USING (timeslot_id) INNER JOIN auth_user ON courier_id=user_id
         WHERE datestamp=?
@@ -160,6 +160,10 @@ custom:
             WHERE courier_id=auth_user.user_id AND datestamp=? AND timeslot_id=?
         )
         LIMIT 1;
+      find-delivery-slot-by-order-id: >
+        SELECT dateslot_id, datestamp, time_start, time_end
+        FROM dateslot INNER JOIN timeslot USING (timeslot_id)
+        WHERE order_id=?;
 
     order:
       create-order: >
@@ -172,6 +176,14 @@ custom:
       read-status-ids: >
         SELECT status_id, status_name
         FROM order_status;
+      find-courier-orders: >
+        SELECT order_id, placed_at, phone_number, comment, status_id, address_id, customer_id
+        FROM prod_order INNER JOIN dateslot USING (order_id)
+        WHERE courier_id=(:courier_id) AND status_id IN (:prod_status_ids);
+      find-customer-orders: >
+        SELECT order_id, placed_at, phone_number, comment, status_id, address_id, customer_id
+        FROM prod_order
+        WHERE customer_id=(:customer_id) AND status_id IN (:prod_status_ids);
 
     order-item:
       create-order-item: >

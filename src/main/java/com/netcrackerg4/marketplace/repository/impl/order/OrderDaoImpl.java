@@ -3,7 +3,9 @@ package com.netcrackerg4.marketplace.repository.impl.order;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.netcrackerg4.marketplace.config.postgres_queries.order.OrderQueries;
+import com.netcrackerg4.marketplace.model.domain.AddressEntity;
 import com.netcrackerg4.marketplace.model.domain.order.OrderEntity;
+import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
@@ -13,14 +15,15 @@ import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderItemDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -86,4 +89,59 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
     public void delete(UUID key) {
         throw new UnsupportedOperationException();
     }
+
+    // todo: think of a better way to handle empty results
+    @Override
+    public List<OrderEntity> readCourierOrders(UUID courierId, List<OrderStatus> orderStatuses) {
+        List<Integer> statusIds = orderStatuses.stream().map(orderStatusIds::get).collect(Collectors.toList());
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("courier_id", courierId);
+            addValue("prod_status_ids", statusIds);
+        }};
+        return doReadOrders(orderQueries.getFindCourierOrders(), namedParams);
+    }
+
+    @Override
+    public List<OrderEntity> readCustomerOrders(UUID customerId, List<OrderStatus> orderStatuses) {
+        List<Integer> statusIds = orderStatuses.stream().map(orderStatusIds::get).collect(Collectors.toList());
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("customer_id", customerId);
+            addValue("prod_status_ids", statusIds);
+        }};
+        return doReadOrders(orderQueries.getFindCourierOrders(), namedParams);
+    }
+
+    private List<OrderEntity> doReadOrders(String query, MapSqlParameterSource params) {
+        NamedParameterJdbcTemplate namedJdbc = new NamedParameterJdbcTemplate(getJdbcTemplate());
+        List<String> errors = new ArrayList<>(0);
+        List<OrderEntity> orders = namedJdbc.query(query, params, (rs, row) -> {
+            var orderBuilder = OrderEntity.builder()
+                    .orderId(rs.getObject("order_id", UUID.class))
+                    .placedAt(rs.getTimestamp("placed_at"))
+                    .phoneNumber(rs.getString("phone_number"))
+                    .comment(rs.getString("comment"))
+                    .status(orderStatusIds.inverse().get(rs.getInt("status_id")));
+            UUID addressId = rs.getObject("address_id", UUID.class);
+            Optional<AddressEntity> maybeAddress = addressDao.read(addressId);
+            if (maybeAddress.isPresent())
+                orderBuilder.address(maybeAddress.get());
+            else {
+                errors.add(String.format("address with id '%s' is missing", addressId.toString()));
+                return null;
+            }
+            UUID customerId = rs.getObject("customer_id", UUID.class);
+            Optional<AppUserEntity> maybeCustomer = userDao.read(customerId);
+            maybeCustomer.ifPresent(orderBuilder::customer);
+
+            OrderEntity order = orderBuilder.build();
+            order.setOrderItems(orderItemDao.readItemsOfOrder(order.getOrderId()));
+
+            return order;
+        });
+        if (errors.size() != 0) {
+            throw new IllegalStateException("Encountered errors:\n" + String.join(",", errors));
+        }
+        return orders;
+    }
+
 }

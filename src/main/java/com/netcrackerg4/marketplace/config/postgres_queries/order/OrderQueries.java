@@ -9,4 +9,6 @@ public class OrderQueries {
     private String createOrder;
     private String readOrder;
     private String readStatusIds;
+    private String findCourierOrders;
+    private String findCustomerOrders;
 }

@@ -6,6 +6,7 @@ import com.netcrackerg4.marketplace.config.postgres_queries.order.DeliverySlotQu
 import com.netcrackerg4.marketplace.model.domain.order.DeliverySlotEntity;
 import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
+import com.netcrackerg4.marketplace.model.dto.timestamp.DateTimeSlot;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
@@ -62,7 +63,7 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
 
     @Override
     public Map<LocalTime, Integer> readTakenTimeslots(LocalDate date) {
-        return getJdbcTemplate().queryForStream(deliverySlotQueries.getGetTakenTimeslots(), (rs, row) ->
+        return getJdbcTemplate().queryForStream(deliverySlotQueries.getReadTakenTimeslots(), (rs, row) ->
                         new DeliveryGrouper(rs.getTime("time_start").toLocalTime(), rs.getInt("num_taken")),
                 Date.valueOf(date)).collect(Collectors.toMap(DeliveryGrouper::getTime, DeliveryGrouper::getN));
     }
@@ -97,6 +98,20 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
             return Optional.empty();
         }
 
+    }
+
+    @Override
+    public Optional<DateTimeSlot> findSlotByOrder(UUID orderId) {
+        try {
+            return Optional.ofNullable(getJdbcTemplate().queryForObject(deliverySlotQueries.getFindDeliverySlotByOrderId(), (rs, row) ->
+                            DateTimeSlot.builder()
+                                    .deliveryDate(rs.getDate("datestamp").toLocalDate())
+                                    .timeStart(rs.getTime("time_start").toLocalTime())
+                                    .timeEnd(rs.getTime("time_end").toLocalTime()).build(),
+                    orderId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
 //    @Override

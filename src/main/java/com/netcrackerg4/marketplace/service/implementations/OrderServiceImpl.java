@@ -9,6 +9,7 @@ import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
+import com.netcrackerg4.marketplace.model.dto.order.OrderDetailsDto;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderedProductRequest;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
@@ -148,12 +149,14 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public EagerContentPage<OrderRequest> getActiveOrders(UUID courierId) {
-        return null;
-    }
-
-    @Override
-    public EagerContentPage<OrderEntity> getOrdersPage(int page, UUID customerId) {
-        return null;
+    public EagerContentPage<OrderDetailsDto> getActiveOrders(UUID courierId) {
+        List<OrderEntity> orders = orderDao.readCourierOrders(courierId, List.of(OrderStatus.SUBMITTED));
+        List<OrderDetailsDto> orderDetailsItems = orders.stream().map(order -> {
+            OrderDetailsDto orderDetails = new OrderDetailsDto();
+            BeanUtils.copyProperties(order, orderDetails);
+            orderDetails.setDateTimeSlot(deliverySlotDao.findSlotByOrder(orderDetails.getOrderId()).orElseThrow());
+            return orderDetails;
+        }).collect(Collectors.toList());
+        return new EagerContentPage<>(orderDetailsItems, 0, 0);
     }
 }
