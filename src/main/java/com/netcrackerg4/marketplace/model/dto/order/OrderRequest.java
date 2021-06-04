@@ -5,6 +5,7 @@ import com.netcrackerg4.marketplace.constants.ValidationDefaultMessage;
 import lombok.Data;
 import org.springframework.lang.Nullable;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -22,6 +23,7 @@ public class OrderRequest {
     private AddressDto address;
     @Nullable
     private String comment;
+    @Valid
     @NotEmpty(message = "no order without products possible")
     private List<OrderItemRequest> products;
 }
