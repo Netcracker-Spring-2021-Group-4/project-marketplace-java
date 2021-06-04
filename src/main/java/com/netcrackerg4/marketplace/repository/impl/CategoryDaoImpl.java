@@ -27,7 +27,6 @@ public class CategoryDaoImpl extends JdbcDaoSupport implements ICategoryDao {
 
     @Override
     public Optional<String> findNameById(int id) {
-        assert getJdbcTemplate() != null;
         Optional<String> categoryName;
         try {
             categoryName = Optional.ofNullable(
@@ -42,7 +41,6 @@ public class CategoryDaoImpl extends JdbcDaoSupport implements ICategoryDao {
 
     @Override
     public List<CategoryEntity> getAll() {
-        assert getJdbcTemplate() != null;
         List<CategoryEntity> list;
         try{
             list = getJdbcTemplate().query(categoryQueries.getGetAll(),

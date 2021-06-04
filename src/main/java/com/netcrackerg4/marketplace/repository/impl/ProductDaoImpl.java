@@ -32,7 +32,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public void create(ProductEntity item) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getCreateProduct(), item.getProductId(), item.getName(),
                 item.getImageUrl(),item.getDescription(), item.getPrice(),item.getInStock(),item.getReserved(),
                 item.getAvailabilityDate(),item.getIsActive(),
@@ -41,7 +40,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public Optional<ProductEntity> read(UUID key) {
-        assert getJdbcTemplate() != null;
         Optional<ProductEntity> product;
         try {
             product = Optional.ofNullable(
@@ -68,7 +66,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public void update(ProductEntity updItem) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getUpdateProductInfo(), updItem.getName(),
                 updItem.getDescription(),updItem.getPrice(), updItem.getInStock(),updItem.getReserved(),
                 updItem.getCategoryId(),updItem.getProductId());
@@ -76,13 +73,11 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public void updatePicture(UUID key, URL url) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getUpdateProductPicture(), url.toString(),key);
     }
 
     @Override
     public List<ProductResponse> findAll() {
-        assert getJdbcTemplate() != null;
 
         return getJdbcTemplate().query(productQueries.getActiveProductsWithDiscount(),
                new ProductResponse.ProductResponseMapper());
@@ -90,7 +85,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public List<ProductResponse> findAll(int p, int s) {
-        assert getJdbcTemplate() != null;
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {
             {
@@ -107,7 +101,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
 
     public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, Double from, Double to, String sortBy, int pageSize, int pageN) {
-        assert getJdbcTemplate() != null;
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("category_ids", categories);
@@ -126,7 +119,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public List<CategoryResponse> findCategories() {
-        assert getJdbcTemplate() != null;
 
         return getJdbcTemplate().query(productQueries.getCategoriesWithAmountOfProduct(),
                 (rs,rowNum)-> CategoryResponse.builder()

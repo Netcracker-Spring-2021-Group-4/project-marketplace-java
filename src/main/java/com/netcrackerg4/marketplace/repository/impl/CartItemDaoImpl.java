@@ -27,7 +27,6 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
 
     @Override
     public void addToCart(CartItemEntity item) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate()
                 .update(cartQueries.getAddToCart(),
                         item.getCartItemId(),
@@ -40,7 +39,6 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
 
     @Override
     public void removeFromCart(UUID cartItemId) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate()
                 .update(cartQueries.getRemoveFromCart(),
                         cartItemId);
@@ -48,7 +46,6 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
 
     @Override
     public Optional<CartItemEntity> getCartItemByProductAndCustomer(UUID customerId, UUID productId) {
-        assert getJdbcTemplate() != null;
         Optional<CartItemEntity> result;
         try {
             result =  Optional.ofNullable(getJdbcTemplate().queryForObject(cartQueries.getGetByCustomerProduct(),
@@ -69,7 +66,6 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
 
     @Override
     public void changeQuantityById(int quantity, UUID cartItemId) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate()
                 .update(cartQueries.getChangeQuantityById(),
                         quantity,
@@ -78,7 +74,6 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
 
     @Override
     public List<CartItemDto> getAuthCustomerCartItems(UUID id) {
-        assert getJdbcTemplate() != null;
         List<CartItemDto> result;
 
         result = getJdbcTemplate().query(cartQueries.getFindAuthCustomerCartItems(),
@@ -92,7 +87,6 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
 
     @Override
     public int reserveProduct(int quantity, UUID productId) {
-        assert getJdbcTemplate() != null;
         long lockId = productId.getMostSignificantBits();
         return getJdbcTemplate().update(cartQueries.getReserveProduct(),
                 lockId, quantity, productId);
@@ -100,7 +94,6 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
 
     @Override
     public int cancelReservation(int quantity, UUID productId) {
-        assert getJdbcTemplate() != null;
         long lockId = productId.getMostSignificantBits();
         return getJdbcTemplate().update(cartQueries.getCancelReservation(),
                 lockId, quantity, productId);

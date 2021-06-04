@@ -27,7 +27,6 @@ public class DiscountDaoImpl extends JdbcDaoSupport implements IDiscountDao {
 
     @Override
     public Optional<DiscountEntity> findActiveProductDiscount(UUID id) {
-        assert getJdbcTemplate() != null;
         Optional<DiscountEntity> discount;
         try {
             discount = Optional.ofNullable(
@@ -50,7 +49,6 @@ public class DiscountDaoImpl extends JdbcDaoSupport implements IDiscountDao {
 
     @Override
     public List<DiscountEntity> findUnexpiredDiscounts(UUID productId) {
-        assert getJdbcTemplate() != null;
         try {
             return getJdbcTemplate().query(discountQueries.getFindUnexpiredDiscounts(), (rs, row) ->
                             DiscountEntity.builder()
@@ -68,7 +66,6 @@ public class DiscountDaoImpl extends JdbcDaoSupport implements IDiscountDao {
 
     @Override
     public void create(DiscountEntity item) {
-        assert getJdbcTemplate() != null;
         Integer overlap = getJdbcTemplate().queryForObject(discountQueries.getCheckPeriod(), Integer.class,
                 item.getProductId(), item.getEndsAt(), item.getStartsAt());
         if (overlap != null && overlap > 0)
@@ -79,7 +76,6 @@ public class DiscountDaoImpl extends JdbcDaoSupport implements IDiscountDao {
 
     @Override
     public Optional<DiscountEntity> read(UUID key) {
-        assert getJdbcTemplate() != null;
         try {
             return Optional.ofNullable(getJdbcTemplate().queryForObject(discountQueries.getReadDiscount(), (rs, row) ->
                             DiscountEntity.builder()
@@ -97,7 +93,6 @@ public class DiscountDaoImpl extends JdbcDaoSupport implements IDiscountDao {
 
     @Override
     public void update(DiscountEntity updItem) {
-        assert getJdbcTemplate() != null;
         Integer overlap = getJdbcTemplate().queryForObject(discountQueries.getCheckPeriodEdit(), Integer.class,
                 updItem.getProductId(), updItem.getDiscountId(), updItem.getEndsAt(), updItem.getStartsAt());
         if (overlap != null && overlap > 0) throw new IllegalStateException("Clashes with another discount.");
@@ -107,7 +102,6 @@ public class DiscountDaoImpl extends JdbcDaoSupport implements IDiscountDao {
 
     @Override
     public void delete(UUID key) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(discountQueries.getDeleteDiscount(), key);
     }
 }
