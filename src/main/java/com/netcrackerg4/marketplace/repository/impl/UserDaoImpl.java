@@ -36,7 +36,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public Optional<AppUserEntity> findByEmail(String email) {
-        assert getJdbcTemplate() != null;
         Optional<AppUserEntity> user;
         try {
             user = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getGetByEmail(), (rs, row) ->
@@ -59,7 +58,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public void create(AppUserEntity item) {
-        assert getJdbcTemplate() != null;
         int statusId = findStatusIdByStatusName(item.getStatus().name());
         int roleId = findRoleIdByRoleName(item.getRole().name());
         getJdbcTemplate().update(userQueries.getCreateNew(), item.getEmail(), item.getPassword(), item.getFirstName(),
@@ -68,7 +66,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public Optional<AppUserEntity> read(UUID key) {
-        assert getJdbcTemplate() != null;
         Optional<AppUserEntity> result;
         try {
             result = Optional.ofNullable(getJdbcTemplate().queryForObject(userQueries.getFindUserById(), (rs, row) ->
@@ -92,7 +89,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public void update(AppUserEntity item) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(userQueries.getUpdateUserInfo(), item.getFirstName(), item.getLastName(), item.getPhoneNumber(),
                 item.getEmail());
     }
@@ -104,7 +100,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public List<GrantedAuthority> getAuthorities(int roleId) {
-        assert getJdbcTemplate() != null;
         return getJdbcTemplate().query(userQueries.getGetAuthorities(), (rs, row) ->
                         new SimpleGrantedAuthority(rs.getString("authority")),
                 roleId, roleId);
@@ -112,19 +107,16 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public void updateStatus(String email, UserStatus status) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(userQueries.getUpdateStatus(), status.name(), email);
     }
 
     @Override
     public void updatePassword(String email, String password) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(userQueries.getUpdatePassword(), password, email);
     }
 
     @Override
     public Integer findStatusIdByStatusName(String name) {
-        assert getJdbcTemplate() != null;
         Integer statusId = getJdbcTemplate().queryForObject(userQueries.getFindStatusIdByName(), Integer.class, name);
         if (statusId == null) throw new BadCodeError();
         return statusId;
@@ -132,7 +124,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public Integer findRoleIdByRoleName(String roleName) {
-        assert getJdbcTemplate() != null;
         Integer roleId = getJdbcTemplate().queryForObject(userQueries.getFindRoleIdByName(), Integer.class, roleName);
         if (roleId == null) throw new BadCodeError();
         return roleId;
@@ -141,7 +132,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
     @Override
     public List<UserAdminView> findUsersByFilter(List<UserRole> targetRoles, List<UserStatus> targetStatuses,
                                                  String firstName, String lastName, int pageSize, int pageNo) {
-        assert getJdbcTemplate() != null;
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("roles", targetRoles.stream().map(UserRole::toString).collect(Collectors.toList()));
@@ -170,7 +160,6 @@ public class UserDaoImpl extends JdbcDaoSupport implements IUserDao {
 
     @Override
     public int countFilteredUsers(List<UserRole> targetRoles, List<UserStatus> targetStatuses, String firstName, String lastName) {
-        assert getJdbcTemplate() != null;
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("roles", targetRoles.stream().map(UserRole::toString).collect(Collectors.toList()));

@@ -2,8 +2,8 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
-import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
+import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public void create(ProductEntity item) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getCreateProduct(), item.getProductId(), item.getName(),
                 item.getImageUrl(),item.getDescription(), item.getPrice(),item.getInStock(),item.getReserved(),
                 item.getAvailabilityDate(),item.getIsActive(),
@@ -41,7 +40,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public Optional<ProductEntity> read(UUID key) {
-        assert getJdbcTemplate() != null;
         Optional<ProductEntity> product;
         try {
             product = Optional.ofNullable(
@@ -68,7 +66,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public void update(ProductEntity updItem) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getUpdateProductInfo(), updItem.getName(),
                 updItem.getDescription(),updItem.getPrice(), updItem.getInStock(),updItem.getReserved(),
                 updItem.getCategoryId(),updItem.getProductId());
@@ -76,7 +73,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public void updatePicture(UUID key, URL url) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(productQueries.getUpdateProductPicture(), url.toString(),key);
     }
 
@@ -84,8 +80,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public List<ProductResponse> findAll(int p, int s) {
-        assert getJdbcTemplate() != null;
-
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {
             {
                 addValue("limit", s);
@@ -99,16 +93,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     }
 
-    @Override
-    public Integer maxPrice() {
-        assert getJdbcTemplate() != null;
-        return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
-    }
-
-
-
-    public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageN, int pageSize) {
-        assert getJdbcTemplate() != null;
+      public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageN, int pageSize) {
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("category_ids", categories);
