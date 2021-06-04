@@ -13,13 +13,12 @@ import java.util.UUID;
 public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID>{
      void updatePicture(UUID key, URL url);
 
-     List<ProductResponse> findAll();
      List<ProductResponse> findAll(int p, int s);
-
      Integer maxPrice();
+     List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageSize, int pageN );
 
-    List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageSize, int pageN );
 
-
+     int findAllSize();
+     int findAllFilteredSize(String query, List<Integer> categories, int from, int to);
 
 }

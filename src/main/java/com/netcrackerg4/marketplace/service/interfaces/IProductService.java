@@ -22,7 +22,6 @@ public interface IProductService {
     Optional<ProductEntity> findProductById(UUID id);
     void updateProductInfo(UUID id,  NewProductDto newProduct);
     void updateProductPicture(UUID id, MultipartFile multipartFile);
-    List<ProductResponse> getAll();
     Page<ProductResponse> findProducts(int page, int size);
     FilterInfo getFilterInfo();
 

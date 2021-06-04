@@ -80,13 +80,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         getJdbcTemplate().update(productQueries.getUpdateProductPicture(), url.toString(),key);
     }
 
-    @Override
-    public List<ProductResponse> findAll() {
-        assert getJdbcTemplate() != null;
 
-        return getJdbcTemplate().query(productQueries.getActiveProductsWithDiscount(),
-               new ProductResponse.ProductResponseMapper());
-    }
 
     @Override
     public List<ProductResponse> findAll(int p, int s) {
@@ -143,7 +137,33 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
         return namedParameterJdbcTemplate.query(sqlQuery,
                 namedParams, new ProductResponse.ProductResponseMapper()
-        );    }
+        );
+    }
+
+    @Override
+    public int findAllSize() {
+        assert getJdbcTemplate() != null;
+        return getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(),Integer.class);
+    }
+
+    @Override
+    public int findAllFilteredSize(String query, List<Integer> categories, int from, int to) {
+        assert getJdbcTemplate() != null;
+
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("category_ids", categories);
+            addValue("minPrice", from);
+            addValue("maxPrice", to);
+            addValue("name_query", "%" + query + "%");
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+
+        return namedParameterJdbcTemplate.queryForObject(productQueries.getActiveProductsFilteredSize(),
+                namedParams, Integer.class
+        );
+
+    }
 
 
     @Override

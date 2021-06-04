@@ -88,14 +88,11 @@ public class ProductServiceImpl implements IProductService {
         productDao.updatePicture(id,url);
     }
 
-    @Override
-    public List<ProductResponse> getAll() {
-       return productDao.findAll();
-    }
+
 
     @Override
     public Page<ProductResponse> findProducts(int page, int size) {
-        return new Page<>(productDao.findAll(page, size), getAll().size());
+        return new Page<>(productDao.findAll(page, size), productDao.findAllSize());
     }
 
     @Override
@@ -154,7 +151,8 @@ public class ProductServiceImpl implements IProductService {
         String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
         SortingOptions sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():SortingOptions.DATE;
         List<ProductResponse> content = productDao.findProductsWithFilters(query,categoryIds,from,to,sortOption,pageSize,pageN);
-        return new Page<>(content, content.size());
+        int size = productDao.findAllFilteredSize(query, categoryIds,from,to);
+        return new Page<>(content,size);
 
     }
 
