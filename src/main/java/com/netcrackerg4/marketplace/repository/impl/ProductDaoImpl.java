@@ -149,6 +149,11 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         );
 
     }
+    @Override
+    public Integer maxPrice() {
+        assert getJdbcTemplate() != null;
+        return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
+    }
 
 
     @Override
