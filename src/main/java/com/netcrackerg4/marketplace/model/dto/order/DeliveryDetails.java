@@ -8,17 +8,15 @@ import org.springframework.lang.Nullable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @Builder
 public class DeliveryDetails {
-    private UUID orderId;
     private List<OrderItemEntity> orderItems;
     private LocalDate datestamp;
     private LocalTime timeStart;
     private LocalTime timeEnd;
-    private String address;
+    private AddressDto address;
     private String phoneNumber;
     @Nullable
     private String comment;

@@ -1,12 +1,14 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.model.domain.AddressEntity;
+import com.netcrackerg4.marketplace.model.domain.order.DeliverySlotEntity;
 import com.netcrackerg4.marketplace.model.domain.order.OrderEntity;
 import com.netcrackerg4.marketplace.model.domain.order.OrderItemEntity;
 import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
+import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderedProductRequest;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
@@ -17,6 +19,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
+import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import lombok.AllArgsConstructor;
@@ -24,6 +27,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -40,10 +44,11 @@ public class OrderServiceImpl implements IOrderService {
     private final IProductDao productDao;
     private final IDiscountDao discountDao;
     private final IAddressDao addressDao;
+    private final IMailService mailService;
 
     @Override
     public List<StatusTimestampDto> getDayTimeslots(LocalDate date) {
-        List<TimeslotEntity> timeslots = deliverySlotDao.readTimeslotOptions();
+        Collection<TimeslotEntity> timeslots = deliverySlotDao.readTimeslotOptions();
         int activeCouriers = deliverySlotDao.countActiveCouriers();
         Map<LocalTime, Integer> takenSlots = deliverySlotDao.readTakenTimeslots(date);
 
@@ -55,7 +60,14 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     @Transactional
-    public void makeOrder(OrderRequest orderRequest, UUID maybeCustomerId) {
+    public synchronized void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer) {
+
+        TimeslotEntity[] timeslotArr = deliverySlotDao.readTimeslotOptions().stream()
+                .filter(slot -> slot.getTimeStart().toLocalTime().equals(orderRequest.getDeliverySlot().toLocalTime()))
+                .toArray(TimeslotEntity[]::new);
+        if (timeslotArr.length != 1) throw new IllegalStateException("Illegal timeslot selected");
+        TimeslotEntity timeslot = timeslotArr[0];
+
         Map<UUID, ProductEntity> loadedProducts = handleStocks(orderRequest.getProducts());
 
         OrderEntity orderEntity = new OrderEntity();
@@ -68,10 +80,9 @@ public class OrderServiceImpl implements IOrderService {
         AddressEntity address = new AddressEntity();
         BeanUtils.copyProperties(orderRequest.getAddress(), address);
         address.setAddressId(UUID.randomUUID());
-        if (maybeCustomerId != null) {
-            address.setCustomerId(maybeCustomerId);
-            orderEntity.setCustomer(userDao.read(maybeCustomerId)
-                    .orElseThrow(() -> new BadCodeError("customer making the order should have been present")));
+        if (maybeCustomer != null) {
+            address.setCustomerId(maybeCustomer.getUserId());
+            orderEntity.setCustomer(maybeCustomer);
         }
 
         addressDao.create(address);
@@ -86,8 +97,29 @@ public class OrderServiceImpl implements IOrderService {
                         .orderId(orderEntity.getOrderId())
                         .build())
                 .collect(Collectors.toList()));
-
         orderDao.create(orderEntity);
+
+        DeliverySlotEntity deliverySlot = DeliverySlotEntity.builder()
+                .deliverySlotId(UUID.randomUUID())
+                .datestamp(Date.valueOf(orderRequest.getDeliverySlot().toLocalDate()))
+                .timeslotEntity(timeslot)
+                .order(orderEntity)
+                .courier(deliverySlotDao.findFreeCourier(orderRequest.getDeliverySlot()).orElseThrow())
+                .build();
+        deliverySlotDao.create(deliverySlot);
+
+        DeliveryDetails deliveryDetails = DeliveryDetails.builder()
+                .orderItems(orderEntity.getOrderItems())
+                .datestamp(orderRequest.getDeliverySlot().toLocalDate())
+                .timeStart(deliverySlot.getTimeslotEntity().getTimeStart().toLocalTime())
+                .timeEnd(deliverySlot.getTimeslotEntity().getTimeEnd().toLocalTime())
+                .address(orderRequest.getAddress())
+                .phoneNumber(orderEntity.getPhoneNumber())
+                .comment(orderEntity.getComment())
+                .customerFirstName(maybeCustomer != null ? maybeCustomer.getFirstName() : null)
+                .customerLastName(maybeCustomer != null ? maybeCustomer.getLastName() : null)
+                .build();
+        mailService.notifyCourierGotDelivery(deliverySlot.getCourier().getEmail(), deliveryDetails);
     }
 
     private Map<UUID, ProductEntity> handleStocks(List<OrderedProductRequest> orderItems) {
@@ -112,7 +144,7 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public void setOrderStatus(UUID orderId, OrderStatus newStatus) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override

@@ -135,6 +135,8 @@ custom:
         WHERE customer_id=?;
 
     delivery-slot:
+      create-delivery-slot: >
+        INSERT INTO dateslot (dateslot_id, datestamp, timeslot_id, courier_id, order_id) VALUES (?,?,?,?,?);
       get-taken-timeslots: >
         SELECT COUNT(user_id) AS num_taken, time_start
         FROM dateslot INNER JOIN timeslot USING (timeslot_id) INNER JOIN auth_user ON courier_id=user_id
@@ -144,13 +146,21 @@ custom:
         SELECT COUNT(user_id)
         FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
         WHERE role_name='ROLE_COURIER' AND status_name='ACTIVE';
-      check-timeslot-present: >
-        SELECT COUNT(timeslot_id)
-        FROM timeslot
-        WHERE time_start=? AND time_end=?;
       read-all-timeslots: >
         SELECT timeslot_id, time_start, time_end
         FROM timeslot;
+      find-free-courier: >
+        SELECT user_id, email, password, first_name, last_name, phone_number
+        FROM auth_user
+        WHERE role_id IN (SELECT role_id FROM user_role WHERE role_name='ROLE_COURIER')
+          AND status_id IN (SELECT status_id FROM user_status WHERE status_name='ACTIVE')
+          AND NOT EXISTS (
+            SELECT *
+            FROM dateslot
+            WHERE courier_id=auth_user.user_id AND datestamp=? AND timeslot_id=?
+        )
+        LIMIT 1;
+
     order:
       create-order: >
         INSERT INTO prod_order (order_id, placed_at, phone_number, comment, status_id, address_id, customer_id)

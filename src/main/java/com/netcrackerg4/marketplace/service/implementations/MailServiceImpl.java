@@ -72,6 +72,6 @@ public class MailServiceImpl implements IMailService {
     @Override
     public void notifyCourierGotDelivery(String courierEmail, DeliveryDetails deliveryDetails) {
         // todo: implement
-        throw new UnsupportedOperationException();
+//        throw new UnsupportedOperationException();
     }
 }

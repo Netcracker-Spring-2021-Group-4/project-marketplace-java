@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.controller;
 
+import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
@@ -27,6 +28,10 @@ public class OrderController {
 
     @PostMapping
     void makeOrder(@RequestBody @Valid OrderRequest orderRequest, Principal principal) {
-        orderService.makeOrder(orderRequest, null);
+        AppUserEntity customer = null;
+        if (principal != null) {
+            customer = userService.findByEmail(principal.getName()).orElse(null);
+        }
+        orderService.makeOrder(orderRequest, customer);
     }
 }

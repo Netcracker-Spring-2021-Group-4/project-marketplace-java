@@ -10,7 +10,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderItemDao;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
@@ -23,10 +23,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
     private final OrderQueries orderQueries;
-    private final BiMap<OrderStatus, Integer> orderStatusIds = HashBiMap.create();
+    private BiMap<OrderStatus, Integer> orderStatusIds;
     private final ICartItemDao cartItemDao;
     private final IAddressDao addressDao;
     private final IUserDao userDao;
@@ -39,7 +39,7 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
 
     @PostConstruct
     private void initOrderStates() {
-        assert getJdbcTemplate() != null;
+        orderStatusIds = HashBiMap.create();
         getJdbcTemplate().query(orderQueries.getReadStatusIds(), (rs, row) ->
                 orderStatusIds.put(OrderStatus.valueOf(rs.getString("status_name")),
                         rs.getInt("status_id")));
@@ -47,7 +47,6 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
 
     @Override
     public void create(OrderEntity item) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(orderQueries.getCreateOrder(), item.getOrderId(), item.getPlacedAt(),
                 item.getPhoneNumber(), item.getComment(), orderStatusIds.get(item.getStatus()),
                 item.getAddress().getAddressId(),
@@ -60,7 +59,6 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
     @Override
     public Optional<OrderEntity> read(UUID key) {
         try {
-            assert getJdbcTemplate() != null;
             OrderEntity coreOrder = getJdbcTemplate().queryForObject(orderQueries.getReadOrder(), (rs, row) -> OrderEntity.builder()
                     .orderId(key)
                     .placedAt(rs.getTimestamp("placed_at"))

@@ -9,4 +9,6 @@ public class DeliverySlotQueries {
     private String getTakenTimeslots;
     private String readAllTimeslots;
     private String countActiveCouriers;
+    private String createDeliverySlot;
+    private String findFreeCourier;
 }

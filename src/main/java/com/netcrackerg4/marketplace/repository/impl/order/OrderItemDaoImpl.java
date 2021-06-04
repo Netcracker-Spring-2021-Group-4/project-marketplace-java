@@ -27,14 +27,12 @@ public class OrderItemDaoImpl extends JdbcDaoSupport implements IOrderItemDao {
 
     @Override
     public void create(OrderItemEntity orderItem) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(orderItemQueries.getCreateOrderItem(), orderItem.getOrderItemId(), orderItem.getQuantity(),
                 orderItem.getPricePerProduct(), orderItem.getOrderId(), orderItem.getProductId());
     }
 
     @Override
     public void createItemsOfOrder(Collection<OrderItemEntity> orderItems) {
-        assert getJdbcTemplate() != null;
         for (OrderItemEntity item : orderItems) {
             getJdbcTemplate().update(orderItemQueries.getCreateOrderItem(), item.getOrderItemId(),
                     item.getQuantity(), item.getPricePerProduct(), item.getOrderId(), item.getProductId());
@@ -44,7 +42,6 @@ public class OrderItemDaoImpl extends JdbcDaoSupport implements IOrderItemDao {
     @Override
     public Optional<OrderItemEntity> read(UUID itemId) {
         try {
-            assert getJdbcTemplate() != null;
             return Optional.ofNullable(getJdbcTemplate().queryForObject(orderItemQueries.getReadOrderItem(),
                     (rs, row) -> OrderItemEntity.builder()
                             .orderItemId(itemId)
@@ -60,7 +57,6 @@ public class OrderItemDaoImpl extends JdbcDaoSupport implements IOrderItemDao {
 
     @Override
     public List<OrderItemEntity> readItemsOfOrder(UUID orderId) {
-        assert getJdbcTemplate() != null;
         return getJdbcTemplate().query(orderItemQueries.getReadItemsOfOrder(), (rs, row) ->
                 OrderItemEntity.builder()
                         .orderItemId(rs.getObject("order_item_id", UUID.class))

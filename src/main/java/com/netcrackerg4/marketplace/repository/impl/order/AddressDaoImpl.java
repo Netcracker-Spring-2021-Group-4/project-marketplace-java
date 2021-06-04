@@ -25,14 +25,12 @@ public class AddressDaoImpl extends JdbcDaoSupport implements IAddressDao {
 
     @Override
     public void create(AddressEntity addressEntity) {
-        assert getJdbcTemplate() != null;
         getJdbcTemplate().update(addressQueries.getCreateAddress(), addressEntity.getAddressId(), addressEntity.getCity(),
                 addressEntity.getStreet(), addressEntity.getBuilding(), addressEntity.getFlat(), addressEntity.getCustomerId());
     }
 
     @Override
     public Optional<AddressEntity> read(UUID addressId) {
-        assert getJdbcTemplate() != null;
         try {
             return Optional.ofNullable(getJdbcTemplate().queryForObject(addressQueries.getReadAddress(), (rs, row) -> AddressEntity.builder()
                     .addressId(addressId)
