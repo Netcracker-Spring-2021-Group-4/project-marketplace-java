@@ -1,12 +1,12 @@
 package com.netcrackerg4.marketplace.controller;
 
+import com.netcrackerg4.marketplace.model.domain.CategoryEntity;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
 import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
+import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
-import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.Page;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,9 +17,8 @@ import java.util.List;
 @RequestMapping("api/v1/public")
 @RequiredArgsConstructor
 public class PublicController {
-
-
     private final IProductService productService;
+    private final ICategoryService categoryService;
 
     @GetMapping("/products")
     public List<ProductResponse> getProducts(){
@@ -40,5 +39,8 @@ public class PublicController {
     public List<CategoryResponse> getCategories(){
         return  productService.getCategories();
     }
+
+    @GetMapping("/categories-all")
+    public List<CategoryEntity> fetchCategories() { return categoryService.getAll(); }
 
 }

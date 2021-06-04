@@ -182,3 +182,6 @@ custom:
         SELECT product_category_name
         FROM product_category
         WHERE category_id = ?;
+      get-all: >
+        SELECT category_id, product_category_name
+        FROM product_category;
