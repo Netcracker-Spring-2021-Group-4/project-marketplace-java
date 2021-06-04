@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,6 +76,40 @@ public class CartServiceImpl implements ICartService {
     @Override
     public void checkAvailability(UUID id, int quantity) {
         getAmountAvailable(id,quantity);
+    }
+
+    @Transactional
+    @Override
+    public void addToCartIfPossible(String email, List<CartItemDto> items) {
+        items.forEach(item -> {
+            UUID productId = item.getProductId();
+            var available = getAmountAvailableWithoutThrow(productId);
+            if(available <= 0) return;
+            var addingToCartQuantity = Math.min(item.getQuantity(), available);
+            UUID customerId = userService.findByEmail(email).getUserId();
+            cartItemDao
+                .getCartItemByProductAndCustomer(customerId, productId)
+                .ifPresentOrElse(
+                    cartItemEntity -> {
+                        UUID id = cartItemEntity.getCartItemId();
+                        int addingQuantity = Math.min(available,
+                                addingToCartQuantity + cartItemEntity.getQuantity());
+                        cartItemDao.changeQuantityById(addingQuantity, id);
+                    },
+                    () -> {
+                        CartItemEntity cartItemEntity =
+                            CartItemEntity.builder()
+                                .cartItemId(UUID.randomUUID())
+                                .customerId(customerId)
+                                .productId(productId)
+                                .quantity(addingToCartQuantity)
+                                .timestampAdded(new Timestamp(System.currentTimeMillis()))
+                                .build();
+
+                        cartItemDao.addToCart(cartItemEntity);
+                    }
+                );
+        });
     }
 
     @Transactional
@@ -182,6 +217,16 @@ public class CartServiceImpl implements ICartService {
         ProductEntity product = checkForExistenceAndReturn(id);
         checkIfProductIsActive(product);
         return getAmountAvailable(product, quantity);
+    }
+
+    private int getAmountAvailableWithoutThrow(UUID id) {
+        AtomicInteger result = new AtomicInteger();
+        productService
+            .findProductById(id)
+            .ifPresent(product -> {
+                if(product.getIsActive()) result.set(product.getInStock() - product.getReserved());
+            });
+        return result.get();
     }
 
     private int getAmountAvailable(ProductEntity product, int quantity) {

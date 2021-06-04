@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.controller;
 
+import com.netcrackerg4.marketplace.model.dto.ValidList;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.dto.user.UserUpdateDto;
 import com.netcrackerg4.marketplace.service.interfaces.ICartService;
@@ -24,6 +25,12 @@ public class AuthCustomerController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         cartService.addToCart(email, cartItemDto);
+    }
+
+    @PostMapping("/add-to-cart-if-possible")
+    public void addToCart(@Valid @RequestBody ValidList<CartItemDto> cartItemDto, Authentication auth){
+        String email = auth.getName();
+        cartService.addToCartIfPossible(email, cartItemDto);
     }
 
     @PostMapping("/remove-from-cart")

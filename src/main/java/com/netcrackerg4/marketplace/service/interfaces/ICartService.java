@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface ICartService {
     void addToCart(String email, CartItemDto item);
+    void addToCartIfPossible(String email, List<CartItemDto> items);
     void removeFromCart(String email, CartItemDto item);
     void checkAvailability(UUID id, int quantity);
     CartInfoResponse getCartInfoAuthorized(String email);

@@ -21,7 +21,7 @@ public class ShoppingCartController {
         cartService.checkAvailability(id, quantity);
     }
 
-    @GetMapping("/cart")
+    @PostMapping("/cart")
     public CartInfoResponse getMyCart(@Valid @RequestBody ValidList<CartItemDto> cartItems) {
         return cartService.getCartInfoNonAuthorized(cartItems);
     }
