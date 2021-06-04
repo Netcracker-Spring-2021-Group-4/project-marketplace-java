@@ -140,12 +140,13 @@ public class ProductServiceImpl implements IProductService {
         discountDao.delete(discountId);
     }
 
+    @Transactional
     @Override
     public Page<ProductResponse> findProducts(ProductSearchFilter searchFilter, int pageSize, int pageN) {
         if(searchFilter.getMinPrice()>searchFilter.getMaxPrice())
             throw new IllegalStateException("MinPrice should be <= MaxPrice");
 
-        List<Integer> categoryIds = searchFilter.getCategoryIds()!= null ? searchFilter.getCategoryIds():categoryService.getCategoriesIds();
+        List<Integer> categoryIds = (searchFilter.getCategoryIds()== null || searchFilter.getCategoryIds().isEmpty()) ? categoryService.getCategoriesIds(): searchFilter.getCategoryIds();
         int from = searchFilter.getMinPrice();
         int to = searchFilter.getMaxPrice()==0 ? productDao.maxPrice() : searchFilter.getMaxPrice();
         String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
