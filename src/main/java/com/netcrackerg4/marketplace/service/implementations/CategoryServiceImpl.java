@@ -21,7 +21,6 @@ import java.util.UUID;
 public class CategoryServiceImpl implements ICategoryService {
     private final ICategoryDao categoryDao;
 
-
     @Override
     public String findNameById(int id) {
         return categoryDao.findNameById(id)
@@ -31,5 +30,11 @@ public class CategoryServiceImpl implements ICategoryService {
     @Override
     public List<CategoryEntity> getAll() {
         return categoryDao.getAll();
+    }
+
+    @Override
+    public String getCategoryNameByProductId(UUID productId) {
+        return (String) categoryDao.getCategoryNameByProductId(productId)
+            .orElseThrow(()-> new IllegalStateException(String.format("Category name for this product not found")));
     }
 }

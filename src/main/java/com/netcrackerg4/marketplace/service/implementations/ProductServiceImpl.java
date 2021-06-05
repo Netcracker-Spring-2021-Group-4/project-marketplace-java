@@ -145,10 +145,23 @@ public class ProductServiceImpl implements IProductService {
 
     }
 
-
-        @Override
+    @Override
     public Optional<ProductEntity> findProductById(UUID id) {
         return productDao.read(id);
+    }
+
+    @Override
+    public void activateDeactivateProduct(UUID productId) {
+        ProductEntity product = findProductById(productId)
+            .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
+        if(product.getIsActive()) {
+            product.setReserved(0);
+            productDao.activateDeactivateProduct(product);
+        }
+        else{
+            product.setAvailabilityDate(new Date());
+            productDao.activateDeactivateProduct(product);
+        }
     }
 
 

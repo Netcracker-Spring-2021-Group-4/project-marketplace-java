@@ -9,4 +9,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class CategoryQueries {
     private String findById;
     private String getAll;
+    private String findCategoryNameByProductId;
 }

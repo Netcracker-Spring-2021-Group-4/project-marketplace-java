@@ -3,6 +3,7 @@ package com.netcrackerg4.marketplace.controller;
 import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
+import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ManagerController {
     private final IProductService productService;
+    private final ICategoryService categoryService;
 
     @PostMapping
             (
@@ -63,5 +65,15 @@ public class ManagerController {
     @DeleteMapping("/products/discounts/{discountId}")
     void deleteDiscount(@PathVariable UUID discountId) {
         productService.removeDiscount(discountId);
+    }
+
+    @PatchMapping("/products/{productId}/activate-deactivate")
+    void activateDeactivateProduct(@PathVariable("productId") UUID productId){
+        productService.activateDeactivateProduct(productId);
+    }
+
+    @GetMapping("/categories/{productId}/category-name")
+    String getCategoryNameByProductId(@PathVariable("productId") UUID productId){
+        return  categoryService.getCategoryNameByProductId(productId);
     }
 }

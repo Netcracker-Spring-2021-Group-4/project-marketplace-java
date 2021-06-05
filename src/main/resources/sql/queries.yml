@@ -104,6 +104,10 @@ custom:
         SELECT product_category.category_id, product_category_name, count(product_id) as amount_of_products
         FROM product_category left outer join product p on product_category.category_id = p.category_id
         group by product_category.category_id;
+      activate-deactivate-product: >
+        UPDATE product
+        SET is_active = CASE WHEN is_active = true THEN false ELSE true END, availability_date = ?, reserved = ?
+        WHERE product_id = ?;
 
     discount:
       find-active-product-discount: >
@@ -181,3 +185,7 @@ custom:
       get-all: >
         SELECT category_id, product_category_name
         FROM product_category;
+      find-category-name-by-product-id: >
+                SELECT product_category_name
+                FROM product INNER JOIN product_category USING(category_id)
+                WHERE product_id = ?;
