@@ -8,4 +8,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "custom.postgres.category")
 public class CategoryQueries {
     private String findById;
+    private String findCategoryNameByProductId;
 }

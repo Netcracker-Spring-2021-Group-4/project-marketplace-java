@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.util.Optional;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Repository
@@ -23,12 +24,25 @@ public class CategoryDaoImpl extends JdbcDaoSupport implements ICategoryDao {
 
     @Override
     public Optional<String> findNameById(int id) {
-        assert getJdbcTemplate() != null;
-        Optional<String> categoryName;
+       Optional<String> categoryName;
         try {
             categoryName = Optional.ofNullable(
                     getJdbcTemplate().queryForObject(categoryQueries.getFindById(),
                             (rs, row) -> rs.getString("product_category_name"), id)
+            );
+        } catch (EmptyResultDataAccessException e ) {
+            categoryName = Optional.empty();
+        }
+        return categoryName;
+    }
+
+    @Override
+    public Optional<String> getCategoryNameByProductId(UUID productId) {
+        Optional<String> categoryName;
+        try {
+            categoryName = Optional.ofNullable(
+                getJdbcTemplate().queryForObject(categoryQueries.getFindCategoryNameByProductId(),
+                    (rs, row) -> rs.getString("product_category_name"), productId)
             );
         } catch (EmptyResultDataAccessException e ) {
             categoryName = Optional.empty();

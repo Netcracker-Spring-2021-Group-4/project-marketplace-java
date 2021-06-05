@@ -83,7 +83,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     @Override
     public List<ProductResponse> findAll() {
         assert getJdbcTemplate() != null;
-
         return getJdbcTemplate().query(productQueries.getActiveProductsWithDiscount(),
                new ProductResponse.ProductResponseMapper());
     }
@@ -143,8 +142,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public void activateDeactivateProduct(ProductEntity product) {
-        assert getJdbcTemplate() != null;
-        getJdbcTemplate().update(productQueries.getActivateDeactivateProduct(), product.getAvailabilityDate(), product.getProductId());
+        getJdbcTemplate().update(productQueries.getActivateDeactivateProduct(), product.getAvailabilityDate(), product.getReserved(), product.getProductId());
     }
-
 }

@@ -156,6 +156,7 @@ public class ProductServiceImpl implements IProductService {
         ProductEntity product = findProductById(productId)
             .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
         if(product.getIsActive()) {
+            product.setReserved(0);
             productDao.activateDeactivateProduct(product);
         }
         else{
