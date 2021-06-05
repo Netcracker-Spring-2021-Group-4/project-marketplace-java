@@ -127,14 +127,11 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public int findAllSize() {
-        assert getJdbcTemplate() != null;
         return getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(),Integer.class);
     }
 
     @Override
     public int findAllFilteredSize(String query, List<Integer> categories, int from, int to) {
-        assert getJdbcTemplate() != null;
-
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("category_ids", categories);
             addValue("minPrice", from);
@@ -151,7 +148,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
     @Override
     public Integer maxPrice() {
-        assert getJdbcTemplate() != null;
         return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
     }
 
