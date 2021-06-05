@@ -16,11 +16,6 @@ import java.util.UUID;
 public class ShoppingCartController {
     private final ICartService cartService;
 
-    @GetMapping("/product/{id}/availability")
-    public void checkInStockProduct(@PathVariable("id") UUID id, @RequestParam(name = "quantity") int quantity) {
-        cartService.checkAvailability(id, quantity);
-    }
-
     @PostMapping("/cart")
     public CartInfoResponse getMyCart(@Valid @RequestBody ValidList<CartItemDto> cartItems) {
         return cartService.getCartInfoNonAuthorized(cartItems);

@@ -4,13 +4,11 @@ import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface ICartService {
-    void addToCart(String email, CartItemDto item);
-    void addToCartIfPossible(String email, List<CartItemDto> items);
-    void removeFromCart(String email, CartItemDto item);
-    void checkAvailability(UUID id, int quantity);
+    boolean addToCart(String email, CartItemDto item);
+    void addToCartListIfPossible(String email, List<CartItemDto> items);
+    boolean removeFromCart(String email, CartItemDto item);
     CartInfoResponse getCartInfoAuthorized(String email);
     CartInfoResponse getCartInfoNonAuthorized(List<CartItemDto> cartItems);
     void makeCartReservation(List<CartItemDto> cartItems);

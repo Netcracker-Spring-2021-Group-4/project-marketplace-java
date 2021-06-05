@@ -21,22 +21,22 @@ public class AuthCustomerController {
     private final IUserService userService;
 
     @PostMapping("/add-to-cart")
-    public void addToCart(@Valid @RequestBody CartItemDto cartItemDto){
+    public boolean addToCart(@Valid @RequestBody CartItemDto cartItemDto){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        cartService.addToCart(email, cartItemDto);
+        return cartService.addToCart(email, cartItemDto);
     }
 
     @PostMapping("/add-to-cart-if-possible")
-    public void addToCart(@Valid @RequestBody ValidList<CartItemDto> cartItemDto, Authentication auth){
+    public void addToCartList(@Valid @RequestBody ValidList<CartItemDto> cartItemDto, Authentication auth){
         String email = auth.getName();
-        cartService.addToCartIfPossible(email, cartItemDto);
+        cartService.addToCartListIfPossible(email, cartItemDto);
     }
 
     @PostMapping("/remove-from-cart")
-    public void removeFromCart(@Valid @RequestBody CartItemDto cartItemDto, Authentication auth) {
+    public boolean removeFromCart(@Valid @RequestBody CartItemDto cartItemDto, Authentication auth) {
         String email = auth.getName();
-        cartService.removeFromCart(email, cartItemDto);
+        return cartService.removeFromCart(email, cartItemDto);
     }
 
     @PutMapping("/me/edit")
