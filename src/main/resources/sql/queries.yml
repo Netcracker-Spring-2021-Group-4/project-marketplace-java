@@ -106,7 +106,7 @@ custom:
         group by product_category.category_id;
       activate-deactivate-product: >
         UPDATE product
-        SET is_active = CASE WHEN is_active = true THEN false ELSE true END, availability_date = ?
+        SET is_active = CASE WHEN is_active = true THEN false ELSE true END, availability_date = ?, reserved = ?
         WHERE product_id = ?;
 
     discount:
@@ -175,3 +175,7 @@ custom:
         SELECT product_category_name
         FROM product_category
         WHERE category_id = ?;
+      find-category-name-by-product-id: >
+        SELECT product_category_name
+        FROM product INNER JOIN product_category USING(category_id)
+        WHERE product_id = ?;
