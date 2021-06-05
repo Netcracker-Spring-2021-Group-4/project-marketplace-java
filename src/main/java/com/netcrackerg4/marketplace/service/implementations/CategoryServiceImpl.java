@@ -1,14 +1,13 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
+import com.netcrackerg4.marketplace.model.response.FilterInfo;
 import com.netcrackerg4.marketplace.model.domain.CategoryEntity;
 import com.netcrackerg4.marketplace.repository.interfaces.ICategoryDao;
-import com.netcrackerg4.marketplace.repository.interfaces.IS3Dao;
 import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
-import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -26,6 +25,16 @@ public class CategoryServiceImpl implements ICategoryService {
     public String findNameById(int id) {
         return categoryDao.findNameById(id)
                 .orElseThrow(() -> new IllegalStateException(String.format("Category with id %d not found", id)));
+    }
+
+    @Override
+    public List<FilterInfo.CategoryResponse> categoriesWithAmountOfProduct() {
+        return categoryDao.findCategoriesWithAmountOfProducts();
+    }
+
+    @Override
+    public List<Integer> getCategoriesIds() {
+        return categoryDao.findCategoriesIds();
     }
 
     @Override

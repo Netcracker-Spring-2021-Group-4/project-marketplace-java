@@ -2,8 +2,8 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
-import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
+import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,16 +76,10 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         getJdbcTemplate().update(productQueries.getUpdateProductPicture(), url.toString(),key);
     }
 
-    @Override
-    public List<ProductResponse> findAll() {
 
-        return getJdbcTemplate().query(productQueries.getActiveProductsWithDiscount(),
-               new ProductResponse.ProductResponseMapper());
-    }
 
     @Override
     public List<ProductResponse> findAll(int p, int s) {
-
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {
             {
                 addValue("limit", s);
@@ -99,34 +93,64 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     }
 
-
-    public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, Double from, Double to, String sortBy, int pageSize, int pageN) {
+      public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageN, int pageSize) {
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("category_ids", categories);
             addValue("minPrice", from);
             addValue("maxPrice", to);
             addValue("name_query", "%" + query + "%");
-            addValue("sortOption",sortBy);
             addValue("limit", pageSize);
             addValue("offset", pageSize * pageN);
         }};
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
-        return namedParameterJdbcTemplate.query(productQueries.getProductsWithFilters(),
+        String sqlQuery;
+        switch (sortBy){
+            case PRICE_ASC:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByPriceAsc();
+                break;
+            case PRICE_DESC:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByPriceDesc();
+                break;
+            case NAME:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByName();
+                break;
+            default:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByDate();
+        }
+
+        return namedParameterJdbcTemplate. query(sqlQuery,
                 namedParams, new ProductResponse.ProductResponseMapper()
-        );    }
+        );
+    }
 
     @Override
-    public List<CategoryResponse> findCategories() {
-
-        return getJdbcTemplate().query(productQueries.getCategoriesWithAmountOfProduct(),
-                (rs,rowNum)-> CategoryResponse.builder()
-                        .categoryId(rs.getInt("category_id"))
-                        .productCategoryName(rs.getString("product_category_name"))
-                        .productsInCategory(rs.getInt("amount_of_products"))
-                        .build());
+    public int findAllSize() {
+        return getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(),Integer.class);
     }
+
+    @Override
+    public int findAllFilteredSize(String query, List<Integer> categories, int from, int to) {
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("category_ids", categories);
+            addValue("minPrice", from);
+            addValue("maxPrice", to);
+            addValue("name_query", "%" + query + "%");
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+
+        return namedParameterJdbcTemplate.queryForObject(productQueries.getActiveProductsFilteredSize(),
+                namedParams, Integer.class
+        );
+
+    }
+    @Override
+    public Integer maxPrice() {
+        return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
+    }
+
 
     @Override
     public void delete(UUID key) {

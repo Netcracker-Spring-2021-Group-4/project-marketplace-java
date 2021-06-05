@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.model.dto.product;
 
 
+import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import lombok.Data;
 import org.springframework.lang.Nullable;
 
@@ -12,16 +13,14 @@ import java.util.List;
 @Data
 public class ProductSearchFilter {
     @Nullable
-    private String sortOption;
-    @NotNull
+    private SortingOptions sortOption;
+    @Nullable
     private List<Integer> categoryIds;
     @Nullable
     @Size(min = 2)
     private String nameQuery;
-    @Nullable
     @Min(0)
-    private Double minPrice;
-    @Min(1)
-    @NotNull
-    private Double maxPrice;
+    private int minPrice;
+    @Min(0)
+    private int maxPrice;
 }

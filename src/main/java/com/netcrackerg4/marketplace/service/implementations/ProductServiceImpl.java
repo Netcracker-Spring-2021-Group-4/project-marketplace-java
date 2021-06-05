@@ -1,14 +1,17 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
+
 import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
-import com.netcrackerg4.marketplace.model.response.CategoryResponse;
+import com.netcrackerg4.marketplace.model.enums.SortingOptions;
+import com.netcrackerg4.marketplace.model.response.FilterInfo;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
+import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import com.netcrackerg4.marketplace.util.Page;
@@ -30,6 +33,7 @@ public class ProductServiceImpl implements IProductService {
 
     private final IProductDao productDao;
     private final IS3Service s3Service;
+    private final ICategoryService categoryService;
     private final IDiscountDao discountDao;
     private final DiscountEntity_Dao discountMapper;
 
@@ -84,20 +88,23 @@ public class ProductServiceImpl implements IProductService {
         productDao.updatePicture(id,url);
     }
 
-    @Override
-    public List<ProductResponse> getAll() {
-       return productDao.findAll();
-    }
 
-    @Override
-    public List<CategoryResponse> getCategories() {
-        return productDao.findCategories();
-    }
 
     @Override
     public Page<ProductResponse> findProducts(int page, int size) {
-        return new Page<>(productDao.findAll(page, size), getAll().size());
+        return new Page<>(productDao.findAll(page, size), productDao.findAllSize());
     }
+
+    @Override
+    public FilterInfo getFilterInfo() {
+
+        List<FilterInfo.CategoryResponse> categories = categoryService.categoriesWithAmountOfProduct();
+        int maxPrice=productDao.maxPrice();
+
+        return new FilterInfo(categories,maxPrice);
+    }
+
+
 
     @Override
     public Optional<DiscountEntity> findActiveProductDiscount(UUID productId) {
@@ -133,15 +140,20 @@ public class ProductServiceImpl implements IProductService {
         discountDao.delete(discountId);
     }
 
+    @Transactional
     @Override
     public Page<ProductResponse> findProducts(ProductSearchFilter searchFilter, int pageSize, int pageN) {
-        List<Integer> categoryIds = searchFilter.getCategoryIds() ;
-        Double from = searchFilter.getMinPrice() != null ? searchFilter.getMinPrice() : 0;
-        Double to = searchFilter.getMaxPrice() ;
+        if(searchFilter.getMinPrice()>searchFilter.getMaxPrice())
+            throw new IllegalStateException("MinPrice should be <= MaxPrice");
+
+        List<Integer> categoryIds = (searchFilter.getCategoryIds()== null || searchFilter.getCategoryIds().isEmpty()) ? categoryService.getCategoriesIds(): searchFilter.getCategoryIds();
+        int from = searchFilter.getMinPrice();
+        int to = searchFilter.getMaxPrice()==0 ? productDao.maxPrice() : searchFilter.getMaxPrice();
         String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
-        String sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():"product_name";
+        SortingOptions sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():SortingOptions.DATE;
         List<ProductResponse> content = productDao.findProductsWithFilters(query,categoryIds,from,to,sortOption,pageSize,pageN);
-        return new Page<>(content, content.size());
+        int size = productDao.findAllFilteredSize(query, categoryIds,from,to);
+        return new Page<>(content,size);
 
     }
 

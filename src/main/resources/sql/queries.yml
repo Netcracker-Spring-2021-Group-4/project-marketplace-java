@@ -67,22 +67,85 @@ custom:
         UPDATE product
         SET image_url = ?
         WHERE product_id = ?;
-      activeProductsWithDiscount: >
-          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-          availability_date,category_id,offered_price
-          FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
-          WHERE is_active=true
-          AND ((offered_price IS NULL)
-          OR ( starts_at>now() AND ends_at <now()));
+      activeProductsSize: >
+        SELECT COUNT(product_id)
+        FROM product
+        WHERE is_active=true
+      activeProductsFilteredSize: >
+        SELECT COUNT(product.product_id)
+              FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+              WHERE is_active=true
+              AND ((
+              offered_price IS NULL
+              AND price>=(:minPrice) AND price<=(:maxPrice)
+              )
+              OR ( starts_at<now() AND ends_at>now()
+              AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
+              )
+              AND product_name LIKE (:name_query)
+              AND category_id IN (:category_ids);
+      maxPrice: >
+        SELECT MAX(price)
+        FROM product
+        WHERE is_active=true;
       productsPage: >
          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
                availability_date,category_id,offered_price
                FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
                WHERE is_active=true
                AND ((offered_price IS NULL)
-               OR ( starts_at>now() AND ends_at <now()))
-                LIMIT (:limit) OFFSET (:offset);
-      productsWithFilters: >
+               OR ( starts_at<now() AND ends_at>now()))
+               LIMIT (:limit) OFFSET (:offset);
+
+      productsWithFiltersOrderByPriceAsc: >
+          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
+          availability_date,category_id,offered_price,
+          CASE
+          WHEN offered_price IS NULL THEN price
+          ELSE offered_price
+          END as newPrice
+          FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+          WHERE is_active=true
+          AND ((
+          offered_price IS NULL
+          AND price>=(:minPrice) AND price<=(:maxPrice)
+          )
+          OR ( starts_at<now() AND ends_at>now()
+          AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
+
+          )
+          AND product_name LIKE (:name_query)
+          AND category_id IN (:category_ids)
+          ORDER BY newPrice ASC
+          LIMIT (:limit) OFFSET (:offset);
+
+
+
+      productsWithFiltersOrderByPriceDesc: >
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
+               availability_date,category_id,offered_price,
+               CASE
+                   WHEN offered_price IS NULL THEN price
+                   ELSE offered_price
+               END as newPrice
+        FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+        WHERE is_active=true
+          AND ((
+                       offered_price IS NULL
+                       AND price>=(:minPrice) AND price<=(:maxPrice)
+                   )
+            OR ( starts_at<now() AND ends_at>now()
+                AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
+
+            )
+          AND product_name LIKE (:name_query)
+          AND category_id IN (:category_ids)
+        ORDER BY newPrice DESC
+        LIMIT (:limit) OFFSET (:offset);
+
+
+
+      productsWithFiltersOrderByName: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
                   availability_date,category_id,offered_price
                   FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
@@ -91,19 +154,37 @@ custom:
         			  offered_price IS NULL
         			  AND price>=(:minPrice) AND price<=(:maxPrice)
         			  )
-        				  OR ( starts_at>now() AND ends_at <now()
+        				  OR ( starts_at<now() AND ends_at>now()
         						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
 
         				  )
         		  AND product_name LIKE (:name_query)
         		  AND category_id IN (:category_ids)
-
-        		  ORDER BY (:sortOption)
+                  ORDER BY product_name
         		  LIMIT (:limit) OFFSET (:offset);
-      categoriesWithAmountOfProduct: >
-        SELECT product_category.category_id, product_category_name, count(product_id) as amount_of_products
-        FROM product_category left outer join product p on product_category.category_id = p.category_id
-        group by product_category.category_id;
+
+
+
+      productsWithFiltersOrderByDate: >
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
+                  availability_date,category_id,offered_price
+                  FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+                  WHERE is_active=true
+                  AND ((
+        			  offered_price IS NULL
+        			  AND price>=(:minPrice) AND price<=(:maxPrice)
+        			  )
+        				  OR ( starts_at<now() AND ends_at>now()
+        						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
+
+        				  )
+        		  AND product_name LIKE (:name_query)
+        		  AND category_id IN (:category_ids)
+                  ORDER BY availability_date
+        		  LIMIT (:limit) OFFSET (:offset);
+
+
+
 
     discount:
       find-active-product-discount: >
@@ -178,6 +259,12 @@ custom:
         SELECT product_category_name
         FROM product_category
         WHERE category_id = ?;
+      categoriesWithAmountOfProduct: >
+        SELECT product_category.category_id, product_category_name, count(product_id) as amount_of_products
+        FROM product_category left outer join product p on product_category.category_id = p.category_id
+        group by product_category.category_id;
+      categoriesIds: >
+        SELECT category_id FROM product_category;
       get-all: >
         SELECT category_id, product_category_name
         FROM product_category;
