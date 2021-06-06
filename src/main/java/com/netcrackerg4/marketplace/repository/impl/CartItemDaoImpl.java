@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.CartQueries;
-import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
+import com.netcrackerg4.marketplace.model.domain.product.CartItemEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +77,7 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
         List<CartItemDto> result;
 
         result = getJdbcTemplate().query(cartQueries.getFindAuthCustomerCartItems(),
-                (rs, row)-> CartItemDto.builder()
+                (rs, row) -> CartItemDto.builder()
                         .productId(UUID.fromString(rs.getString("product_id")))
                         .quantity(rs.getInt("quantity"))
                         .build(), id);
@@ -97,5 +97,11 @@ public class CartItemDaoImpl extends JdbcDaoSupport implements ICartItemDao {
         long lockId = productId.getMostSignificantBits();
         return getJdbcTemplate().update(cartQueries.getCancelReservation(),
                 lockId, quantity, productId);
+    }
+
+    @Override
+    public void resetCustomerCart(UUID customerId) {
+        assert getJdbcTemplate() != null;
+        getJdbcTemplate().update(cartQueries.getResetCart(), customerId);
     }
 }

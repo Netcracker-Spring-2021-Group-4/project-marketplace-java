@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.CartItemEntity;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.model.response.CartProductInfo;
@@ -83,7 +83,7 @@ public class CartServiceImpl implements ICartService {
         UUID productId = item.getProductId();
         int amountAvailable = getAmountAvailable(item.getProductId(), item.getQuantity());
 
-        UUID customerId = userService.findByEmail(email).getUserId();
+        UUID customerId = userService.findByEmail(email).orElseThrow(() -> new IllegalStateException("User with such email not found.")).getUserId();
         var existingCartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
         existingCartItem
                 .ifPresentOrElse(

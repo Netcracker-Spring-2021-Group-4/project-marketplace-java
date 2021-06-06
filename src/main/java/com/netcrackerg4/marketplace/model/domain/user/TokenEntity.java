@@ -1,4 +1,4 @@
-package com.netcrackerg4.marketplace.model.domain;
+package com.netcrackerg4.marketplace.model.domain.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
