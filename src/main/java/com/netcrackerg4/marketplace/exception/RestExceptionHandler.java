@@ -13,6 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
+import java.util.NoSuchElementException;
 
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
@@ -43,6 +44,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                         .message("Token already used")
                         .build();
         return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.EXPECTATION_FAILED, req);
+    }
+
+    @ExceptionHandler(value = {NoSuchElementException.class})
+    public ResponseEntity<?> handleEmptyOptional(NoSuchElementException e, WebRequest req) {
+        var body = ErrorBody.builder()
+                .message("The data needed to process your request is missing.")
+                .description("You are trying to access a resource that does not exist.")
+                .build();
+        return handleExceptionInternal(e, body, new HttpHeaders(), HttpStatus.NOT_ACCEPTABLE, req);
     }
 
     @Override
