@@ -11,4 +11,5 @@ public class OrderQueries {
     private String readStatusIds;
     private String findCourierOrders;
     private String findCustomerOrders;
+    private String countCourierOrdersNum;
 }

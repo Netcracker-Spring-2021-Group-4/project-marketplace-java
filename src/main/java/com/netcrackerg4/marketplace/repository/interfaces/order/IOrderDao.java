@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface IOrderDao extends AbstractCrudRepository<OrderEntity, UUID> {
-    List<OrderEntity> readCourierOrders(UUID courierId, List<OrderStatus> orderStatuses);
+    List<OrderEntity> readCourierOrders(UUID courierId, List<OrderStatus> orderStatuses, int pageSize, int pageNo);
+
+    int countCourierOrders(UUID courierId, List<OrderStatus> orderStatuses);
 
     List<OrderEntity> readCustomerOrders(UUID customerId, List<OrderStatus> orderStatuses);
 }

@@ -11,12 +11,14 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class OrderRequest {
+    @NotNull
     @Pattern(regexp = ValidationConstants.PHONE_PATTERN, message = ValidationDefaultMessage.WRONG_FORMAT_PHONE_NUMBER)
     private String phoneNumber;
+    @NotNull
     @Future(message = "address must be specified to be in future")
     private LocalDateTime deliverySlot;
     @NotNull
@@ -25,5 +27,5 @@ public class OrderRequest {
     private String comment;
     @Valid
     @NotEmpty(message = "no order without products possible")
-    private List<OrderItemRequest> products;
+    private Set<OrderItemRequest> products;
 }

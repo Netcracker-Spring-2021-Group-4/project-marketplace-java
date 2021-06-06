@@ -10,6 +10,7 @@ import java.util.UUID;
 public class OrderItemRequest {
     @NotNull(message = "product must be specified")
     private UUID productId;
+    @NotNull
     @Min(value = 1, message = "quantity of a product must be > 0")
     private int quantity;
 }

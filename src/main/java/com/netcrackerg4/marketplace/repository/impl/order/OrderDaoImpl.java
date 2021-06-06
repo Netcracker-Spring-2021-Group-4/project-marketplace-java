@@ -3,6 +3,7 @@ package com.netcrackerg4.marketplace.repository.impl.order;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.netcrackerg4.marketplace.config.postgres_queries.order.OrderQueries;
+import com.netcrackerg4.marketplace.exception.BadCodeError;
 import com.netcrackerg4.marketplace.model.domain.AddressEntity;
 import com.netcrackerg4.marketplace.model.domain.order.OrderEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
@@ -90,15 +91,34 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
         throw new UnsupportedOperationException();
     }
 
-    // todo: think of a better way to handle empty results
     @Override
-    public List<OrderEntity> readCourierOrders(UUID courierId, List<OrderStatus> orderStatuses) {
+    public List<OrderEntity> readCourierOrders(UUID courierId, List<OrderStatus> orderStatuses, int pageSize, int pageNo) {
         List<Integer> statusIds = orderStatuses.stream().map(orderStatusIds::get).collect(Collectors.toList());
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("courier_id", courierId);
             addValue("prod_status_ids", statusIds);
+            addValue("limit", pageSize);
+            addValue("offset", pageSize * pageNo);
         }};
         return doReadOrders(orderQueries.getFindCourierOrders(), namedParams);
+    }
+
+    @Override
+    public int countCourierOrders(UUID courierId, List<OrderStatus> orderStatuses) {
+        try {
+            List<Integer> statusIds = orderStatuses.stream().map(orderStatusIds::get).collect(Collectors.toList());
+
+            MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+                addValue("courier_id", courierId);
+                addValue("prod_status_ids", statusIds);
+            }};
+            Integer maybeOrdersNum = new NamedParameterJdbcTemplate(getJdbcTemplate())
+                    .queryForObject(orderQueries.getCountCourierOrdersNum(), namedParams, Integer.class);
+            if (maybeOrdersNum != null) return maybeOrdersNum;
+            else throw new BadCodeError("'null' orders assigned to a courier");
+        } catch (EmptyResultDataAccessException e) {
+            throw new IllegalStateException("error counting number of courier's orders", e);
+        }
     }
 
     @Override

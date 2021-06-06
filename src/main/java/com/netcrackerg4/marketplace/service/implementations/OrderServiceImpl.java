@@ -22,11 +22,13 @@ import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
+import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
 import com.netcrackerg4.marketplace.util.mappers.OrderItemMapper;
 import com.netcrackerg4.marketplace.util.mappers.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Service
 public class OrderServiceImpl implements IOrderService {
+    @Value("${custom.pagination.courier-orders}")
+    private final int COURIER_ORDERS;
+
     private final IDeliverySlotDao deliverySlotDao;
     private final IUserDao userDao;
     private final IOrderDao orderDao;
@@ -65,11 +70,9 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     public synchronized void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer) {
 
-        TimeslotEntity[] timeslotArr = deliverySlotDao.readTimeslotOptions().stream()
+        TimeslotEntity timeslot = deliverySlotDao.readTimeslotOptions().stream()
                 .filter(slot -> slot.getTimeStart().toLocalTime().equals(orderRequest.getDeliverySlot().toLocalTime()))
-                .toArray(TimeslotEntity[]::new);
-        if (timeslotArr.length != 1) throw new IllegalStateException("Illegal timeslot selected");
-        TimeslotEntity timeslot = timeslotArr[0];
+                .findFirst().orElseThrow(() -> new IllegalStateException("Illegal timeslot selected"));
 
         Map<UUID, ProductEntity> loadedProducts = handleStocks(orderRequest.getProducts());
 
@@ -125,7 +128,7 @@ public class OrderServiceImpl implements IOrderService {
         mailService.notifyCourierGotDelivery(deliverySlot.getCourier().getEmail(), deliveryDetails);
     }
 
-    private Map<UUID, ProductEntity> handleStocks(List<OrderItemRequest> orderItems) {
+    private Map<UUID, ProductEntity> handleStocks(Collection<OrderItemRequest> orderItems) {
         Map<UUID, ProductEntity> productEntityMap = new HashMap<>(orderItems.size());
         for (OrderItemRequest item : orderItems) {
             ProductEntity product = productDao.read(item.getProductId()).orElseThrow();
@@ -151,8 +154,8 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public List<OrderResponse> getCourierOrders(UUID courierId) {
-        List<OrderEntity> orders = orderDao.readCourierOrders(courierId, List.of(OrderStatus.SUBMITTED));
+    public EagerContentPage<OrderResponse> getCourierOrders(UUID courierId, List<OrderStatus> targetOrderStatuses, int page) {
+        List<OrderEntity> orders = orderDao.readCourierOrders(courierId, targetOrderStatuses, COURIER_ORDERS, page);
         List<OrderResponse> orderDetailsItems = orders.stream().map(order -> {
             OrderResponse orderDetails = new OrderResponse();
             BeanUtils.copyProperties(order, orderDetails);
@@ -163,6 +166,8 @@ public class OrderServiceImpl implements IOrderService {
             orderDetails.setOrderItems(order.getOrderItems().stream().map(OrderItemMapper::entityToResponse).collect(Collectors.toList()));
             return orderDetails;
         }).collect(Collectors.toList());
-        return orderDetailsItems;
+        int totalNumOrders = orderDao.countCourierOrders(courierId, targetOrderStatuses);
+        int numPages = (int) Math.ceil((double) totalNumOrders / COURIER_ORDERS);
+        return new EagerContentPage<>(orderDetailsItems, numPages, COURIER_ORDERS);
     }
 }
