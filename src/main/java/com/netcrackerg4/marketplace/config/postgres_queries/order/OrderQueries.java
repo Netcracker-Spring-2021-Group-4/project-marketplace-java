@@ -12,4 +12,5 @@ public class OrderQueries {
     private String findCourierOrders;
     private String findCustomerOrders;
     private String countCourierOrdersNum;
+    private String countCustomerOrdersNum;
 }

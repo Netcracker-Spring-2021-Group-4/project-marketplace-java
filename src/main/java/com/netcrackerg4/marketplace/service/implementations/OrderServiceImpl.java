@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -68,28 +69,27 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     @Transactional
+    // fixme: synchronized is temporary
     public synchronized void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer) {
-
         TimeslotEntity timeslot = deliverySlotDao.readTimeslotOptions().stream()
                 .filter(slot -> slot.getTimeStart().toLocalTime().equals(orderRequest.getDeliverySlot().toLocalTime()))
                 .findFirst().orElseThrow(() -> new IllegalStateException("Illegal timeslot selected"));
+        if (!deliverySlotDao.deliverySlotIsFree(Date.valueOf(orderRequest.getDeliverySlot().toLocalDate()),
+                Time.valueOf(orderRequest.getDeliverySlot().toLocalTime())))
+            throw new IllegalStateException("This timeslot is already taken");
 
         Map<UUID, ProductEntity> loadedProducts = handleStocks(orderRequest.getProducts());
 
         OrderEntity orderEntity = new OrderEntity();
+        BeanUtils.copyProperties(orderRequest, orderEntity);
         orderEntity.setOrderId(UUID.randomUUID());
         orderEntity.setPlacedAt(Timestamp.from(Instant.now()));
-        orderEntity.setPhoneNumber(orderRequest.getPhoneNumber());
-        orderEntity.setComment(orderRequest.getComment());
         orderEntity.setStatus(OrderStatus.SUBMITTED);
 
         AddressEntity address = new AddressEntity();
         BeanUtils.copyProperties(orderRequest.getAddress(), address);
         address.setAddressId(UUID.randomUUID());
-        if (maybeCustomer != null) {
-            address.setCustomerId(maybeCustomer.getUserId());
-            orderEntity.setCustomer(maybeCustomer);
-        }
+        if (maybeCustomer != null) orderEntity.setCustomer(maybeCustomer);
 
         addressDao.create(address);
         orderEntity.setAddress(address);
@@ -114,17 +114,15 @@ public class OrderServiceImpl implements IOrderService {
                 .build();
         deliverySlotDao.create(deliverySlot);
 
-        DeliveryDetails deliveryDetails = DeliveryDetails.builder()
-                .orderItems(orderEntity.getOrderItems())
-                .datestamp(orderRequest.getDeliverySlot().toLocalDate())
-                .timeStart(deliverySlot.getTimeslotEntity().getTimeStart().toLocalTime())
-                .timeEnd(deliverySlot.getTimeslotEntity().getTimeEnd().toLocalTime())
-                .address(orderRequest.getAddress())
-                .phoneNumber(orderEntity.getPhoneNumber())
-                .comment(orderEntity.getComment())
-                .customerFirstName(maybeCustomer != null ? maybeCustomer.getFirstName() : null)
-                .customerLastName(maybeCustomer != null ? maybeCustomer.getLastName() : null)
-                .build();
+        DeliveryDetails deliveryDetails = new DeliveryDetails();
+        BeanUtils.copyProperties(orderRequest, deliveryDetails);
+        deliveryDetails.setDatestamp(orderRequest.getDeliverySlot().toLocalDate());
+        deliveryDetails.setTimeStart(deliverySlot.getTimeslotEntity().getTimeStart().toLocalTime());
+        deliveryDetails.setTimeEnd(deliverySlot.getTimeslotEntity().getTimeEnd().toLocalTime());
+        deliveryDetails.setCustomerFirstName(maybeCustomer != null ? maybeCustomer.getFirstName() : orderEntity.getFirstName());
+        deliveryDetails.setCustomerLastName(maybeCustomer != null ? maybeCustomer.getLastName() : orderEntity.getLastName());
+        deliveryDetails.setOrderItems(orderEntity.getOrderItems());
+
         mailService.notifyCourierGotDelivery(deliverySlot.getCourier().getEmail(), deliveryDetails);
     }
 

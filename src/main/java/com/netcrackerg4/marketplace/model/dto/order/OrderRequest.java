@@ -3,6 +3,7 @@ package com.netcrackerg4.marketplace.model.dto.order;
 import com.netcrackerg4.marketplace.constants.ValidationConstants;
 import com.netcrackerg4.marketplace.constants.ValidationDefaultMessage;
 import lombok.Data;
+import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.lang.Nullable;
 
 import javax.validation.Valid;
@@ -11,7 +12,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Data
 public class OrderRequest {
@@ -24,8 +25,13 @@ public class OrderRequest {
     @NotNull
     private AddressDto address;
     @Nullable
+    private String firstName;
+    @Nullable
+    private String lastName;
+    @Nullable
     private String comment;
     @Valid
+    @UniqueElements
     @NotEmpty(message = "no order without products possible")
-    private Set<OrderItemRequest> products;
+    private List<OrderItemRequest> products;
 }

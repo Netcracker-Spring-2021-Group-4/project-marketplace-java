@@ -22,6 +22,10 @@ public class OrderEntity {
     private Timestamp placedAt;
     private String phoneNumber;
     @Nullable
+    private String firstName;
+    @Nullable
+    private String lastName;
+    @Nullable
     private String comment;
     private OrderStatus status;
     private AddressEntity address;

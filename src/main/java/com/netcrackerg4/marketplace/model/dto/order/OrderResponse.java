@@ -17,6 +17,10 @@ public class OrderResponse {
     private String phoneNumber;
     @Nullable
     private String comment;
+    @Nullable
+    private String firstName;
+    @Nullable
+    private String lastName;
     private OrderStatus status;
     private AddressDto address;
     @Nullable

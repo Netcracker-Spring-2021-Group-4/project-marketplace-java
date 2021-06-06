@@ -36,9 +36,10 @@ public class OrderController {
     @PostMapping
     void makeOrder(@RequestBody @Valid OrderRequest orderRequest, Principal principal) {
         AppUserEntity customer = null;
-        if (principal != null) {
+        if (principal != null)
             customer = userService.findByEmail(principal.getName()).orElse(null);
-        }
+        else if (orderRequest.getFirstName() == null || orderRequest.getLastName() == null)
+            throw new IllegalStateException("Customer must either be authenticated or provide his name.");
         orderService.makeOrder(orderRequest, customer);
     }
 

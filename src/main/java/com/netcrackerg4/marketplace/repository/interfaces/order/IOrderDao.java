@@ -12,5 +12,8 @@ public interface IOrderDao extends AbstractCrudRepository<OrderEntity, UUID> {
 
     int countCourierOrders(UUID courierId, List<OrderStatus> orderStatuses);
 
-    List<OrderEntity> readCustomerOrders(UUID customerId, List<OrderStatus> orderStatuses);
+    List<OrderEntity> readCustomerOrders(UUID customerId, List<OrderStatus> orderStatuses, int pageSize, int pageNo);
+
+    int countCustomerOrders(UUID customerId, List<OrderStatus> orderStatuses);
+
 }

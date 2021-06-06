@@ -17,4 +17,10 @@ public class AddressDto {
     private String building;
     @Nullable
     private Integer flat;
+
+    @Override
+    public String toString() {
+        return String.format("City: %s, street: %s, building: %s", city, street, building)
+                + (flat != null ? String.format(" flat: %d.", flat) : '.');
+    }
 }
