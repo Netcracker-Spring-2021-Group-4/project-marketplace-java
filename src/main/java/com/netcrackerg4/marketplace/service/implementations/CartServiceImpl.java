@@ -60,11 +60,28 @@ public class CartServiceImpl implements ICartService {
                 });
     }
 
+    @Transactional
     @Override
-    public CartInfoResponse getCartInfoAuthorized(String email) {
-        UUID userId = userService.findByEmail(email).getUserId();
-        List<CartItemDto> cartItems = cartItemDao.getAuthCustomerCartItems(userId);
-        return getCartInfoResponse(cartItems);
+    public void removeFromCart(String email, CartItemDto item) {
+        UUID productId = item.getProductId();
+        int quantityToRemove = item.getQuantity();
+        UUID customerId = userService.findByEmail(email).orElseThrow().getUserId();
+        CartItemEntity cartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId)
+                .orElseThrow(() -> {
+                    throw new IllegalStateException(
+                            String.format("There is no product with id %s in your cart", productId)
+                    );
+                });
+        UUID cartItemId = cartItem.getCartItemId();
+        int quantityInCart = cartItem.getQuantity();
+        int quantityLeft = quantityInCart - quantityToRemove;
+        if (quantityLeft > 0) {
+            getAmountAvailable(productId, quantityLeft);
+            cartItemDao.changeQuantityById(quantityLeft, cartItemId);
+        } else if (quantityLeft == 0) cartItemDao.removeFromCart(cartItemId);
+        else throw new IllegalStateException(
+                    String.format("You have %d items of that product in cart.\nYou cannot change the quantity to %d",
+                            quantityInCart, quantityLeft));
     }
 
     @Override
@@ -110,28 +127,11 @@ public class CartServiceImpl implements ICartService {
                 );
     }
 
-    @Transactional
     @Override
-    public void removeFromCart(String email, CartItemDto item) {
-        UUID productId = item.getProductId();
-        int quantityToRemove = item.getQuantity();
-        UUID customerId = userService.findByEmail(email).getUserId();
-        CartItemEntity cartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId)
-                .orElseThrow(() -> {
-                    throw new IllegalStateException(
-                            String.format("There is no product with id %s in your cart", productId)
-                    );});
-        UUID cartItemId = cartItem.getCartItemId();
-        int quantityInCart = cartItem.getQuantity();
-        int quantityLeft = quantityInCart - quantityToRemove;
-        if(quantityLeft > 0) {
-            getAmountAvailable(productId, quantityLeft);
-            cartItemDao.changeQuantityById(quantityLeft, cartItemId);
-        }
-        else if (quantityLeft == 0) cartItemDao.removeFromCart(cartItemId);
-        else throw new IllegalStateException(
-                String.format("You have %d items of that product in cart.\nYou cannot change the quantity to %d",
-                        quantityInCart, quantityLeft));
+    public CartInfoResponse getCartInfoAuthorized(String email) {
+        UUID userId = userService.findByEmail(email).orElseThrow().getUserId();
+        List<CartItemDto> cartItems = cartItemDao.getAuthCustomerCartItems(userId);
+        return getCartInfoResponse(cartItems);
     }
 
     private CartInfoResponse getCartInfoResponse(List<CartItemDto> cartItems) {

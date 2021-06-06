@@ -1,8 +1,6 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 
-import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;

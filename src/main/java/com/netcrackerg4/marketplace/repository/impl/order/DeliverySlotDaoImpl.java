@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
+@DependsOn("flywayInitializer")
 public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlotDao {
     private final DeliverySlotQueries deliverySlotQueries;
     private Set<TimeslotEntity> timeslots;
