@@ -16,7 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,28 +75,57 @@ public class CartServiceImpl implements ICartService {
         return getCartInfoResponse(cartItems);
     }
 
+    @Transactional
     @Override
-    public void checkAvailability(UUID id, int quantity) {
-        getAmountAvailable(id,quantity);
+    public void addToCartListIfPossible(String email, List<CartItemDto> items) {
+        items.forEach(item -> {
+            UUID productId = item.getProductId();
+            var available = getAmountAvailableWithoutThrow(productId);
+            if(available <= 0) return;
+            var addingToCartQuantity = Math.min(item.getQuantity(), available);
+            UUID customerId = userService.findByEmail(email).getUserId();
+            cartItemDao
+                .getCartItemByProductAndCustomer(customerId, productId)
+                .ifPresentOrElse(
+                    cartItemEntity -> {
+                        UUID id = cartItemEntity.getCartItemId();
+                        int addingQuantity = Math.min(available,
+                                addingToCartQuantity + cartItemEntity.getQuantity());
+                        cartItemDao.changeQuantityById(addingQuantity, id);
+                    },
+                    () -> {
+                        CartItemEntity cartItemEntity =
+                            CartItemEntity.builder()
+                                .cartItemId(UUID.randomUUID())
+                                .customerId(customerId)
+                                .productId(productId)
+                                .quantity(addingToCartQuantity)
+                                .timestampAdded(new Timestamp(System.currentTimeMillis()))
+                                .build();
+
+                        cartItemDao.addToCart(cartItemEntity);
+                    }
+                );
+        });
     }
 
     @Transactional
     @Override
-    public void addToCart(String email, CartItemDto item) {
+    public boolean addToCart(String email, CartItemDto item) {
         UUID productId = item.getProductId();
-        int amountAvailable = getAmountAvailable(item.getProductId(), item.getQuantity());
-
+        int amountAvailable = getAmountAvailableWithoutThrow(item.getProductId());
+        if(amountAvailable <= 0) return false;
         UUID customerId = userService.findByEmail(email).getUserId();
         var existingCartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
+        AtomicBoolean success = new AtomicBoolean(true);
         existingCartItem
                 .ifPresentOrElse(
                     cartItemEntity -> {
                         UUID id = cartItemEntity.getCartItemId();
                         int addingQuantity = cartItemEntity.getQuantity() + item.getQuantity();
-                        if(amountAvailable < addingQuantity)
-                            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
-                        else
-                            cartItemDao.changeQuantityById(addingQuantity, id);
+                        int newQuantity = Math.min(addingQuantity, amountAvailable);
+                        if(addingQuantity > amountAvailable) success.set(false);
+                        cartItemDao.changeQuantityById(newQuantity, id);
                     },
                     () -> {
                         CartItemEntity cartItemEntity =
@@ -108,35 +140,34 @@ public class CartServiceImpl implements ICartService {
                         cartItemDao.addToCart(cartItemEntity);
                     }
                 );
+        return success.get();
     }
 
     @Transactional
     @Override
-    public void removeFromCart(String email, CartItemDto item) {
+    public boolean removeFromCart(String email, CartItemDto item) {
         UUID productId = item.getProductId();
         int quantityToRemove = item.getQuantity();
         UUID customerId = userService.findByEmail(email).getUserId();
-        CartItemEntity cartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId)
-                .orElseThrow(() -> {
-                    throw new IllegalStateException(
-                            String.format("There is no product with id %s in your cart", productId)
-                    );});
+        var cartItemEntityOptional =
+                cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
+        if(cartItemEntityOptional.isEmpty()) return false;
+        var cartItem = cartItemEntityOptional.get();
         UUID cartItemId = cartItem.getCartItemId();
         int quantityInCart = cartItem.getQuantity();
         int quantityLeft = quantityInCart - quantityToRemove;
         if(quantityLeft > 0) {
-            getAmountAvailable(productId, quantityLeft);
-            cartItemDao.changeQuantityById(quantityLeft, cartItemId);
+            int amountAvailable = getAmountAvailableWithoutThrow(productId);
+            int quantity = Math.min(quantityLeft, amountAvailable);
+            cartItemDao.changeQuantityById(quantity, cartItemId);
         }
-        else if (quantityLeft == 0) cartItemDao.removeFromCart(cartItemId);
-        else throw new IllegalStateException(
-                String.format("You have %d items of that product in cart.\nYou cannot change the quantity to %d",
-                        quantityInCart, quantityLeft));
+        else cartItemDao.removeFromCart(cartItemId);
+        return true;
     }
 
     private CartInfoResponse getCartInfoResponse(List<CartItemDto> cartItems) {
         List<CartProductInfo> productInfos = cartItems.stream()
-                .map(this::CartProductInfoMapper).collect(Collectors.toList());
+                .map(this::cartProductInfoMapper).filter(Objects::nonNull).collect(Collectors.toList());
         int summaryPrice = productInfos.stream().mapToInt(CartProductInfo::getTotalPrice).sum();
         int summaryPriceWithoutDiscount = productInfos.stream().mapToInt(CartProductInfo::getTotalPriceWithoutDiscount).sum();
 
@@ -147,10 +178,12 @@ public class CartServiceImpl implements ICartService {
                 .build();
     }
 
-    private CartProductInfo CartProductInfoMapper(CartItemDto cartItem) {
+    private CartProductInfo cartProductInfoMapper(CartItemDto cartItem) {
         UUID productId = cartItem.getProductId();
         int quantity = cartItem.getQuantity();
-        getAmountAvailable(productId, quantity);
+        int amountAvailable = getAmountAvailableWithoutThrow(productId);
+        if (amountAvailable <= 0) return null;
+        int finalQuantity = Math.min(quantity, amountAvailable);
         var product = productService.findProductById(productId).get();
         var categoryName = categoryService.findNameById(product.getCategoryId());
         var productInfo =
@@ -160,9 +193,9 @@ public class CartServiceImpl implements ICartService {
                         .description(product.getDescription())
                         .imageUrl(product.getImageUrl())
                         .price(product.getPrice())
-                        .quantity(quantity)
+                        .quantity(finalQuantity)
                         .category(categoryName);
-        int totalPriceWithoutDiscount = product.getPrice() * quantity;
+        int totalPriceWithoutDiscount = product.getPrice() * finalQuantity;
         productInfo.totalPriceWithoutDiscount(totalPriceWithoutDiscount);
         productService.findActiveProductDiscount(cartItem.getProductId()).ifPresentOrElse(
                 discount -> {
@@ -178,18 +211,14 @@ public class CartServiceImpl implements ICartService {
         return productInfo.build();
     }
 
-    private int getAmountAvailable(UUID id, int quantity) {
-        ProductEntity product = checkForExistenceAndReturn(id);
-        checkIfProductIsActive(product);
-        return getAmountAvailable(product, quantity);
-    }
-
-    private int getAmountAvailable(ProductEntity product, int quantity) {
-        int amountAvailable = product.getInStock() - product.getReserved();
-        if (amountAvailable < quantity) {
-            throw new IllegalStateException(String.format(NOT_SO_MUCH_IN_STOCK, amountAvailable));
-        }
-        return amountAvailable;
+    private int getAmountAvailableWithoutThrow(UUID id) {
+        AtomicInteger result = new AtomicInteger();
+        productService
+            .findProductById(id)
+            .ifPresent(product -> {
+                if(product.getIsActive()) result.set(product.getInStock() - product.getReserved());
+            });
+        return result.get();
     }
 
     private ProductEntity checkForExistenceAndReturn(UUID id) {
@@ -204,10 +233,5 @@ public class CartServiceImpl implements ICartService {
         if(!product.getIsActive())
             throw new IllegalStateException(String.format("Product with id %s is not available now",
                     product.getProductId()));
-    }
-
-    private boolean checkAmountAvailable(ProductEntity product, int quantity) {
-        int amountAvailable = product.getInStock() - product.getReserved();
-        return amountAvailable >= quantity;
     }
 }
