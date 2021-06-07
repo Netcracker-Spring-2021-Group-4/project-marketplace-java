@@ -8,7 +8,6 @@ import com.netcrackerg4.marketplace.model.domain.AddressEntity;
 import com.netcrackerg4.marketplace.model.domain.order.OrderEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
-import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
     private final OrderQueries orderQueries;
     private BiMap<OrderStatus, Integer> orderStatusIds;
-    private final ICartItemDao cartItemDao;
     private final IAddressDao addressDao;
     private final IUserDao userDao;
     private final IOrderItemDao orderItemDao;
@@ -56,8 +54,6 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
                 item.getPhoneNumber(), item.getComment(), item.getFirstName(), item.getLastName(),
                 orderStatusIds.get(item.getStatus()), item.getAddress().getAddressId(),
                 item.getCustomer() != null ? item.getCustomer().getUserId() : null);
-        if (item.getCustomer() != null)
-            cartItemDao.resetCustomerCart(item.getCustomer().getUserId());
         orderItemDao.createItemsOfOrder(item.getOrderItems());
     }
 

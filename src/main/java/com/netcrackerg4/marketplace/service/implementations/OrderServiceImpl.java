@@ -14,14 +14,16 @@ import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
+import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
+import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
-import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
+import com.netcrackerg4.marketplace.util.AdvLockUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
 import com.netcrackerg4.marketplace.util.mappers.OrderItemMapper;
@@ -48,12 +50,13 @@ public class OrderServiceImpl implements IOrderService {
     private final int COURIER_ORDERS;
 
     private final IDeliverySlotDao deliverySlotDao;
-    private final IUserDao userDao;
+    private final ICartItemDao cartItemDao;
     private final IOrderDao orderDao;
     private final IProductDao productDao;
     private final IDiscountDao discountDao;
     private final IAddressDao addressDao;
     private final IMailService mailService;
+    private final IAdvLockUtil advLockUtil;
 
     @Override
     public List<StatusTimestampDto> getDayTimeslots(LocalDate date) {
@@ -70,10 +73,12 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     // fixme: synchronized is temporary
-    public synchronized void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer) {
+    public void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer) {
         TimeslotEntity timeslot = deliverySlotDao.readTimeslotOptions().stream()
                 .filter(slot -> slot.getTimeStart().toLocalTime().equals(orderRequest.getDeliverySlot().toLocalTime()))
                 .findFirst().orElseThrow(() -> new IllegalStateException("Illegal timeslot selected"));
+        advLockUtil.requestTransactionLock(AdvLockUtil.toLong(orderRequest.getDeliverySlot().toLocalDate().hashCode(),
+                orderRequest.getDeliverySlot().toLocalTime().hashCode()));
         if (!deliverySlotDao.deliverySlotIsFree(Date.valueOf(orderRequest.getDeliverySlot().toLocalDate()),
                 Time.valueOf(orderRequest.getDeliverySlot().toLocalTime())))
             throw new IllegalStateException("This timeslot is already taken");
@@ -104,6 +109,7 @@ public class OrderServiceImpl implements IOrderService {
                         .build())
                 .collect(Collectors.toList()));
         orderDao.create(orderEntity);
+        if (maybeCustomer != null) cartItemDao.resetCustomerCart(maybeCustomer.getUserId());
 
         DeliverySlotEntity deliverySlot = DeliverySlotEntity.builder()
                 .deliverySlotId(UUID.randomUUID())
@@ -129,6 +135,7 @@ public class OrderServiceImpl implements IOrderService {
     private Map<UUID, ProductEntity> handleStocks(Collection<OrderItemRequest> orderItems) {
         Map<UUID, ProductEntity> productEntityMap = new HashMap<>(orderItems.size());
         for (OrderItemRequest item : orderItems) {
+            advLockUtil.requestTransactionLock(item.getProductId().getMostSignificantBits());
             ProductEntity product = productDao.read(item.getProductId()).orElseThrow();
             productEntityMap.put(product.getProductId(), product);
             if (product.getReserved() < item.getQuantity())

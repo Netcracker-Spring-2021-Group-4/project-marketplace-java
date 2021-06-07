@@ -20,7 +20,8 @@ import org.springframework.context.annotation.Configuration;
         DeliverySlotQueries.class,
         OrderQueries.class,
         AddressQueries.class,
-        OrderItemQueries.class
+        OrderItemQueries.class,
+        AdvLockQueries.class
 })
 public class DbQueryConfig {
     @Autowired
