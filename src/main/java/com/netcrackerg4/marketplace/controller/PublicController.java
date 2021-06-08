@@ -56,4 +56,9 @@ public class PublicController {
     Optional<DiscountEntity> getActiveDiscount(@PathVariable UUID productId){
       return productService.findActiveProductDiscount(productId);
     }
+
+    @GetMapping("/categories/{productId}/category-name")
+    String getCategoryNameByProductId(@PathVariable("productId") UUID productId){
+      return  categoryService.getCategoryNameByProductId(productId);
+    }
 }

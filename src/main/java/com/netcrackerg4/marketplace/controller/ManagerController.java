@@ -72,8 +72,5 @@ public class ManagerController {
         productService.activateDeactivateProduct(productId);
     }
 
-    @GetMapping("/categories/{productId}/category-name")
-    String getCategoryNameByProductId(@PathVariable("productId") UUID productId){
-        return  categoryService.getCategoryNameByProductId(productId);
-    }
+
 }
