@@ -16,5 +16,4 @@ public class ProductQueries {
     private String productsWithFilters;
     private String productsPage;
     private String activateDeactivateProduct;
-    private String maxPrice;
 }
