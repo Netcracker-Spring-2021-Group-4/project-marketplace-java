@@ -1,8 +1,9 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.order.OrderQueries;
-import com.netcrackerg4.marketplace.model.response.CourierOrderResponse;
+import com.netcrackerg4.marketplace.model.response.CourierDeliveryResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.ICourierDao;
+import com.netcrackerg4.marketplace.repository.mapper.CourierDeliveryMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
@@ -24,7 +25,7 @@ public class CourierDaoImpl extends JdbcDaoSupport implements ICourierDao {
     }
 
     @Override
-    public List<CourierOrderResponse> getCourierSlots(UUID id, LocalDate date) {
+    public List<CourierDeliveryResponse> getCourierSlots(UUID id, LocalDate date) {
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("courier_id", id);
@@ -32,6 +33,6 @@ public class CourierDaoImpl extends JdbcDaoSupport implements ICourierDao {
         }};
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
-        return namedParameterJdbcTemplate.query(orderQueries.getCourierOrders(),namedParams, new CourierOrderResponse.OrderResponseMapper());
+        return namedParameterJdbcTemplate.query(orderQueries.getCourierOrders(),namedParams, new CourierDeliveryMapper());
     }
 }

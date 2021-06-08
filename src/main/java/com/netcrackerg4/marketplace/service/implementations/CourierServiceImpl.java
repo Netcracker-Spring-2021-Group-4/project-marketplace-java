@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.response.CourierOrderResponse;
+import com.netcrackerg4.marketplace.model.response.CourierDeliveryResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.ICourierDao;
 import com.netcrackerg4.marketplace.service.interfaces.ICourierService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
@@ -18,7 +18,7 @@ public class CourierServiceImpl implements ICourierService {
     private final ICourierDao courierDao;
 
     @Override
-    public List<CourierOrderResponse> getDayTimeslots(LocalDate date, String email) {
+    public List<CourierDeliveryResponse> getDayTimeslots(LocalDate date, String email) {
 
         UUID courierId = userService.findByEmail(email).orElseThrow().getUserId();
         return courierDao.getCourierSlots(courierId,date);
