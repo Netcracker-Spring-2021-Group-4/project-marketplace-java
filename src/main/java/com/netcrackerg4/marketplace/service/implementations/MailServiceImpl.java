@@ -1,6 +1,8 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.exception.BadCodeError;
+import com.netcrackerg4.marketplace.model.domain.order.OrderItemEntity;
+import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
 import com.netcrackerg4.marketplace.model.enums.AccountActivation;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import lombok.RequiredArgsConstructor;
@@ -65,6 +67,48 @@ public class MailServiceImpl implements IMailService {
         message.setTo(receiver);
         message.setSubject("NC-Marketplace. Password reset.");
         message.setText(resetUrl);
+        mailSender.send(message);
+    }
+
+    @Override
+    public void notifyCourierGotDelivery(String courierEmail, DeliveryDetails deliveryDetails) {
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        StringBuilder textBuilder = new StringBuilder();
+        {
+            textBuilder.append("You are assigned a new delivery.").append('\n');
+
+            textBuilder.append("Date: ").append(deliveryDetails.getDatestamp()).append('\n');
+            textBuilder.append("Timeslot: ").append(deliveryDetails.getTimeStart())
+                    .append(" - ").append(deliveryDetails.getTimeEnd()).append('\n');
+
+            textBuilder.append("Address:\n").append(deliveryDetails.getAddress()).append('\n');
+
+            textBuilder.append("Customer number: ").append(deliveryDetails.getPhoneNumber()).append('\n');
+            textBuilder.append("First name: ").append(deliveryDetails.getCustomerFirstName())
+                    .append('\t').append("Last name: ").append(deliveryDetails.getCustomerLastName()).append('\n');
+
+            if (deliveryDetails.getComment() != null)
+                textBuilder.append("Comment: ").append(deliveryDetails.getComment()).append('\n');
+
+            int sum = 0;
+            textBuilder.append("Products:\n");
+            for (OrderItemEntity item : deliveryDetails.getOrderItems()) {
+                textBuilder.append("ProductNo: ").append(item.getProductId()).append('\n');
+                textBuilder.append("Quantity: ").append(item.getQuantity()).append('\n');
+                String formattedPrice = String.format("%s.%s", item.getPricePerProduct() / 100,
+                        item.getPricePerProduct() - item.getPricePerProduct() / 100 * 100);
+                textBuilder.append("Price per item: ").append(formattedPrice).append('\n');
+                textBuilder.append('\n');
+                sum += item.getPricePerProduct() * item.getQuantity();
+            }
+            textBuilder.append("Total sum: ").append(sum / 100).append('.').append(sum - sum / 100 * 100);
+        }
+
+        message.setFrom(SENDER_EMAIL);
+        message.setTo(courierEmail);
+        message.setSubject("NC-Marketplace. New order.");
+        message.setText(textBuilder.toString());
         mailSender.send(message);
     }
 }

@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.TokenQueries;
-import com.netcrackerg4.marketplace.model.domain.TokenEntity;
+import com.netcrackerg4.marketplace.model.domain.user.TokenEntity;
 import com.netcrackerg4.marketplace.repository.interfaces.ITokenDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

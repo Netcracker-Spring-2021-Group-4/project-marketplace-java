@@ -2,7 +2,7 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.UserQueries;
 import com.netcrackerg4.marketplace.exception.BadCodeError;
-import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
+import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.user.UserAdminView;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;

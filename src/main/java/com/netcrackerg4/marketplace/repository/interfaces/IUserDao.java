@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.repository.interfaces;
 
-import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
+import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.user.UserAdminView;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;

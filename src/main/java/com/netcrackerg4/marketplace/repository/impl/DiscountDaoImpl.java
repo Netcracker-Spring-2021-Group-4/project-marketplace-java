@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.DiscountQueries;
-import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
