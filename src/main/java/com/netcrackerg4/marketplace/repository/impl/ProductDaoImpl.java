@@ -2,7 +2,6 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
-import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import lombok.AllArgsConstructor;
@@ -117,16 +116,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
                 namedParams, new ProductResponse.ProductResponseMapper()
         );    }
 
-    @Override
-    public List<CategoryResponse> findCategories() {
-
-        return getJdbcTemplate().query(productQueries.getCategoriesWithAmountOfProduct(),
-                (rs,rowNum)-> CategoryResponse.builder()
-                        .categoryId(rs.getInt("category_id"))
-                        .productCategoryName(rs.getString("product_category_name"))
-                        .productsInCategory(rs.getInt("amount_of_products"))
-                        .build());
-    }
 
     @Override
     public void delete(UUID key) {

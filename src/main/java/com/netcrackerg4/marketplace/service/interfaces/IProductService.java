@@ -5,7 +5,6 @@ import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
-import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.util.Page;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +23,6 @@ public interface IProductService {
     void updateProductPicture(UUID id, MultipartFile multipartFile);
     void activateDeactivateProduct(UUID productId);
     List<ProductResponse> getAll();
-    List<CategoryResponse> getCategories();
     Page<ProductResponse> findProducts(int page, int size);
     Optional<DiscountEntity> findActiveProductDiscount(UUID productId);
     List<DiscountEntity> getUnexpiredDiscounts(UUID productId);

@@ -4,7 +4,6 @@ import com.netcrackerg4.marketplace.model.domain.CategoryEntity;
 import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
-import com.netcrackerg4.marketplace.model.response.CategoryResponse;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
 import com.netcrackerg4.marketplace.service.interfaces.IProductService;
@@ -38,10 +37,6 @@ public class PublicController {
     public Page<ProductResponse> getProductPage(@RequestParam int page,@RequestParam int size)
     {
         return  productService.findProducts(page,size);
-    }
-    @GetMapping("/categories")
-    public List<CategoryResponse> getCategories(){
-        return  productService.getCategories();
     }
 
     @GetMapping("/categories-all")
