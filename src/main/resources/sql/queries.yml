@@ -89,8 +89,7 @@ custom:
         FROM product
         WHERE is_active=true;
       productsPage: >
-         SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-               availability_date,category_id,offered_price
+         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price
                FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
                WHERE is_active=true
                AND ((offered_price IS NULL)
@@ -98,8 +97,7 @@ custom:
                LIMIT (:limit) OFFSET (:offset);
 
       productsWithFiltersOrderByPriceAsc: >
-          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-          availability_date,category_id,offered_price,
+          SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price,
           CASE
           WHEN offered_price IS NULL THEN price
           ELSE offered_price
@@ -122,8 +120,7 @@ custom:
 
 
       productsWithFiltersOrderByPriceDesc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-               availability_date,category_id,offered_price,
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price,
                CASE
                    WHEN offered_price IS NULL THEN price
                    ELSE offered_price
@@ -146,8 +143,8 @@ custom:
 
 
       productsWithFiltersOrderByName: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-                  availability_date,category_id,offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,
+        category_id,offered_price
                   FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
                   WHERE is_active=true
                   AND ((
@@ -166,8 +163,8 @@ custom:
 
 
       productsWithFiltersOrderByDate: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-                  availability_date,category_id,offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,
+                  category_id,offered_price
                   FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
                   WHERE is_active=true
                   AND ((
