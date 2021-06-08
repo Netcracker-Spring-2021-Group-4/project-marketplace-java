@@ -13,14 +13,25 @@ import javax.sql.DataSource;
 @Repository
 public class AdvLockUtil extends JdbcDaoSupport implements IAdvLockUtil {
     private final AdvLockQueries lockQueries;
+    private final int ORDER_SESSION_ID = 1;
 
     @Autowired
     public void setParentDataSource(DataSource dataSource) {
         super.setDataSource(dataSource);
     }
 
+//    @Override
+//    public void requestOrderLock() {
+//        getJdbcTemplate().queryForObject(lockQueries.getCaptureSessional(), Object.class, ORDER_SESSION_ID);
+//    }
+
     @Override
     public void requestTransactionLock(long lockId) {
-        getJdbcTemplate().queryForObject(lockQueries.getTransaction(), Object.class, lockId);
+        getJdbcTemplate().queryForObject(lockQueries.getCaptureTransactional(), Object.class, lockId);
     }
+
+//    @Override
+//    public void releaseOrderLock() {
+//        getJdbcTemplate().queryForObject(lockQueries.getReleaseSessional(), Object.class, ORDER_SESSION_ID);
+//    }
 }

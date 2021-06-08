@@ -6,5 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @ConfigurationProperties(prefix = "custom.postgres.advisory-lock")
 public class AdvLockQueries {
-    private String transaction;
+    private String captureTransactional;
+//    private String captureSessional;
+//    private String releaseSessional;
 }

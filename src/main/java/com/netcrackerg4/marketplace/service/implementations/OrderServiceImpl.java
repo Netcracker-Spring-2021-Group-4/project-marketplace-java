@@ -23,7 +23,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
-import com.netcrackerg4.marketplace.util.AdvLockUtil;
+import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
 import com.netcrackerg4.marketplace.util.mappers.OrderItemMapper;
@@ -72,12 +72,11 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     @Transactional
-    // fixme: synchronized is temporary
     public void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer) {
         TimeslotEntity timeslot = deliverySlotDao.readTimeslotOptions().stream()
                 .filter(slot -> slot.getTimeStart().toLocalTime().equals(orderRequest.getDeliverySlot().toLocalTime()))
                 .findFirst().orElseThrow(() -> new IllegalStateException("Illegal timeslot selected"));
-        advLockUtil.requestTransactionLock(AdvLockUtil.toLong(orderRequest.getDeliverySlot().toLocalDate().hashCode(),
+        advLockUtil.requestTransactionLock(AdvLockIdUtil.toLong(orderRequest.getDeliverySlot().toLocalDate().hashCode(),
                 orderRequest.getDeliverySlot().toLocalTime().hashCode()));
         if (!deliverySlotDao.deliverySlotIsFree(Date.valueOf(orderRequest.getDeliverySlot().toLocalDate()),
                 Time.valueOf(orderRequest.getDeliverySlot().toLocalTime())))
@@ -134,8 +133,10 @@ public class OrderServiceImpl implements IOrderService {
 
     private Map<UUID, ProductEntity> handleStocks(Collection<OrderItemRequest> orderItems) {
         Map<UUID, ProductEntity> productEntityMap = new HashMap<>(orderItems.size());
+        orderItems.stream().sorted(Comparator.comparing(OrderItemRequest::getProductId))
+                .forEach(item -> advLockUtil.requestTransactionLock(item.getProductId().getMostSignificantBits()));
+
         for (OrderItemRequest item : orderItems) {
-            advLockUtil.requestTransactionLock(item.getProductId().getMostSignificantBits());
             ProductEntity product = productDao.read(item.getProductId()).orElseThrow();
             productEntityMap.put(product.getProductId(), product);
             if (product.getReserved() < item.getQuantity())

@@ -1,8 +1,12 @@
 custom:
   postgres:
     advisory-lock:
-      transaction: >
+      capture-transactional: >
         SELECT pg_advisory_xact_lock(?);
+    #      capture-sessional: >
+    #        SELECT pg_advisory_lock(?);
+    #      release-sessional: >
+    #        SELECT pg_advisory_unlock(?);
     user:
       get-by-email: >
         SELECT user_id, email, password, first_name, last_name, phone_number, status_name, role_name
