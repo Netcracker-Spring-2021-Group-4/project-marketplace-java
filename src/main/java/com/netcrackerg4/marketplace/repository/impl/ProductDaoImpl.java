@@ -146,6 +146,12 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         );
 
     }
+
+    @Override
+    public void activateDeactivateProduct(ProductEntity product) {
+        getJdbcTemplate().update(productQueries.getActivateDeactivateProduct(), product.getAvailabilityDate(), product.getReserved(), product.getProductId());
+    }
+
     @Override
     public Integer maxPrice() {
         return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);

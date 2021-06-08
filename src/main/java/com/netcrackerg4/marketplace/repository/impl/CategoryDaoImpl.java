@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.UUID;
 
 @AllArgsConstructor
 @Repository
@@ -72,5 +73,19 @@ public class CategoryDaoImpl extends JdbcDaoSupport implements ICategoryDao {
         }
 
         return list;
+    }
+
+    @Override
+    public Optional<String> getCategoryNameByProductId(UUID productId) {
+        Optional<String> categoryName;
+        try {
+            categoryName = Optional.ofNullable(
+                getJdbcTemplate().queryForObject(categoryQueries.getFindCategoryNameByProductId(),
+                    (rs, row) -> rs.getString("product_category_name"), productId)
+            );
+        } catch (EmptyResultDataAccessException e ) {
+            categoryName = Optional.empty();
+        }
+        return categoryName;
     }
 }

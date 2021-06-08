@@ -17,8 +17,7 @@ public class ProductQueries {
     private String productsWithFiltersOrderByPriceDesc;
     private String productsWithFiltersOrderByName;
     private String productsWithFiltersOrderByDate;
-
     private String productsPage;
     private String maxPrice;
-
+    private String activateDeactivateProduct;
 }

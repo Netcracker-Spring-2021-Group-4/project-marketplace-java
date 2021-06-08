@@ -183,6 +183,10 @@ custom:
                   ORDER BY availability_date
         		  LIMIT (:limit) OFFSET (:offset);
 
+      activate-deactivate-product: >
+        UPDATE product
+        SET is_active = CASE WHEN is_active = true THEN false ELSE true END, availability_date = ?, reserved = ?
+        WHERE product_id = ?;
 
 
 
@@ -268,3 +272,7 @@ custom:
       get-all: >
         SELECT category_id, product_category_name
         FROM product_category;
+      find-category-name-by-product-id: >
+        SELECT product_category_name
+        FROM product INNER JOIN product_category USING(category_id)
+        WHERE product_id = ?;

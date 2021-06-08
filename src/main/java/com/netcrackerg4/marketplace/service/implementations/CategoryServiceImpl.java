@@ -41,4 +41,10 @@ public class CategoryServiceImpl implements ICategoryService {
     public List<CategoryEntity> getAll() {
         return categoryDao.getAll();
     }
+
+    @Override
+    public String getCategoryNameByProductId(UUID productId) {
+        return (String) categoryDao.getCategoryNameByProductId(productId)
+            .orElseThrow(()-> new IllegalStateException(String.format("Category not found")));
+    }
 }
