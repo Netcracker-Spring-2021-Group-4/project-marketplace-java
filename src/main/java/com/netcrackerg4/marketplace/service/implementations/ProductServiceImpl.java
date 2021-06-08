@@ -99,7 +99,8 @@ public class ProductServiceImpl implements IProductService {
     public FilterInfo getFilterInfo() {
 
         List<FilterInfo.CategoryResponse> categories = categoryService.categoriesWithAmountOfProduct();
-        int maxPrice=productDao.maxPrice();
+
+        int maxPrice = productDao.findAllSize()!=0 ? productDao.maxPrice():0;
 
         return new FilterInfo(categories,maxPrice);
     }
