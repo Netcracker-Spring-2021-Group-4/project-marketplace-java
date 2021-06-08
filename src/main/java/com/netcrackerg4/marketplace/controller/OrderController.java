@@ -5,6 +5,7 @@ import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
+import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
@@ -36,10 +37,12 @@ public class OrderController {
     @PostMapping
     void makeOrder(@RequestBody @Valid OrderRequest orderRequest, Principal principal) {
         AppUserEntity customer = null;
-        if (principal != null)
+        if (principal != null) {
             customer = userService.findByEmail(principal.getName()).orElse(null);
-        else if (orderRequest.getFirstName() == null || orderRequest.getLastName() == null)
-            throw new IllegalStateException("Customer must either be authenticated or provide his name.");
+            if (customer != null && customer.getRole() != UserRole.ROLE_CUSTOMER)
+                throw new IllegalStateException("Only customers can make orders.");
+        } else if (orderRequest.getFirstName() == null || orderRequest.getLastName() == null)
+            throw new IllegalStateException("Customer must either be authenticated or provide his full name.");
         orderService.makeOrder(orderRequest, customer);
     }
 

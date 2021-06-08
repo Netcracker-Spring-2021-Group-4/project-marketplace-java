@@ -15,7 +15,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
@@ -114,16 +113,6 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
                     orderId));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
-        }
-    }
-
-    @Override
-    public boolean deliverySlotIsFree(Date date, Time startTime) {
-        try {
-            Integer countSlot = getJdbcTemplate().queryForObject(deliverySlotQueries.getCheckSlotIsAvailable(), Integer.class, date, startTime);
-            return countSlot == null || countSlot == 0;
-        } catch (DataAccessException e) {
-            return false;
         }
     }
 

@@ -5,8 +5,6 @@ import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.timestamp.DateTimeSlot;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -27,6 +25,4 @@ public interface IDeliverySlotDao {
     Optional<AppUserEntity> findFreeCourier(LocalDateTime deliveryTimeSlot);
 
     Optional<DateTimeSlot> findSlotByOrder(UUID orderId);
-
-    boolean deliverySlotIsFree(Date date, Time startTime);
 }

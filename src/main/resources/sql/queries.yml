@@ -297,10 +297,6 @@ custom:
         SELECT dateslot_id, datestamp, time_start, time_end
         FROM dateslot INNER JOIN timeslot USING (timeslot_id)
         WHERE order_id=?;
-      check-slot-is-available: >
-        SELECT COUNT(dateslot_id)
-        FROM dateslot INNER JOIN timeslot USING (timeslot_id)
-        WHERE datestamp=? AND time_start=?;
 
     order:
       create-order: >

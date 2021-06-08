@@ -35,7 +35,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -78,9 +77,8 @@ public class OrderServiceImpl implements IOrderService {
                 .findFirst().orElseThrow(() -> new IllegalStateException("Illegal timeslot selected"));
         advLockUtil.requestTransactionLock(AdvLockIdUtil.toLong(orderRequest.getDeliverySlot().toLocalDate().hashCode(),
                 orderRequest.getDeliverySlot().toLocalTime().hashCode()));
-        if (!deliverySlotDao.deliverySlotIsFree(Date.valueOf(orderRequest.getDeliverySlot().toLocalDate()),
-                Time.valueOf(orderRequest.getDeliverySlot().toLocalTime())))
-            throw new IllegalStateException("This timeslot is already taken");
+        Optional<AppUserEntity> maybeCourier = deliverySlotDao.findFreeCourier(orderRequest.getDeliverySlot());
+        AppUserEntity courier = maybeCourier.orElseThrow(() -> new IllegalStateException("This timeslot is already taken"));
 
         Map<UUID, ProductEntity> loadedProducts = handleStocks(orderRequest.getProducts());
 
@@ -115,7 +113,7 @@ public class OrderServiceImpl implements IOrderService {
                 .datestamp(Date.valueOf(orderRequest.getDeliverySlot().toLocalDate()))
                 .timeslotEntity(timeslot)
                 .order(orderEntity)
-                .courier(deliverySlotDao.findFreeCourier(orderRequest.getDeliverySlot()).orElseThrow())
+                .courier(courier)
                 .build();
         deliverySlotDao.create(deliverySlot);
 
