@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -25,7 +26,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CartServiceImpl implements ICartService {
-    public static final String NOT_SO_MUCH_IN_STOCK = "There is only %d items in stock! Try buying less ;)";
 
     private final ICartItemDao cartItemDao;
     private final IProductService productService;
@@ -45,7 +45,10 @@ public class CartServiceImpl implements ICartService {
                         String.format("You cannot reserve %d items of product with id %s",
                                 i.getQuantity(), i.getProductId()));
             },
-            () -> cartItems.forEach(i -> cartItemDao.reserveProduct(i.getQuantity(), i.getProductId()))
+            () -> cartItems
+                    .stream()
+                    .sorted(Comparator.comparing(CartItemDto::getProductId))
+                    .forEach(i -> cartItemDao.reserveProduct(i.getQuantity(), i.getProductId()))
         );
 
     }
@@ -54,6 +57,8 @@ public class CartServiceImpl implements ICartService {
     @Transactional
     public void cancelCartReservation(List<CartItemDto> cartItems) {
         cartItems
+                .stream()
+                .sorted(Comparator.comparing(CartItemDto::getProductId))
                 .forEach( i -> {
                     var product = checkForExistenceAndReturn(i.getProductId());
                     if(!product.getIsActive()) return;
