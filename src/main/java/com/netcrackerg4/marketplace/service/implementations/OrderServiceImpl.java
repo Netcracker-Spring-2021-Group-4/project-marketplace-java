@@ -14,14 +14,16 @@ import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
+import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
+import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
-import com.netcrackerg4.marketplace.repository.interfaces.IUserDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
+import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
 import com.netcrackerg4.marketplace.util.mappers.OrderItemMapper;
@@ -33,7 +35,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -48,12 +49,13 @@ public class OrderServiceImpl implements IOrderService {
     private final int COURIER_ORDERS;
 
     private final IDeliverySlotDao deliverySlotDao;
-    private final IUserDao userDao;
+    private final ICartItemDao cartItemDao;
     private final IOrderDao orderDao;
     private final IProductDao productDao;
     private final IDiscountDao discountDao;
     private final IAddressDao addressDao;
     private final IMailService mailService;
+    private final IAdvLockUtil advLockUtil;
 
     @Override
     public List<StatusTimestampDto> getDayTimeslots(LocalDate date) {
@@ -69,14 +71,14 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     @Transactional
-    // fixme: synchronized is temporary
-    public synchronized void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer) {
+    public void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer) {
         TimeslotEntity timeslot = deliverySlotDao.readTimeslotOptions().stream()
                 .filter(slot -> slot.getTimeStart().toLocalTime().equals(orderRequest.getDeliverySlot().toLocalTime()))
                 .findFirst().orElseThrow(() -> new IllegalStateException("Illegal timeslot selected"));
-        if (!deliverySlotDao.deliverySlotIsFree(Date.valueOf(orderRequest.getDeliverySlot().toLocalDate()),
-                Time.valueOf(orderRequest.getDeliverySlot().toLocalTime())))
-            throw new IllegalStateException("This timeslot is already taken");
+        advLockUtil.requestTransactionLock(AdvLockIdUtil.toLong(orderRequest.getDeliverySlot().toLocalDate().hashCode(),
+                orderRequest.getDeliverySlot().toLocalTime().hashCode()));
+        Optional<AppUserEntity> maybeCourier = deliverySlotDao.findFreeCourier(orderRequest.getDeliverySlot());
+        AppUserEntity courier = maybeCourier.orElseThrow(() -> new IllegalStateException("This timeslot is already taken"));
 
         Map<UUID, ProductEntity> loadedProducts = handleStocks(orderRequest.getProducts());
 
@@ -104,13 +106,14 @@ public class OrderServiceImpl implements IOrderService {
                         .build())
                 .collect(Collectors.toList()));
         orderDao.create(orderEntity);
+        if (maybeCustomer != null) cartItemDao.resetCustomerCart(maybeCustomer.getUserId());
 
         DeliverySlotEntity deliverySlot = DeliverySlotEntity.builder()
                 .deliverySlotId(UUID.randomUUID())
                 .datestamp(Date.valueOf(orderRequest.getDeliverySlot().toLocalDate()))
                 .timeslotEntity(timeslot)
                 .order(orderEntity)
-                .courier(deliverySlotDao.findFreeCourier(orderRequest.getDeliverySlot()).orElseThrow())
+                .courier(courier)
                 .build();
         deliverySlotDao.create(deliverySlot);
 
@@ -128,6 +131,9 @@ public class OrderServiceImpl implements IOrderService {
 
     private Map<UUID, ProductEntity> handleStocks(Collection<OrderItemRequest> orderItems) {
         Map<UUID, ProductEntity> productEntityMap = new HashMap<>(orderItems.size());
+        orderItems.stream().sorted(Comparator.comparing(OrderItemRequest::getProductId))
+                .forEach(item -> advLockUtil.requestTransactionLock(item.getProductId().getMostSignificantBits()));
+
         for (OrderItemRequest item : orderItems) {
             ProductEntity product = productDao.read(item.getProductId()).orElseThrow();
             productEntityMap.put(product.getProductId(), product);

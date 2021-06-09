@@ -1,5 +1,12 @@
 custom:
   postgres:
+    advisory-lock:
+      capture-transactional: >
+        SELECT pg_advisory_xact_lock(?);
+    #      capture-sessional: >
+    #        SELECT pg_advisory_lock(?);
+    #      release-sessional: >
+    #        SELECT pg_advisory_unlock(?);
     user:
       get-by-email: >
         SELECT user_id, email, password, first_name, last_name, phone_number, status_name, role_name
@@ -290,10 +297,6 @@ custom:
         SELECT dateslot_id, datestamp, time_start, time_end
         FROM dateslot INNER JOIN timeslot USING (timeslot_id)
         WHERE order_id=?;
-      check-slot-is-available: >
-        SELECT COUNT(dateslot_id)
-        FROM dateslot INNER JOIN timeslot USING (timeslot_id)
-        WHERE datestamp=? AND time_start=?;
 
     order:
       create-order: >
