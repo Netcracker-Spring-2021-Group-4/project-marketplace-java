@@ -54,9 +54,9 @@ custom:
       create-product: >
         INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
         is_active,category_id) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?);
-      findProductById: >
+      find-product-by-id: >
         SELECT product_id,product_name, image_url,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product WHERE product_id = ?
-      findInStockById: >
+      find-in-stock-by-id: >
         SELECT in_stock FROM product WHERE product_id = ?
       update-product-info: >
         UPDATE product
@@ -67,11 +67,11 @@ custom:
         UPDATE product
         SET image_url = ?
         WHERE product_id = ?;
-      activeProductsSize: >
+      active-products-size: >
         SELECT COUNT(product_id)
         FROM product
         WHERE is_active=true
-      activeProductsFilteredSize: >
+      active-products-filtered-size: >
         SELECT COUNT(product.product_id)
               FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
               WHERE is_active=true
@@ -84,11 +84,11 @@ custom:
               )
               AND product_name LIKE (:name_query)
               AND category_id IN (:category_ids);
-      maxPrice: >
+      max-price: >
         SELECT MAX(price)
         FROM product
         WHERE is_active=true;
-      productsPage: >
+      products-page: >
          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
                availability_date,category_id,offered_price
                FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
@@ -97,7 +97,7 @@ custom:
                OR ( starts_at<now() AND ends_at>now()))
                LIMIT (:limit) OFFSET (:offset);
 
-      productsWithFiltersOrderByPriceAsc: >
+      products-with-filters-order-by-price-asc: >
           SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
           availability_date,category_id,offered_price,
           CASE
@@ -121,7 +121,7 @@ custom:
 
 
 
-      productsWithFiltersOrderByPriceDesc: >
+      products-with-filters-order-by-price-desc: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
                availability_date,category_id,offered_price,
                CASE
@@ -145,7 +145,7 @@ custom:
 
 
 
-      productsWithFiltersOrderByName: >
+      products-with-filters-order-by-name: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
                   availability_date,category_id,offered_price
                   FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
@@ -165,7 +165,7 @@ custom:
 
 
 
-      productsWithFiltersOrderByDate: >
+      products-with-filters-order-by-date: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
                   availability_date,category_id,offered_price
                   FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
@@ -231,7 +231,7 @@ custom:
         find-role-id-by-role-name: >
           SELECT role_id FROM user_role WHERE role_name=?;
     cart:
-      addToCart: >
+      add-to-cart: >
         INSERT INTO cart_item(cart_item_id, quantity,timestamp_added,customer_id,product_id)
         VALUES (?,?,?,?,?);
       remove-from-cart: >
@@ -259,11 +259,11 @@ custom:
         SELECT product_category_name
         FROM product_category
         WHERE category_id = ?;
-      categoriesWithAmountOfProduct: >
+      categories-with-amount-of-product: >
         SELECT product_category.category_id, product_category_name, count(product_id) as amount_of_products
         FROM product_category left outer join product p on product_category.category_id = p.category_id
         group by product_category.category_id;
-      categoriesIds: >
+      categories-ids: >
         SELECT category_id FROM product_category;
       get-all: >
         SELECT category_id, product_category_name
