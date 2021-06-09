@@ -297,6 +297,10 @@ custom:
         SELECT dateslot_id, datestamp, time_start, time_end
         FROM dateslot INNER JOIN timeslot USING (timeslot_id)
         WHERE order_id=?;
+      courier-orders: >
+        SELECT order_id, time_start, time_end, phone_number, first_name, last_name, status_name, city,street,building,flat
+        FROM (((prod_order INNER JOIN dateslot USING (order_id)) INNER JOIN address using (address_id)) INNER JOIN order_status USING (status_id)) INNER JOIN timeslot USING (timeslot_id)
+        WHERE courier_id=(:courier_id) AND datestamp =(:date);
 
     order:
       create-order: >
@@ -327,10 +331,7 @@ custom:
         SELECT COALESCE(COUNT(order_id), 0)
         FROM prod_order
         WHERE customer_id=(:customer_id) AND status_id IN (:prod_status_ids);
-      courier-orders: >
-        SELECT order_id, time_start, time_end, phone_number, first_name, last_name, status_name, city,street,building,flat
-        FROM (((prod_order INNER JOIN dateslot USING (order_id)) INNER JOIN address using (address_id)) INNER JOIN order_status USING (status_id)) INNER JOIN timeslot USING (timeslot_id)
-        WHERE courier_id=(:courier_id) AND datestamp =(:date);
+
     order-item:
       create-order-item: >
         INSERT INTO order_item (order_item_id, quantity, price, order_id, product_id) VALUES (?, ?, ?, ?, ?);

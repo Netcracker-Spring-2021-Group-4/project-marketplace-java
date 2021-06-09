@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.model.response.CourierDeliveryResponse;
-import com.netcrackerg4.marketplace.repository.interfaces.ICourierDao;
+import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import com.netcrackerg4.marketplace.service.interfaces.ICourierService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
 import lombok.AllArgsConstructor;
@@ -15,12 +15,12 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CourierServiceImpl implements ICourierService {
     private IUserService userService;
-    private final ICourierDao courierDao;
+    private final IDeliverySlotDao slotDao;
 
     @Override
     public List<CourierDeliveryResponse> getDayTimeslots(LocalDate date, String email) {
 
         UUID courierId = userService.findByEmail(email).orElseThrow().getUserId();
-        return courierDao.getCourierSlots(courierId,date);
+        return slotDao.getCourierSlots(courierId,date);
     }
 }
