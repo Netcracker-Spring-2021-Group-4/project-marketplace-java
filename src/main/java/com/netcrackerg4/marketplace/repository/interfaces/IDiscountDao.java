@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.repository.interfaces;
 
-import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 
 import java.util.List;
 import java.util.Optional;
