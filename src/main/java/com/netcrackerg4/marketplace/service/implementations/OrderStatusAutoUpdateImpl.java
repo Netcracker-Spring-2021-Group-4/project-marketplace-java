@@ -12,10 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Time;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,8 +36,6 @@ public class OrderStatusAutoUpdateImpl implements IOrderStatusAutoUpdate {
             System.exit(-1);
         }
         TimeslotEntity firstSlot = timeslots[0];
-        // feature idea (optimization): add check for non-working hours not to query DB if no change can be done anyway
-//        TimeslotEntity lastSlot = timeslots[timeslots.length - 1];
         long period = firstSlot.getTimeEnd().toLocalTime()
                 .minus(firstSlot.getTimeStart().toLocalTime().toSecondOfDay(), ChronoUnit.SECONDS)
                 .toSecondOfDay();
@@ -75,14 +71,12 @@ public class OrderStatusAutoUpdateImpl implements IOrderStatusAutoUpdate {
     @Override
     @Transactional
     public void updateSubmitted() {
-        Collection<UUID> updated = orderDao.updateStatusIfStarted(OrderStatus.SUBMITTED, OrderStatus.IN_DELIVERY);
-        updated.forEach(x -> System.out.printf("updated order with id %s to SUBMITTED\n", x.toString()));
+        orderDao.updateStatusIfStarted(OrderStatus.SUBMITTED, OrderStatus.IN_DELIVERY);
     }
 
     @Override
     @Transactional
     public void updateInDelivery() {
-        Collection<UUID> updated = orderDao.updateStatusIfFinished(OrderStatus.IN_DELIVERY, OrderStatus.FAILED);
-        updated.forEach(x -> System.out.printf("updated order with id %s to FAILED\n", x.toString()));
+        orderDao.updateStatusIfFinished(OrderStatus.IN_DELIVERY, OrderStatus.FAILED);
     }
 }
