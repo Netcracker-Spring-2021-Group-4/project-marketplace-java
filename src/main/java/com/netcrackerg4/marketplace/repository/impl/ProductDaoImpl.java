@@ -5,7 +5,7 @@ import com.netcrackerg4.marketplace.model.domain.ProductEntity;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
-import com.netcrackerg4.marketplace.repository.mapper.ProductForCatalogResponseMapper;
+import com.netcrackerg4.marketplace.repository.mapper.ProductResponseFullMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -89,7 +89,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         };
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
         return namedParameterJdbcTemplate.query(productQueries.getProductsPage(),
-                namedParams, new ProductForCatalogResponseMapper()
+                namedParams, new ProductResponseFullMapper()
         );
 
     }
@@ -122,7 +122,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         }
 
         return namedParameterJdbcTemplate. query(sqlQuery,
-                namedParams, new ProductForCatalogResponseMapper()
+                namedParams, new ProductResponseFullMapper()
         );
     }
 
