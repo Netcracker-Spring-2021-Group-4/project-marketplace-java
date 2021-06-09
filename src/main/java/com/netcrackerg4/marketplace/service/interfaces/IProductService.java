@@ -25,6 +25,8 @@ public interface IProductService {
     Page<ProductResponse> findProducts(int page, int size);
     FilterInfo getFilterInfo();
 
+    List<ProductResponse> getListOfProductForComparison(List<UUID> ids);
+
     Optional<DiscountEntity> findActiveProductDiscount(UUID productId);
     List<DiscountEntity> getUnexpiredDiscounts(UUID productId);
     void addDiscount(UUID productId, DiscountDto discountDto);

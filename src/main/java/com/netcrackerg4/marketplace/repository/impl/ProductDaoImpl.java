@@ -147,6 +147,22 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         );
 
     }
+
+    @Override
+    public Optional<ProductResponse> findProductForComparison(UUID id) {
+        Optional<ProductResponse> product;
+        try {
+            product = Optional.ofNullable(
+                    getJdbcTemplate().queryForObject(productQueries.getFindProductById(),
+                            new ProductResponseMapper(true, false, false)
+                            , id)
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+        return product;
+    }
+
     @Override
     public Integer maxPrice() {
         return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);

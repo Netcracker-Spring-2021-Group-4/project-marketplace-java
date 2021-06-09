@@ -22,10 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URL;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -105,6 +103,22 @@ public class ProductServiceImpl implements IProductService {
         return new FilterInfo(categories,maxPrice);
     }
 
+    @Override
+    public List<ProductResponse> getListOfProductForComparison(List<UUID> ids) {
+        return ids.stream()
+            .map( id -> {
+                var productResponseOptional = productDao.findProductForComparison(id);
+                if(productResponseOptional.isEmpty()) return null;
+                var productResponse = productResponseOptional.get();
+                discountDao.findActiveProductDiscount(id)
+                    .ifPresentOrElse(
+                        discount -> productResponse.setDiscount(discount.getOfferedPrice()),
+                        () -> productResponse.setDiscount(-1));
+                return productResponse;
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    }
 
 
     @Override
