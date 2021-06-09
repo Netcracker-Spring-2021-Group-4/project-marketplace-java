@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class ProductResponseMapper implements RowMapper<ProductResponse> {
+public class ProductForCatalogResponseMapper implements RowMapper<ProductResponse> {
 
     @Override
     public ProductResponse mapRow(ResultSet rs, int i) throws SQLException {
