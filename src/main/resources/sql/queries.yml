@@ -187,7 +187,10 @@ custom:
         		  AND category_id IN (:category_ids)
                   ORDER BY availability_date
         		  LIMIT (:limit) OFFSET (:offset);
-
+      product-for-comparison-by-id: >
+        SELECT product_id, product_name, description, image_url, price, category_id
+        FROM product
+        WHERE product_id = ?
 
 
 
