@@ -4,6 +4,7 @@ import com.netcrackerg4.marketplace.model.domain.order.OrderEntity;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.repository.interfaces.AbstractCrudRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,4 +17,7 @@ public interface IOrderDao extends AbstractCrudRepository<OrderEntity, UUID> {
 
     int countCustomerOrders(UUID customerId, List<OrderStatus> orderStatuses);
 
+    Collection<UUID> updateStatusIfStarted(OrderStatus current, OrderStatus next);
+
+    Collection<UUID> updateStatusIfFinished(OrderStatus current, OrderStatus next);
 }

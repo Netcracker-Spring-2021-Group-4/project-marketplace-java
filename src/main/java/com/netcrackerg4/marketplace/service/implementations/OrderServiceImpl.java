@@ -23,6 +23,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.service.interfaces.IMailService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
+import com.netcrackerg4.marketplace.service.interfaces.IOrderStatusAutoUpdate;
 import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
@@ -34,6 +35,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -42,8 +44,8 @@ import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 @Service
+@AllArgsConstructor
 public class OrderServiceImpl implements IOrderService {
     @Value("${custom.pagination.courier-orders}")
     private final int COURIER_ORDERS;
@@ -56,6 +58,12 @@ public class OrderServiceImpl implements IOrderService {
     private final IAddressDao addressDao;
     private final IMailService mailService;
     private final IAdvLockUtil advLockUtil;
+    private final IOrderStatusAutoUpdate orderAutoUpdate;
+
+    @PostConstruct
+    private void initAutoUpdate() {
+        orderAutoUpdate.initSchedulers(orderAutoUpdate::updateSubmitted, orderAutoUpdate::updateInDelivery);
+    }
 
     @Override
     public List<StatusTimestampDto> getDayTimeslots(LocalDate date) {

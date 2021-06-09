@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class MailServiceImpl implements IMailService {
     @Value("${custom.frontend.password-reset-url}")
     private final String RESET_PASSWORD_URL;
     private final JavaMailSender mailSender;
+    private final ExecutorService sendExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     public void sendConfirmSignupLetter(String receiver, String firstName, String lastName,
@@ -44,7 +47,11 @@ public class MailServiceImpl implements IMailService {
         message.setTo(receiver);
         message.setSubject(String.format("Dear %s %s, please confirm your registration.", firstName, lastName));
         message.setText(confirmUri);
-        mailSender.send(message);
+        sendEmail(message);
+    }
+
+    private void sendEmail(final SimpleMailMessage mail) {
+        sendExecutor.submit(() -> mailSender.send(mail));
     }
 
     private String getConfirmUrl(AccountActivation activationType) {
@@ -67,7 +74,7 @@ public class MailServiceImpl implements IMailService {
         message.setTo(receiver);
         message.setSubject("NC-Marketplace. Password reset.");
         message.setText(resetUrl);
-        mailSender.send(message);
+        sendEmail(message);
     }
 
     @Override
@@ -109,6 +116,6 @@ public class MailServiceImpl implements IMailService {
         message.setTo(courierEmail);
         message.setSubject("NC-Marketplace. New order.");
         message.setText(textBuilder.toString());
-        mailSender.send(message);
+        sendEmail(message);
     }
 }

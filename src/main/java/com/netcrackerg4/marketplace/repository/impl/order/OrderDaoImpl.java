@@ -195,5 +195,24 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
         }
     }
 
+    @Override
+    public Collection<UUID> updateStatusIfStarted(OrderStatus current, OrderStatus next) {
+        int currStatusId = orderStatusIds.get(current);
+        int updStatusId = orderStatusIds.get(next);
+        return getJdbcTemplate().queryForList(orderQueries.getUpdateStatusWithinSlot(), UUID.class, updStatusId, currStatusId);
+    }
+
+    @Override
+    public Collection<UUID> updateStatusIfFinished(OrderStatus current, OrderStatus next) {
+        int currStatusId = orderStatusIds.get(current);
+        int updStatusId = orderStatusIds.get(next);
+        try {
+            return getJdbcTemplate().queryForList(orderQueries.getUpdateStatusAfterSlot(), UUID.class, updStatusId, currStatusId);
+        } catch (DataAccessException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
 
 }
