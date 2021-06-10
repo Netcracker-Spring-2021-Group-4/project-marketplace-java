@@ -43,7 +43,7 @@ public class PublicController {
     @GetMapping("/categories-all")
     public List<CategoryEntity> fetchCategories() { return categoryService.getAll(); }
 
-    @GetMapping("/list-comparison")
+    @PostMapping("/list-comparison")
     public List<ProductResponse> getListForComparison(@Valid @RequestBody ValidList<UUID> ids) {return productService.getListOfProductForComparison(ids); }
 
 }
