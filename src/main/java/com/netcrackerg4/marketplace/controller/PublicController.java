@@ -55,7 +55,7 @@ public class PublicController {
         return productService.findActiveProductDiscount(productId);
     }
 
-    @GetMapping("/categories/{productId}/category-name")
+    @GetMapping("/categories-all/{productId}/category-name")
     String getCategoryNameByProductId(@PathVariable("productId") UUID productId){
         return  categoryService.getCategoryNameByProductId(productId);
     }
