@@ -1,4 +1,4 @@
-package com.netcrackerg4.marketplace.model.domain;
+package com.netcrackerg4.marketplace.model.domain.product;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;

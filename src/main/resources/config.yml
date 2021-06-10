@@ -25,6 +25,7 @@ custom:
     password-reset-url: /new-password
   pagination:
     user-search: 2
+    courier-orders: 2
 
 cloud:
   aws:
