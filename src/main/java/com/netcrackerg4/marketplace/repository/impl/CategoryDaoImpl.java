@@ -43,8 +43,6 @@ public class CategoryDaoImpl extends JdbcDaoSupport implements ICategoryDao {
     @Override
     public List<FilterInfo.CategoryResponse> findCategoriesWithAmountOfProducts() {
 
-        assert getJdbcTemplate() != null;
-
         return getJdbcTemplate().query(categoryQueries.getCategoriesWithAmountOfProduct(),
                 (rs,rowNum)-> new FilterInfo.CategoryResponse(
                         (rs.getInt("category_id")),
@@ -54,8 +52,6 @@ public class CategoryDaoImpl extends JdbcDaoSupport implements ICategoryDao {
 
     @Override
     public List<Integer> findCategoriesIds() {
-        assert getJdbcTemplate() != null;
-
         return getJdbcTemplate().queryForList(categoryQueries.getCategoriesIds(), Integer.class   )
     ;}
 

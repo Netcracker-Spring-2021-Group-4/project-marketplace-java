@@ -1,8 +1,9 @@
 package com.netcrackerg4.marketplace.controller;
 
 import com.netcrackerg4.marketplace.model.domain.CategoryEntity;
-import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
+import com.netcrackerg4.marketplace.model.dto.ValidList;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
 import com.netcrackerg4.marketplace.model.response.FilterInfo;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
@@ -45,6 +46,7 @@ public class PublicController {
     @GetMapping("/categories-all")
     public List<CategoryEntity> fetchCategories() { return categoryService.getAll(); }
 
+
     @GetMapping("/products/{id}")
     public Optional<ProductEntity> findProductById(@PathVariable("id") UUID productId){
         return productService.findProductById(productId);
@@ -59,5 +61,9 @@ public class PublicController {
     String getCategoryNameByProductId(@PathVariable("productId") UUID productId){
         return  categoryService.getCategoryNameByProductId(productId);
     }
+
+    @GetMapping("/list-comparison")
+    public List<ProductResponse> getListForComparison(@Valid @RequestBody ValidList<UUID> ids) {return productService.getListOfProductForComparison(ids); }
+
 
 }

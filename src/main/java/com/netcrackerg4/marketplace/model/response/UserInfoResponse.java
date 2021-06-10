@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.model.response;
 
-import com.netcrackerg4.marketplace.model.domain.AppUserEntity;
+import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
 import lombok.AllArgsConstructor;

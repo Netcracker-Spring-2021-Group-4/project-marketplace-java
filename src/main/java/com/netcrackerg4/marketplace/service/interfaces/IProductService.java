@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.service.interfaces;
 
-import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import com.netcrackerg4.marketplace.model.dto.product.NewProductDto;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
@@ -24,6 +24,7 @@ public interface IProductService {
     void updateProductPicture(UUID id, MultipartFile multipartFile);
     Page<ProductResponse> findProducts(int page, int size);
     FilterInfo getFilterInfo();
+    List<ProductResponse> getListOfProductForComparison(List<UUID> ids);
     Optional<DiscountEntity> findActiveProductDiscount(UUID productId);
     List<DiscountEntity> getUnexpiredDiscounts(UUID productId);
     void addDiscount(UUID productId, DiscountDto discountDto);

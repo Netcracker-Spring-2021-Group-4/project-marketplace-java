@@ -1,6 +1,6 @@
 package com.netcrackerg4.marketplace.util.mappers;
 
-import com.netcrackerg4.marketplace.model.domain.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.dto.product.DiscountDto;
 import org.springframework.stereotype.Service;
 

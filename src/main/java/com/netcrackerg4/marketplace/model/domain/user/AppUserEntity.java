@@ -1,4 +1,4 @@
-package com.netcrackerg4.marketplace.model.domain;
+package com.netcrackerg4.marketplace.model.domain.user;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.netcrackerg4.marketplace.model.enums.UserRole;

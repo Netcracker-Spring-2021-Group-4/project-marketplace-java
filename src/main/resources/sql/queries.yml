@@ -1,5 +1,12 @@
 custom:
   postgres:
+    advisory-lock:
+      capture-transactional: >
+        SELECT pg_advisory_xact_lock(?);
+    #      capture-sessional: >
+    #        SELECT pg_advisory_lock(?);
+    #      release-sessional: >
+    #        SELECT pg_advisory_unlock(?);
     user:
       get-by-email: >
         SELECT user_id, email, password, first_name, last_name, phone_number, status_name, role_name
@@ -50,13 +57,14 @@ custom:
         FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
         WHERE role_name IN (:roles) AND status_name IN (:statuses)
         AND first_name LIKE (:fst_seq) AND last_name LIKE (:last_seq);
+
     product:
       create-product: >
         INSERT INTO product (product_id, product_name, image_url, description, price, in_stock, reserved, availability_date,
         is_active,category_id) VALUES (?,?, ?, ?, ?, ?, ?, ?,?,?);
-      findProductById: >
+      find-product-by-id: >
         SELECT product_id,product_name, image_url,description,price::money::numeric::float8,in_stock,reserved,availability_date,is_active,category_id FROM product WHERE product_id = ?
-      findInStockById: >
+      find-in-stock-by-id: >
         SELECT in_stock FROM product WHERE product_id = ?
       update-product-info: >
         UPDATE product
@@ -67,11 +75,11 @@ custom:
         UPDATE product
         SET image_url = ?
         WHERE product_id = ?;
-      activeProductsSize: >
+      active-products-size: >
         SELECT COUNT(product_id)
         FROM product
         WHERE is_active=true
-      activeProductsFilteredSize: >
+      active-products-filtered-size: >
         SELECT COUNT(product.product_id)
               FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
               WHERE is_active=true
@@ -82,24 +90,22 @@ custom:
               OR ( starts_at<now() AND ends_at>now()
               AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
               )
-              AND product_name LIKE (:name_query)
+              AND product_name ILIKE (:name_query)
               AND category_id IN (:category_ids);
-      maxPrice: >
+      max-price: >
         SELECT MAX(price)
         FROM product
         WHERE is_active=true;
-      productsPage: >
-         SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-               availability_date,category_id,offered_price
+      products-page: >
+         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price
                FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
                WHERE is_active=true
                AND ((offered_price IS NULL)
                OR ( starts_at<now() AND ends_at>now()))
                LIMIT (:limit) OFFSET (:offset);
 
-      productsWithFiltersOrderByPriceAsc: >
-          SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-          availability_date,category_id,offered_price,
+      products-with-filters-order-by-price-asc: >
+          SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price,
           CASE
           WHEN offered_price IS NULL THEN price
           ELSE offered_price
@@ -114,16 +120,15 @@ custom:
           AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
 
           )
-          AND product_name LIKE (:name_query)
+          AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
           ORDER BY newPrice ASC
           LIMIT (:limit) OFFSET (:offset);
 
 
 
-      productsWithFiltersOrderByPriceDesc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-               availability_date,category_id,offered_price,
+      products-with-filters-order-by-price-desc: >
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price,
                CASE
                    WHEN offered_price IS NULL THEN price
                    ELSE offered_price
@@ -138,16 +143,16 @@ custom:
                 AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
 
             )
-          AND product_name LIKE (:name_query)
+          AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
         ORDER BY newPrice DESC
         LIMIT (:limit) OFFSET (:offset);
 
 
 
-      productsWithFiltersOrderByName: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-                  availability_date,category_id,offered_price
+      products-with-filters-order-by-name: >
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,
+        category_id,offered_price
                   FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
                   WHERE is_active=true
                   AND ((
@@ -158,16 +163,16 @@ custom:
         						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
 
         				  )
-        		  AND product_name LIKE (:name_query)
+        		  AND product_name ILIKE (:name_query)
         		  AND category_id IN (:category_ids)
                   ORDER BY product_name
         		  LIMIT (:limit) OFFSET (:offset);
 
 
 
-      productsWithFiltersOrderByDate: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,reserved,
-                  availability_date,category_id,offered_price
+      products-with-filters-order-by-date: >
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,
+                  category_id,offered_price
                   FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
                   WHERE is_active=true
                   AND ((
@@ -178,7 +183,7 @@ custom:
         						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
 
         				  )
-        		  AND product_name LIKE (:name_query)
+        		  AND product_name ILIKE (:name_query)
         		  AND category_id IN (:category_ids)
                   ORDER BY availability_date
         		  LIMIT (:limit) OFFSET (:offset);
@@ -188,7 +193,10 @@ custom:
         SET is_active = CASE WHEN is_active = true THEN false ELSE true END, availability_date = ?, reserved = ?
         WHERE product_id = ?;
 
-
+      product-for-comparison-by-id: >
+        SELECT product_id, product_name, description, image_url, price, category_id
+        FROM product
+        WHERE product_id = ?
 
     discount:
       find-active-product-discount: >
@@ -234,8 +242,9 @@ custom:
       role:
         find-role-id-by-role-name: >
           SELECT role_id FROM user_role WHERE role_name=?;
+
     cart:
-      addToCart: >
+      add-to-cart: >
         INSERT INTO cart_item(cart_item_id, quantity,timestamp_added,customer_id,product_id)
         VALUES (?,?,?,?,?);
       remove-from-cart: >
@@ -253,21 +262,131 @@ custom:
         SELECT product_id, quantity
         FROM cart_item
         WHERE customer_id = ?;
+      reset-cart: >
+        DELETE FROM cart_item
+        WHERE customer_id=?;
       reserve-product: >
         CALL add_product_reservation(?, ?, ?);
       cancel-reservation: >
         CALL delete_product_reservation(?, ?, ?);
+
+
+    delivery-slot:
+      create-delivery-slot: >
+        INSERT INTO dateslot (dateslot_id, datestamp, timeslot_id, courier_id, order_id) VALUES (?,?,?,?,?);
+      read-taken-timeslots: >
+        SELECT COUNT(user_id) AS num_taken, time_start
+        FROM dateslot INNER JOIN timeslot USING (timeslot_id) INNER JOIN auth_user ON courier_id=user_id
+        WHERE datestamp=?
+        GROUP BY time_start;
+      count-active-couriers: >
+        SELECT COUNT(user_id)
+        FROM auth_user INNER JOIN user_role USING (role_id) INNER JOIN user_status USING (status_id)
+        WHERE role_name='ROLE_COURIER' AND status_name='ACTIVE';
+      read-all-timeslots: >
+        SELECT timeslot_id, time_start, time_end
+        FROM timeslot;
+      find-free-courier: >
+        SELECT user_id, email, password, first_name, last_name, phone_number
+        FROM auth_user
+        WHERE role_id IN (SELECT role_id FROM user_role WHERE role_name='ROLE_COURIER')
+          AND status_id IN (SELECT status_id FROM user_status WHERE status_name='ACTIVE')
+          AND NOT EXISTS (
+            SELECT *
+            FROM dateslot
+            WHERE courier_id=auth_user.user_id AND datestamp=? AND timeslot_id=?
+        )
+        LIMIT 1;
+      find-delivery-slot-by-order-id: >
+        SELECT dateslot_id, datestamp, time_start, time_end
+        FROM dateslot INNER JOIN timeslot USING (timeslot_id)
+        WHERE order_id=?;
+      courier-orders: >
+        SELECT order_id, time_start, time_end, phone_number, first_name, last_name, status_name, city,street,building,flat
+        FROM (((prod_order INNER JOIN dateslot USING (order_id)) INNER JOIN address using (address_id)) INNER JOIN order_status USING (status_id)) INNER JOIN timeslot USING (timeslot_id)
+        WHERE courier_id=(:courier_id) AND datestamp =(:date)
+        ORDER BY time_start;
+
+    order:
+      create-order: >
+        INSERT INTO prod_order (order_id, placed_at, phone_number, comment, first_name, last_name, status_id, address_id, customer_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+      read-order: >
+        SELECT placed_at, phone_number, comment, first_name, last_name, status_id, address_id, customer_id
+        FROM prod_order
+        WHERE order_id=?;
+      read-status-ids: >
+        SELECT status_id, status_name
+        FROM order_status;
+      find-courier-orders: >
+        SELECT order_id, placed_at, phone_number, comment, first_name, last_name, status_id, address_id, customer_id
+        FROM prod_order INNER JOIN dateslot USING (order_id)
+        WHERE courier_id=(:courier_id) AND status_id IN (:prod_status_ids)
+        LIMIT (:limit) OFFSET (:offset);
+      count-courier-orders-num: >
+        SELECT COALESCE(COUNT(order_id), 0) AS temp
+        FROM prod_order INNER JOIN dateslot USING (order_id)
+        WHERE courier_id=(:courier_id) AND status_id IN (:prod_status_ids);
+      find-customer-orders: >
+        SELECT order_id, placed_at, phone_number, comment, status_id, address_id, customer_id
+        FROM prod_order
+        WHERE customer_id=(:customer_id) AND status_id IN (:prod_status_ids)
+        LIMIT (:limit) OFFSET (:offset);
+      count-customer-orders-num: >
+        SELECT COALESCE(COUNT(order_id), 0)
+        FROM prod_order
+        WHERE customer_id=(:customer_id) AND status_id IN (:prod_status_ids);
+      update-status-within-slot: >
+        UPDATE prod_order
+        SET status_id=?
+        WHERE status_id=? AND order_id IN (
+                                            SELECT order_id
+                                            FROM dateslot INNER JOIN timeslot USING (timeslot_id)
+                                            WHERE datestamp=CURRENT_DATE AND time_start < LOCALTIME AND time_end > LOCALTIME
+                                            )
+        RETURNING order_id;
+      update-status-after-slot: >
+        UPDATE prod_order
+        SET status_id=?
+        WHERE status_id=? AND order_id IN (
+                                            SELECT order_id
+                                            FROM dateslot INNER JOIN timeslot USING (timeslot_id)
+                                            WHERE datestamp=CURRENT_DATE AND time_end <= LOCALTIME OR datestamp < CURRENT_DATE
+                                            )
+        RETURNING order_id;
+
+    order-item:
+      create-order-item: >
+        INSERT INTO order_item (order_item_id, quantity, price, order_id, product_id) VALUES (?, ?, ?, ?, ?);
+      read-order-item: >
+        SELECT quantity, price, order_id, product_id
+        FROM order_item
+        WHERE order_item_id=?;
+      read-items-of-order: >
+        SELECT order_item_id, quantity, price, product_id
+        FROM order_item
+        WHERE order_id=?;
+
+    address:
+      create-address: >
+        INSERT INTO address (address_id, city, street, building, flat, customer_id) VALUES (?, ?, ?, ?, ?, ?);
+      read-address: >
+        SELECT city, street, building, flat, customer_id
+        FROM address
+        WHERE address_id=?;
+
+
 
     category:
       find-by-id: >
         SELECT product_category_name
         FROM product_category
         WHERE category_id = ?;
-      categoriesWithAmountOfProduct: >
+      categories-with-amount-of-product: >
         SELECT product_category.category_id, product_category_name, count(product_id) as amount_of_products
         FROM product_category left outer join product p on product_category.category_id = p.category_id
         group by product_category.category_id;
-      categoriesIds: >
+      categories-ids: >
         SELECT category_id FROM product_category;
       get-all: >
         SELECT category_id, product_category_name

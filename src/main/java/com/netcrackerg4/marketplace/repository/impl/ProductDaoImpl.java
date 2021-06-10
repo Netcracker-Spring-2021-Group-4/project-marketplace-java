@@ -1,10 +1,11 @@
 package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
-import com.netcrackerg4.marketplace.model.response.ProductResponse;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.enums.SortingOptions;
+import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
+import com.netcrackerg4.marketplace.repository.mapper.ProductResponseMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -88,7 +89,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         };
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
         return namedParameterJdbcTemplate.query(productQueries.getProductsPage(),
-                namedParams, new ProductResponse.ProductResponseMapper()
+                namedParams, new ProductResponseMapper()
         );
 
     }
@@ -121,7 +122,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         }
 
         return namedParameterJdbcTemplate. query(sqlQuery,
-                namedParams, new ProductResponse.ProductResponseMapper()
+                namedParams, new ProductResponseMapper()
         );
     }
 
@@ -150,6 +151,20 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     @Override
     public void activateDeactivateProduct(ProductEntity product) {
         getJdbcTemplate().update(productQueries.getActivateDeactivateProduct(), product.getAvailabilityDate(), product.getReserved(), product.getProductId());
+}
+
+    public Optional<ProductResponse> findProductForComparison(UUID id) {
+        Optional<ProductResponse> product;
+        try {
+            product = Optional.ofNullable(
+                    getJdbcTemplate().queryForObject(productQueries.getFindProductById(),
+                            new ProductResponseMapper(true, false, false)
+                            , id)
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+        return product;
     }
 
     @Override

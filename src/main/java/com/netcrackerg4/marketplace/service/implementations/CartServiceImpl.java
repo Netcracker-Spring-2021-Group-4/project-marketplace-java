@@ -1,7 +1,7 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import com.netcrackerg4.marketplace.model.domain.CartItemEntity;
-import com.netcrackerg4.marketplace.model.domain.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.CartItemEntity;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.model.response.CartProductInfo;
@@ -68,11 +68,38 @@ public class CartServiceImpl implements ICartService {
                 });
     }
 
+    @Transactional
     @Override
-    public CartInfoResponse getCartInfoAuthorized(String email) {
-        UUID userId = userService.findByEmail(email).getUserId();
-        List<CartItemDto> cartItems = cartItemDao.getAuthCustomerCartItems(userId);
-        return getCartInfoResponse(cartItems);
+    public boolean addToCart(String email, CartItemDto item) {
+        UUID productId = item.getProductId();
+        int amountAvailable = getAmountAvailableWithoutThrow(item.getProductId());
+        if (amountAvailable <= 0) return false;
+        UUID customerId = userService.findByEmail(email).orElseThrow().getUserId();
+        var existingCartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
+        AtomicBoolean success = new AtomicBoolean(true);
+        existingCartItem
+                .ifPresentOrElse(
+                        cartItemEntity -> {
+                            UUID id = cartItemEntity.getCartItemId();
+                            int addingQuantity = cartItemEntity.getQuantity() + item.getQuantity();
+                            int newQuantity = Math.min(addingQuantity, amountAvailable);
+                            if (addingQuantity > amountAvailable) success.set(false);
+                            cartItemDao.changeQuantityById(newQuantity, id);
+                        },
+                        () -> {
+                            CartItemEntity cartItemEntity =
+                                    CartItemEntity.builder()
+                                            .cartItemId(UUID.randomUUID())
+                                            .customerId(customerId)
+                                            .productId(productId)
+                                            .quantity(item.getQuantity())
+                                            .timestampAdded(new Timestamp(System.currentTimeMillis()))
+                                            .build();
+
+                            cartItemDao.addToCart(cartItemEntity);
+                        }
+                );
+        return success.get();
     }
 
     @Override
@@ -86,66 +113,32 @@ public class CartServiceImpl implements ICartService {
         items.forEach(item -> {
             UUID productId = item.getProductId();
             var available = getAmountAvailableWithoutThrow(productId);
-            if(available <= 0) return;
+            if (available <= 0) return;
             var addingToCartQuantity = Math.min(item.getQuantity(), available);
-            UUID customerId = userService.findByEmail(email).getUserId();
+            UUID customerId = userService.findByEmail(email).orElseThrow().getUserId();
             cartItemDao
-                .getCartItemByProductAndCustomer(customerId, productId)
-                .ifPresentOrElse(
-                    cartItemEntity -> {
-                        UUID id = cartItemEntity.getCartItemId();
-                        int addingQuantity = Math.min(available,
-                                addingToCartQuantity + cartItemEntity.getQuantity());
-                        cartItemDao.changeQuantityById(addingQuantity, id);
-                    },
-                    () -> {
-                        CartItemEntity cartItemEntity =
-                            CartItemEntity.builder()
-                                .cartItemId(UUID.randomUUID())
-                                .customerId(customerId)
-                                .productId(productId)
-                                .quantity(addingToCartQuantity)
-                                .timestampAdded(new Timestamp(System.currentTimeMillis()))
-                                .build();
+                    .getCartItemByProductAndCustomer(customerId, productId)
+                    .ifPresentOrElse(
+                            cartItemEntity -> {
+                                UUID id = cartItemEntity.getCartItemId();
+                                int addingQuantity = Math.min(available,
+                                        addingToCartQuantity + cartItemEntity.getQuantity());
+                                cartItemDao.changeQuantityById(addingQuantity, id);
+                            },
+                            () -> {
+                                CartItemEntity cartItemEntity =
+                                        CartItemEntity.builder()
+                                                .cartItemId(UUID.randomUUID())
+                                                .customerId(customerId)
+                                                .productId(productId)
+                                                .quantity(addingToCartQuantity)
+                                                .timestampAdded(new Timestamp(System.currentTimeMillis()))
+                                                .build();
 
-                        cartItemDao.addToCart(cartItemEntity);
-                    }
-                );
+                                cartItemDao.addToCart(cartItemEntity);
+                            }
+                    );
         });
-    }
-
-    @Transactional
-    @Override
-    public boolean addToCart(String email, CartItemDto item) {
-        UUID productId = item.getProductId();
-        int amountAvailable = getAmountAvailableWithoutThrow(item.getProductId());
-        if(amountAvailable <= 0) return false;
-        UUID customerId = userService.findByEmail(email).getUserId();
-        var existingCartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
-        AtomicBoolean success = new AtomicBoolean(true);
-        existingCartItem
-                .ifPresentOrElse(
-                    cartItemEntity -> {
-                        UUID id = cartItemEntity.getCartItemId();
-                        int addingQuantity = cartItemEntity.getQuantity() + item.getQuantity();
-                        int newQuantity = Math.min(addingQuantity, amountAvailable);
-                        if(addingQuantity > amountAvailable) success.set(false);
-                        cartItemDao.changeQuantityById(newQuantity, id);
-                    },
-                    () -> {
-                        CartItemEntity cartItemEntity =
-                            CartItemEntity.builder()
-                                .cartItemId(UUID.randomUUID())
-                                .customerId(customerId)
-                                .productId(productId)
-                                .quantity(item.getQuantity())
-                                .timestampAdded(new Timestamp(System.currentTimeMillis()))
-                                .build();
-
-                        cartItemDao.addToCart(cartItemEntity);
-                    }
-                );
-        return success.get();
     }
 
     @Transactional
@@ -153,7 +146,7 @@ public class CartServiceImpl implements ICartService {
     public boolean removeFromCart(String email, CartItemDto item) {
         UUID productId = item.getProductId();
         int quantityToRemove = item.getQuantity();
-        UUID customerId = userService.findByEmail(email).getUserId();
+        UUID customerId = userService.findByEmail(email).orElseThrow().getUserId();
         var cartItemEntityOptional =
                 cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
         if(cartItemEntityOptional.isEmpty()) return false;
@@ -161,13 +154,19 @@ public class CartServiceImpl implements ICartService {
         UUID cartItemId = cartItem.getCartItemId();
         int quantityInCart = cartItem.getQuantity();
         int quantityLeft = quantityInCart - quantityToRemove;
-        if(quantityLeft > 0) {
+        if (quantityLeft > 0) {
             int amountAvailable = getAmountAvailableWithoutThrow(productId);
             int quantity = Math.min(quantityLeft, amountAvailable);
             cartItemDao.changeQuantityById(quantity, cartItemId);
-        }
-        else cartItemDao.removeFromCart(cartItemId);
+        } else cartItemDao.removeFromCart(cartItemId);
         return true;
+    }
+
+    @Override
+    public CartInfoResponse getCartInfoAuthorized(String email) {
+        UUID userId = userService.findByEmail(email).orElseThrow().getUserId();
+        List<CartItemDto> cartItems = cartItemDao.getAuthCustomerCartItems(userId);
+        return getCartInfoResponse(cartItems);
     }
 
     private CartInfoResponse getCartInfoResponse(List<CartItemDto> cartItems) {
