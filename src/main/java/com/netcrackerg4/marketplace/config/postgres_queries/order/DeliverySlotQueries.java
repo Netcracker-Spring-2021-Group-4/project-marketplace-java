@@ -12,4 +12,6 @@ public class DeliverySlotQueries {
     private String createDeliverySlot;
     private String findFreeCourier;
     private String findDeliverySlotByOrderId;
+    private String courierOrders;
+
 }

@@ -9,13 +9,17 @@ import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.timestamp.DateTimeSlot;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
 import com.netcrackerg4.marketplace.model.enums.UserStatus;
+import com.netcrackerg4.marketplace.model.response.CourierDeliveryResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
+import com.netcrackerg4.marketplace.repository.mapper.CourierDeliveryMapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
@@ -41,6 +45,9 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
     public void setParentDataSource(DataSource dataSource) {
         super.setDataSource(dataSource);
     }
+
+
+
 
     @PostConstruct
     private void initTimeslots() {
@@ -114,6 +121,18 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<CourierDeliveryResponse> getCourierSlots(UUID id, LocalDate date) {
+
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("courier_id", id);
+            addValue("date", date);
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+        return namedParameterJdbcTemplate.query(deliverySlotQueries.getCourierOrders(),namedParams, new CourierDeliveryMapper());
     }
 
     @AllArgsConstructor
