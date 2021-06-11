@@ -24,12 +24,11 @@ public interface IProductService {
     void updateProductPicture(UUID id, MultipartFile multipartFile);
     Page<ProductResponse> findProducts(int page, int size);
     FilterInfo getFilterInfo();
-
     List<ProductResponse> getListOfProductForComparison(List<UUID> ids);
-
     Optional<DiscountEntity> findActiveProductDiscount(UUID productId);
     List<DiscountEntity> getUnexpiredDiscounts(UUID productId);
     void addDiscount(UUID productId, DiscountDto discountDto);
     void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto);
     void removeDiscount(UUID discountId);
+    void activateDeactivateProduct(UUID productId);
 }

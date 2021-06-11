@@ -155,6 +155,20 @@ public class ProductServiceImpl implements IProductService {
         discountDao.delete(discountId);
     }
 
+    @Override
+    public void activateDeactivateProduct(UUID productId) {
+        ProductEntity product = findProductById(productId)
+            .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
+        if(product.getIsActive()) {
+            product.setReserved(0);
+            productDao.activateDeactivateProduct(product);
+        }
+        else{
+            product.setAvailabilityDate(new Date());
+            productDao.activateDeactivateProduct(product);
+        }
+    }
+
     @Transactional
     @Override
     public Page<ProductResponse> findProducts(ProductSearchFilter searchFilter, int pageSize, int pageN) {

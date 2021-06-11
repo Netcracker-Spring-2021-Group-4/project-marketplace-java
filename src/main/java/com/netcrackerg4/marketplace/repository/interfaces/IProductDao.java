@@ -18,5 +18,7 @@ public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID>
      List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageSize, int pageN );
      int findAllSize();
      int findAllFilteredSize(String query, List<Integer> categories, int from, int to);
+     void activateDeactivateProduct(ProductEntity product);
      Optional<ProductResponse> findProductForComparison(UUID id);
+
 }

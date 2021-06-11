@@ -11,4 +11,5 @@ public class CategoryQueries {
     private String categoriesWithAmountOfProduct;
     private String categoriesIds;
     private String getAll;
+    private String findCategoryNameByProductId;
 }

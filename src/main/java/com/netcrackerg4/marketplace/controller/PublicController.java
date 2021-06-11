@@ -1,6 +1,8 @@
 package com.netcrackerg4.marketplace.controller;
 
 import com.netcrackerg4.marketplace.model.domain.CategoryEntity;
+import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
+import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.dto.ValidList;
 import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
 import com.netcrackerg4.marketplace.model.response.FilterInfo;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -44,6 +47,22 @@ public class PublicController {
     public List<CategoryEntity> fetchCategories() { return categoryService.getAll(); }
 
     @PostMapping("/list-comparison")
-    public List<ProductResponse> getListForComparison(@Valid @RequestBody ValidList<UUID> ids) {return productService.getListOfProductForComparison(ids); }
+
+    @GetMapping("/products/{id}")
+    public Optional<ProductEntity> findProductById(@PathVariable("id") UUID productId){
+        return productService.findProductById(productId);
+    }
+
+    @GetMapping("/products/{productId}/active-discount")
+    Optional<DiscountEntity> getActiveDiscount(@PathVariable UUID productId){
+        return productService.findActiveProductDiscount(productId);
+    }
+
+    @GetMapping("/categories-all/{productId}/category-name")
+    String getCategoryNameByProductId(@PathVariable("productId") UUID productId){
+        return  categoryService.getCategoryNameByProductId(productId);
+    }
+
+
 
 }
