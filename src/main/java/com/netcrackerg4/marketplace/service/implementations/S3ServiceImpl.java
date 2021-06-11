@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -16,9 +18,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class S3ServiceImpl implements IS3Service {
     private final IS3Dao s3Dao;
+    private final static long MB = 1_000_000;
+    private final static int IMAGE_WIDTH = 512;
 
     @Override
     public URL uploadImage(UUID nameId, MultipartFile multipartFile) {
+        long fileSize = multipartFile.getSize();
+        if(fileSize > MB) throw new IllegalStateException("The file can be max 1 MB in size");
+        checkImageDimensions(multipartFile);
         String tempDir = getTempDirPath();
         String extension = this.getFileExtension(multipartFile)
                 .orElseThrow(() -> {throw new IllegalStateException("File has no extension");});
@@ -34,6 +41,18 @@ public class S3ServiceImpl implements IS3Service {
             throw new IllegalStateException(e);
         } finally {
             if (file.exists()) file.delete();
+        }
+    }
+
+    private void checkImageDimensions(MultipartFile file) {
+        BufferedImage readImage = null;
+        try {
+            readImage = ImageIO.read(file.getInputStream());
+            int h = readImage.getHeight();
+            int w = readImage.getWidth();
+            if( h != IMAGE_WIDTH && w != IMAGE_WIDTH) throw new IllegalStateException("The image must be 512x512");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
     }
 

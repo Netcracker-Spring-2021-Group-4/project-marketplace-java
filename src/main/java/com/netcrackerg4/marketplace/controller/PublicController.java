@@ -46,6 +46,7 @@ public class PublicController {
     @GetMapping("/categories-all")
     public List<CategoryEntity> fetchCategories() { return categoryService.getAll(); }
 
+    @PostMapping("/list-comparison")
 
     @GetMapping("/products/{id}")
     public Optional<ProductEntity> findProductById(@PathVariable("id") UUID productId){
@@ -62,8 +63,6 @@ public class PublicController {
         return  categoryService.getCategoryNameByProductId(productId);
     }
 
-    @GetMapping("/list-comparison")
-    public List<ProductResponse> getListForComparison(@Valid @RequestBody ValidList<UUID> ids) {return productService.getListOfProductForComparison(ids); }
 
 
 }
