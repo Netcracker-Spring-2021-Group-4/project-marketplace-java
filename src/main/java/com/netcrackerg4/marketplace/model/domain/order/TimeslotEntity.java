@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Time;
+import java.util.Comparator;
 
 @Data
 @Builder
@@ -19,5 +20,9 @@ public class TimeslotEntity {
     @Override
     public int hashCode() {
         return timeslotId;
+    }
+
+    public static Comparator<TimeslotEntity> getStartComparator() {
+        return Comparator.comparing(TimeslotEntity::getTimeStart);
     }
 }

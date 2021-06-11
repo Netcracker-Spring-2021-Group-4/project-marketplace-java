@@ -61,7 +61,7 @@ public class ProductServiceImpl implements IProductService {
     @Transactional
     @Override
     public void updateProductInfo(UUID id,  NewProductDto newProduct) {
-
+// fixme: acquire trans lock for product edit
         findProductById(id)
                 .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
         ProductEntity productEntity = ProductEntity.builder()
