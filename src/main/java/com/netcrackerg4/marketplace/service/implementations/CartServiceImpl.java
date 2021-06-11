@@ -2,6 +2,8 @@ package com.netcrackerg4.marketplace.service.implementations;
 
 import com.netcrackerg4.marketplace.model.domain.product.CartItemEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
+import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
+import com.netcrackerg4.marketplace.model.dto.ContentErrorWrapper;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.model.response.CartProductInfo;
@@ -15,12 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -70,75 +67,62 @@ public class CartServiceImpl implements ICartService {
 
     @Transactional
     @Override
-    public boolean addToCart(String email, CartItemDto item) {
+    public ContentErrorWrapper<Boolean> addToCart(String email, CartItemDto item) {
         UUID productId = item.getProductId();
-        int amountAvailable = getAmountAvailableWithoutThrow(item.getProductId());
-        if (amountAvailable <= 0) return false;
+        var amountAvailableWrapper = getAmountAvailableWithoutThrow(item.getProductId());
+        if(amountAvailableWrapper.getError() != null)
+            return new ContentErrorWrapper<>(false, amountAvailableWrapper.getError());
+        int amountAvailable = amountAvailableWrapper.getContent();
+        if (amountAvailable <= 0)
+            return new ContentErrorWrapper<>(false, getErrorMessageNoAvailability(productId));
+
         UUID customerId = userService.findByEmail(email).orElseThrow().getUserId();
+        var addingToCartQuantity = Math.min(item.getQuantity(), amountAvailable);
         var existingCartItem = cartItemDao.getCartItemByProductAndCustomer(customerId, productId);
-        AtomicBoolean success = new AtomicBoolean(true);
+        var resultValue = new ContentErrorWrapper<>(true, null);
         existingCartItem
                 .ifPresentOrElse(
                         cartItemEntity -> {
                             UUID id = cartItemEntity.getCartItemId();
-                            int addingQuantity = cartItemEntity.getQuantity() + item.getQuantity();
-                            int newQuantity = Math.min(addingQuantity, amountAvailable);
-                            if (addingQuantity > amountAvailable) success.set(false);
+                            int overallAdding = cartItemEntity.getQuantity() + addingToCartQuantity;
+                            if (overallAdding > amountAvailable)
+                                resultValue.setError(String
+                                        .format("Your cart now stores the maximum of %d items of product with id %s",
+                                        amountAvailable, item.getProductId()));
+                            else if (item.getQuantity() > amountAvailable)
+                                resultValue.setError(getErrorMessageAddingMaxAvailable
+                                        (item.getQuantity(), item.getProductId(), amountAvailable));
+
+                            int newQuantity = Math.min(overallAdding, amountAvailable);
                             cartItemDao.changeQuantityById(newQuantity, id);
                         },
                         () -> {
+                            if(item.getQuantity() > amountAvailable) {
+                                resultValue.setError(getErrorMessageAddingMaxAvailable(
+                                        item.getQuantity(), productId, amountAvailable));
+                            }
                             CartItemEntity cartItemEntity =
                                     CartItemEntity.builder()
                                             .cartItemId(UUID.randomUUID())
                                             .customerId(customerId)
                                             .productId(productId)
-                                            .quantity(item.getQuantity())
+                                            .quantity(addingToCartQuantity)
                                             .timestampAdded(new Timestamp(System.currentTimeMillis()))
                                             .build();
 
                             cartItemDao.addToCart(cartItemEntity);
                         }
                 );
-        return success.get();
-    }
-
-    @Override
-    public CartInfoResponse getCartInfoNonAuthorized(List<CartItemDto> cartItems) {
-        return getCartInfoResponse(cartItems);
+        return resultValue;
     }
 
     @Transactional
     @Override
-    public void addToCartListIfPossible(String email, List<CartItemDto> items) {
-        items.forEach(item -> {
-            UUID productId = item.getProductId();
-            var available = getAmountAvailableWithoutThrow(productId);
-            if (available <= 0) return;
-            var addingToCartQuantity = Math.min(item.getQuantity(), available);
-            UUID customerId = userService.findByEmail(email).orElseThrow().getUserId();
-            cartItemDao
-                    .getCartItemByProductAndCustomer(customerId, productId)
-                    .ifPresentOrElse(
-                            cartItemEntity -> {
-                                UUID id = cartItemEntity.getCartItemId();
-                                int addingQuantity = Math.min(available,
-                                        addingToCartQuantity + cartItemEntity.getQuantity());
-                                cartItemDao.changeQuantityById(addingQuantity, id);
-                            },
-                            () -> {
-                                CartItemEntity cartItemEntity =
-                                        CartItemEntity.builder()
-                                                .cartItemId(UUID.randomUUID())
-                                                .customerId(customerId)
-                                                .productId(productId)
-                                                .quantity(addingToCartQuantity)
-                                                .timestampAdded(new Timestamp(System.currentTimeMillis()))
-                                                .build();
-
-                                cartItemDao.addToCart(cartItemEntity);
-                            }
-                    );
-        });
+    public List<String> addToCartList(String email, List<CartItemDto> items) {
+        return items.stream()
+                .map(i -> addToCart(email, i).getError())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -155,38 +139,63 @@ public class CartServiceImpl implements ICartService {
         int quantityInCart = cartItem.getQuantity();
         int quantityLeft = quantityInCart - quantityToRemove;
         if (quantityLeft > 0) {
-            int amountAvailable = getAmountAvailableWithoutThrow(productId);
-            int quantity = Math.min(quantityLeft, amountAvailable);
+            var amountAvailableWrapper = getAmountAvailableWithoutThrow(productId);
+            if(amountAvailableWrapper.getError() != null) return false;
+            int quantity = Math.min(quantityLeft, amountAvailableWrapper.getContent());
             cartItemDao.changeQuantityById(quantity, cartItemId);
         } else cartItemDao.removeFromCart(cartItemId);
         return true;
     }
 
     @Override
-    public CartInfoResponse getCartInfoAuthorized(String email) {
+    public ContentErrorListWrapper<CartInfoResponse> getCartInfoNonAuthorized(List<CartItemDto> cartItems) {
+        return getCartInfoResponse(cartItems);
+    }
+
+    @Override
+    public ContentErrorListWrapper<CartInfoResponse> getCartInfoAuthorized(String email) {
         UUID userId = userService.findByEmail(email).orElseThrow().getUserId();
         List<CartItemDto> cartItems = cartItemDao.getAuthCustomerCartItems(userId);
         return getCartInfoResponse(cartItems);
     }
 
-    private CartInfoResponse getCartInfoResponse(List<CartItemDto> cartItems) {
-        List<CartProductInfo> productInfos = cartItems.stream()
-                .map(this::cartProductInfoMapper).filter(Objects::nonNull).collect(Collectors.toList());
+    private ContentErrorListWrapper<CartInfoResponse> getCartInfoResponse(List<CartItemDto> cartItems) {
+        List<ContentErrorWrapper<CartProductInfo>> mapperResults = cartItems.stream()
+                .map(this::cartProductInfoMapper).collect(Collectors.toList());
+        var productInfos = mapperResults.stream()
+                .map(ContentErrorWrapper::getContent)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         int summaryPrice = productInfos.stream().mapToInt(CartProductInfo::getTotalPrice).sum();
         int summaryPriceWithoutDiscount = productInfos.stream().mapToInt(CartProductInfo::getTotalPriceWithoutDiscount).sum();
 
-        return CartInfoResponse.builder()
+        var content = CartInfoResponse.builder()
                 .content(productInfos)
                 .summaryPrice(summaryPrice)
                 .summaryPriceWithoutDiscount(summaryPriceWithoutDiscount)
                 .build();
+        var errors = mapperResults.stream()
+                .map(ContentErrorWrapper::getError)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return new ContentErrorListWrapper<>(content, errors);
     }
 
-    private CartProductInfo cartProductInfoMapper(CartItemDto cartItem) {
+    private ContentErrorWrapper<CartProductInfo> cartProductInfoMapper(CartItemDto cartItem) {
+        var result = new ContentErrorWrapper<CartProductInfo>();
         UUID productId = cartItem.getProductId();
         int quantity = cartItem.getQuantity();
-        int amountAvailable = getAmountAvailableWithoutThrow(productId);
-        if (amountAvailable <= 0) return null;
+        var amountAvailableWrapper = getAmountAvailableWithoutThrow(productId);
+        if (amountAvailableWrapper.getError() != null)
+            return new ContentErrorWrapper<>(null, amountAvailableWrapper.getError());
+
+        var amountAvailable = amountAvailableWrapper.getContent();
+        if (amountAvailable <= 0)
+            return new ContentErrorWrapper<>(null, getErrorMessageNoAvailability(productId));
+
+        if (quantity > amountAvailable)
+            result.setError(getErrorMessageAddingMaxAvailable(quantity, productId, amountAvailable));
+
         int finalQuantity = Math.min(quantity, amountAvailable);
         var product = productService.findProductById(productId).get();
         var categoryName = categoryService.findNameById(product.getCategoryId());
@@ -212,17 +221,33 @@ public class CartServiceImpl implements ICartService {
                         .discount(-1)
                         .totalPrice(totalPriceWithoutDiscount)
         );
-        return productInfo.build();
+        var content = productInfo.build();
+        result.setContent(content);
+        return result;
     }
 
-    private int getAmountAvailableWithoutThrow(UUID id) {
-        AtomicInteger result = new AtomicInteger();
+    private String getErrorMessageNoAvailability(UUID productId) {
+        return String.format("Items of product with id %s are not available", productId);
+    }
+
+    private String getErrorMessageAddingMaxAvailable(int quantity, UUID productId, int available) {
+        return String.format("Cannot add %d items of product with id %s to the cart, adding %d items",
+                quantity, productId, available);
+    }
+
+    private ContentErrorWrapper<Integer> getAmountAvailableWithoutThrow(UUID id) {
+        ContentErrorWrapper<Integer> returnValue = new ContentErrorWrapper<>();
         productService
             .findProductById(id)
-            .ifPresent(product -> {
-                if(product.getIsActive()) result.set(product.getInStock() - product.getReserved());
-            });
-        return result.get();
+            .ifPresentOrElse(product -> {
+                if(!product.getIsActive()) {
+                    returnValue.setError(String.format("Product with id %s is not active now", id));
+                    return;
+                }
+                returnValue.setContent(product.getInStock() - product.getReserved());
+            }, () -> returnValue.setError(String.format("Product with id %s not found", id))
+            );
+        return returnValue;
     }
 
     private ProductEntity checkForExistenceAndReturn(UUID id) {
