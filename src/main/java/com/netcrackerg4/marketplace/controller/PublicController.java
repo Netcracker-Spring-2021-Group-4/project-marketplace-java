@@ -47,6 +47,7 @@ public class PublicController {
     public List<CategoryEntity> fetchCategories() { return categoryService.getAll(); }
 
     @PostMapping("/list-comparison")
+    public List<ProductResponse> getListForComparison(@Valid @RequestBody ValidList<UUID> ids) {return productService.getListOfProductForComparison(ids); }
 
     @GetMapping("/products/{id}")
     public Optional<ProductEntity> findProductById(@PathVariable("id") UUID productId){
