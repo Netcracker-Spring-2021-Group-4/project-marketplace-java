@@ -77,9 +77,11 @@ public class CartServiceImpl implements ICartService {
         var amountAvailableWrapper = getAmountAvailableWithoutThrow(item.getProductId());
         if(amountAvailableWrapper.getError() != null)
             return new ContentErrorWrapper<>(false, amountAvailableWrapper.getError());
+
+        var productName = productService.findProductById(productId).orElseThrow().getName();
         int amountAvailable = amountAvailableWrapper.getContent();
         if (amountAvailable <= 0)
-            return new ContentErrorWrapper<>(false, getErrorMessageNoAvailability(productId));
+            return new ContentErrorWrapper<>(false, getErrorMessageNoAvailability(productName));
 
         UUID customerId = userService.findByEmail(email).orElseThrow().getUserId();
         var addingToCartQuantity = Math.min(item.getQuantity(), amountAvailable);
@@ -92,11 +94,11 @@ public class CartServiceImpl implements ICartService {
                             int overallAdding = cartItemEntity.getQuantity() + addingToCartQuantity;
                             if (overallAdding > amountAvailable)
                                 resultValue.setError(String
-                                        .format("Your cart now stores the maximum of %d items of product with id %s",
-                                        amountAvailable, item.getProductId()));
+                                        .format("Your cart now stores the maximum of %d items of product with name \"%s\"",
+                                        amountAvailable, productName));
                             else if (item.getQuantity() > amountAvailable)
                                 resultValue.setError(getErrorMessageAddingMaxAvailable
-                                        (item.getQuantity(), item.getProductId(), amountAvailable));
+                                        (item.getQuantity(), productName, amountAvailable));
 
                             int newQuantity = Math.min(overallAdding, amountAvailable);
                             cartItemDao.changeQuantityById(newQuantity, id);
@@ -104,7 +106,7 @@ public class CartServiceImpl implements ICartService {
                         () -> {
                             if(item.getQuantity() > amountAvailable) {
                                 resultValue.setError(getErrorMessageAddingMaxAvailable(
-                                        item.getQuantity(), productId, amountAvailable));
+                                        item.getQuantity(), productName, amountAvailable));
                             }
                             CartItemEntity cartItemEntity =
                                     CartItemEntity.builder()
@@ -193,16 +195,16 @@ public class CartServiceImpl implements ICartService {
         var amountAvailableWrapper = getAmountAvailableWithoutThrow(productId);
         if (amountAvailableWrapper.getError() != null)
             return new ContentErrorWrapper<>(null, amountAvailableWrapper.getError());
-
+        var product = productService.findProductById(productId).orElseThrow();
+        var productName = product.getName();
         var amountAvailable = amountAvailableWrapper.getContent();
         if (amountAvailable <= 0)
-            return new ContentErrorWrapper<>(null, getErrorMessageNoAvailability(productId));
+            return new ContentErrorWrapper<>(null, getErrorMessageNoAvailability(productName));
 
         if (quantity > amountAvailable)
-            result.setError(getErrorMessageAddingMaxAvailable(quantity, productId, amountAvailable));
+            result.setError(getErrorMessageAddingMaxAvailable(quantity, productName, amountAvailable));
 
         int finalQuantity = Math.min(quantity, amountAvailable);
-        var product = productService.findProductById(productId).get();
         var categoryName = categoryService.findNameById(product.getCategoryId());
         var productInfo =
                 CartProductInfo.builder()
@@ -231,13 +233,13 @@ public class CartServiceImpl implements ICartService {
         return result;
     }
 
-    private String getErrorMessageNoAvailability(UUID productId) {
-        return String.format("Items of product with id %s are not available", productId);
+    private String getErrorMessageNoAvailability(String productName) {
+        return String.format("Items of product with name \"%s\"  are not available", productName);
     }
 
-    private String getErrorMessageAddingMaxAvailable(int quantity, UUID productId, int available) {
-        return String.format("Cannot add %d items of product with id %s to the cart, adding %d items",
-                quantity, productId, available);
+    private String getErrorMessageAddingMaxAvailable(int quantity, String productName, int available) {
+        return String.format("Cannot add %d items of product with name \"%s\" to the cart, adding %d items",
+                quantity, productName, available);
     }
 
     private ContentErrorWrapper<Integer> getAmountAvailableWithoutThrow(UUID id) {
@@ -246,7 +248,7 @@ public class CartServiceImpl implements ICartService {
             .findProductById(id)
             .ifPresentOrElse(product -> {
                 if(!product.getIsActive()) {
-                    returnValue.setError(String.format("Product with id %s is not active now", id));
+                    returnValue.setError(String.format("Product with name \"%s\" is not active now", product.getName()));
                     return;
                 }
                 returnValue.setContent(product.getInStock() - product.getReserved());
