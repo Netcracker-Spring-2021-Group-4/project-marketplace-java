@@ -1,6 +1,7 @@
 package com.netcrackerg4.marketplace.controller.cart;
 
 import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
+import com.netcrackerg4.marketplace.model.dto.ContentErrorWrapper;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.dto.ValidList;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
@@ -20,6 +21,11 @@ public class ShoppingCartController {
     @PostMapping("/cart")
     public ContentErrorListWrapper<CartInfoResponse> getMyCart(@Valid @RequestBody ValidList<CartItemDto> cartItems) {
         return cartService.getCartInfoNonAuthorized(cartItems);
+    }
+
+    @GetMapping("/product-availability")
+    public ContentErrorWrapper<Integer> getProductAvailability(@RequestParam(name= "id") UUID productId) {
+        return cartService.checkProductAvailability(productId);
     }
 
     @PostMapping("/reserve")

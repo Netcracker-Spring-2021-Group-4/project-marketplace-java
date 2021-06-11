@@ -65,6 +65,11 @@ public class CartServiceImpl implements ICartService {
                 });
     }
 
+    @Override
+    public ContentErrorWrapper<Integer> checkProductAvailability(UUID productId) {
+        return getAmountAvailableWithoutThrow(productId);
+    }
+
     @Transactional
     @Override
     public ContentErrorWrapper<Boolean> addToCart(String email, CartItemDto item) {
