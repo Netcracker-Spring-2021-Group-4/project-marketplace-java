@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.controller;
 
+import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.model.response.CourierDeliveryResponse;
@@ -43,5 +44,14 @@ public class CourierController {
     EagerContentPage<OrderResponse> getCourierOrders(@RequestParam @Min(0) int page, Principal principal) {
         UUID courierId = userService.findByEmail(principal.getName()).orElseThrow().getUserId();
         return orderService.getCourierOrders(courierId, List.of(OrderStatus.SUBMITTED, OrderStatus.IN_DELIVERY), page);
+    }
+
+    @PatchMapping("/orders/{orderId}")
+    void updateOrderState(@PathVariable UUID orderId, @RequestParam OrderStatus orderStatus, Principal principal) {
+        AppUserEntity courier = userService.findByEmail(principal.getName())
+                .orElseThrow(() -> new IllegalStateException("Could not find such courier."));
+        if (!orderService.courierOwnsOrder(courier.getUserId(), orderId))
+            throw new IllegalStateException("you are not assigned to this delivery");
+        orderService.setOrderStatus(orderId, orderStatus, false);
     }
 }

@@ -14,9 +14,13 @@ public class OrderQueries {
     private String findCourierOrders;
     private String findCustomerOrders;
 
+    private String checkCourierAssigned;
+    private String checkCustomerMade;
+
     private String countCourierOrdersNum;
     private String countCustomerOrdersNum;
 
+    private String updateStatus;
     private String updateStatusWithinSlot;
     private String updateStatusAfterSlot;
 }
