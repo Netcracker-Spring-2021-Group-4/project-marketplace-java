@@ -9,6 +9,7 @@ import com.netcrackerg4.marketplace.model.dto.product.ProductSearchFilter;
 import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.model.response.FilterInfo;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
+import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
@@ -34,6 +35,7 @@ public class ProductServiceImpl implements IProductService {
     private final ICategoryService categoryService;
     private final IDiscountDao discountDao;
     private final DiscountEntity_Dao discountMapper;
+    private final IAdvLockUtil advLockUtil;
 
     @Transactional
     @Override
@@ -61,7 +63,7 @@ public class ProductServiceImpl implements IProductService {
     @Transactional
     @Override
     public void updateProductInfo(UUID id,  NewProductDto newProduct) {
-// fixme: acquire trans lock for product edit
+        advLockUtil.requestTransactionLock(id.getMostSignificantBits());
         findProductById(id)
                 .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
         ProductEntity productEntity = ProductEntity.builder()

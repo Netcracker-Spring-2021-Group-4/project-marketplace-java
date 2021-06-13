@@ -62,7 +62,7 @@ public class OrderServiceImpl implements IOrderService {
 
     @PostConstruct
     private void initAutoUpdate() {
-        orderAutoUpdate.initSchedulers(orderAutoUpdate::updateSubmitted, orderAutoUpdate::updateInDelivery);
+        orderAutoUpdate.initSchedulers(orderAutoUpdate::updateSubmitted);
     }
 
     @Override
@@ -141,12 +141,14 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     public void setOrderStatus(UUID orderId, OrderStatus newStatus, boolean notifyCourier) {
         OrderEntity order = orderDao.read(orderId).orElseThrow();
+        if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FAILED)
+            throw new IllegalStateException("Status of cancelled or failed order cannot be changed.");
         orderDao.updateStatus(orderId, newStatus);
         if (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)
             handleStocksReturn(order.getOrderItems());
-        if (notifyCourier) {
-            // todo: optionally notify courier (if user cancelled order from their account)
-        }
+//        if (notifyCourier) {
+        // todo: optionally notify courier (if user cancelled order from their account)
+//        }
     }
 
     private void handleStocksReturn(Collection<OrderItemEntity> orderItems) {

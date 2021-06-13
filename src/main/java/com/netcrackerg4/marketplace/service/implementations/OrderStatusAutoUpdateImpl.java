@@ -24,11 +24,10 @@ public class OrderStatusAutoUpdateImpl implements IOrderStatusAutoUpdate {
     private final IOrderDao orderDao;
 
     private final ScheduledExecutorService inDeliveryScheduler = Executors.newSingleThreadScheduledExecutor();
-    private final ScheduledExecutorService failedScheduler = Executors.newSingleThreadScheduledExecutor();
 
     @Override
     @Transactional
-    public void initSchedulers(Runnable updSubmitted, Runnable updInDelivery) {
+    public void initSchedulers(Runnable updSubmitted) {
         Optional<TimeslotEntity> maybeFstSlot = deliverySlotDao.readTimeslotOptions().stream()
                 .min(TimeslotEntity.getStartComparator());
         if (maybeFstSlot.isEmpty()) {
@@ -48,29 +47,17 @@ public class OrderStatusAutoUpdateImpl implements IOrderStatusAutoUpdate {
                 .findAny();
 
         Optional<LocalTime> nextSlotStart = nextSlot.map(TimeslotEntity::getTimeStart).map(Time::toLocalTime);
-        Optional<LocalTime> nextSlotEnd = nextSlot.map(TimeslotEntity::getTimeEnd).map(Time::toLocalTime);
 
         long submittedDelay = nextSlotStart.isPresent()
                 ? nextSlotStart.get().toSecondOfDay() - LocalTime.now().toSecondOfDay()
                 : LocalTime.MAX.toSecondOfDay() - LocalTime.now().toSecondOfDay() + firstSlot.getTimeStart().toLocalTime().toSecondOfDay();
 
-        long inDeliveryDelay = nextSlotEnd.isPresent()
-                ? nextSlotEnd.get().toSecondOfDay() - LocalTime.now().toSecondOfDay()
-                : LocalTime.MAX.toSecondOfDay() - LocalTime.now().toSecondOfDay() + firstSlot.getTimeEnd().toLocalTime().toSecondOfDay();
-
         inDeliveryScheduler.scheduleAtFixedRate(updSubmitted, submittedDelay, period, TimeUnit.SECONDS);
-        failedScheduler.scheduleAtFixedRate(updInDelivery, inDeliveryDelay, period, TimeUnit.SECONDS);
     }
 
     @Override
     @Transactional
     public void updateSubmitted() {
         orderDao.updateStatusIfStarted(OrderStatus.SUBMITTED, OrderStatus.IN_DELIVERY);
-    }
-
-    @Override
-    @Transactional
-    public void updateInDelivery() {
-        orderDao.updateStatusIfFinished(OrderStatus.IN_DELIVERY, OrderStatus.FAILED);
     }
 }
