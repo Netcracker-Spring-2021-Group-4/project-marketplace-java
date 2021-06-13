@@ -16,8 +16,11 @@ public interface IOrderService {
 
     void makeOrder(OrderRequest orderRequest, AppUserEntity maybeCustomer);
 
-    void setOrderStatus(UUID orderId, OrderStatus newStatus);
+    void setOrderStatus(UUID orderId, OrderStatus newStatus, boolean notifyCourier);
 
     EagerContentPage<OrderResponse> getCourierOrders(UUID courierId, List<OrderStatus> targetOrderStatuses, int page);
 
+    boolean courierOwnsOrder(UUID userId, UUID orderId);
+
+    boolean customerOwnsOrder(UUID userId, UUID orderId);
 }

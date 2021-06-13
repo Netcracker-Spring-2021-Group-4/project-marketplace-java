@@ -199,7 +199,11 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
     public Collection<UUID> updateStatusIfStarted(OrderStatus current, OrderStatus next) {
         int currStatusId = orderStatusIds.get(current);
         int updStatusId = orderStatusIds.get(next);
-        return getJdbcTemplate().queryForList(orderQueries.getUpdateStatusWithinSlot(), UUID.class, updStatusId, currStatusId);
+        try {
+            return getJdbcTemplate().queryForList(orderQueries.getUpdateStatusWithinSlot(), UUID.class, updStatusId, currStatusId);
+        } catch (DataAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
@@ -209,8 +213,36 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
         try {
             return getJdbcTemplate().queryForList(orderQueries.getUpdateStatusAfterSlot(), UUID.class, updStatusId, currStatusId);
         } catch (DataAccessException e) {
-            e.printStackTrace();
-            return new ArrayList<>();
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public void updateStatus(UUID orderId, OrderStatus newStatus) {
+        try {
+            getJdbcTemplate().update(orderQueries.getUpdateStatus(), orderStatusIds.get(newStatus), orderId);
+        } catch (DataAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public boolean isAssignedToCourier(UUID orderId, UUID courierId) {
+        try {
+            Integer n = getJdbcTemplate().queryForObject(orderQueries.getCheckCourierAssigned(), Integer.class, orderId, courierId);
+            return n != null && n != 0;
+        } catch (DataAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public boolean isMadeByCustomer(UUID orderId, UUID customerId) {
+        try {
+            Integer n = getJdbcTemplate().queryForObject(orderQueries.getCheckCustomerMade(), Integer.class, orderId, customerId);
+            return n != null && n != 0;
+        } catch (DataAccessException e) {
+            throw new IllegalStateException(e);
         }
     }
 

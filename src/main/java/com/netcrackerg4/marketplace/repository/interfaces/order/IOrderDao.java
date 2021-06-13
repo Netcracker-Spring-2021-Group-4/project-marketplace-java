@@ -20,4 +20,10 @@ public interface IOrderDao extends AbstractCrudRepository<OrderEntity, UUID> {
     Collection<UUID> updateStatusIfStarted(OrderStatus current, OrderStatus next);
 
     Collection<UUID> updateStatusIfFinished(OrderStatus current, OrderStatus next);
+
+    void updateStatus(UUID orderId, OrderStatus newStatus);
+
+    boolean isAssignedToCourier(UUID orderId, UUID courierId);
+
+    boolean isMadeByCustomer(UUID orderId, UUID customerId);
 }
