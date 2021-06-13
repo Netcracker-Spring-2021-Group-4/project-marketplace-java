@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.controller;
 
+import com.netcrackerg4.marketplace.model.dto.ContentErrorWrapper;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.ValidList;
 import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
@@ -14,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.security.Principal;
 import java.util.UUID;
 
@@ -27,16 +29,16 @@ public class AuthCustomerController {
     private final IOrderService orderService;
 
     @PostMapping("/add-to-cart")
-    public boolean addToCart(@Valid @RequestBody CartItemDto cartItemDto){
+    public ContentErrorWrapper<Boolean> addToCart(@Valid @RequestBody CartItemDto cartItemDto){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         return cartService.addToCart(email, cartItemDto);
     }
 
     @PostMapping("/add-to-cart-if-possible")
-    public void addToCartList(@Valid @RequestBody ValidList<CartItemDto> cartItemDto, Authentication auth){
+    public List<String> addToCartList(@Valid @RequestBody ValidList<CartItemDto> cartItemDto, Authentication auth){
         String email = auth.getName();
-        cartService.addToCartListIfPossible(email, cartItemDto);
+        return cartService.addToCartList(email, cartItemDto);
     }
 
     @PostMapping("/remove-from-cart")
