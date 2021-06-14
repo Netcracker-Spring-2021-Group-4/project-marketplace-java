@@ -14,6 +14,7 @@ import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
+import com.netcrackerg4.marketplace.model.response.CustomerOrderResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
@@ -27,6 +28,7 @@ import com.netcrackerg4.marketplace.service.interfaces.IOrderStatusAutoUpdate;
 import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
+import com.netcrackerg4.marketplace.util.mappers.OrderEntity_CustomerResponse;
 import com.netcrackerg4.marketplace.util.mappers.OrderItemMapper;
 import com.netcrackerg4.marketplace.util.mappers.UserMapper;
 import lombok.AllArgsConstructor;
@@ -189,6 +191,16 @@ public class OrderServiceImpl implements IOrderService {
         int totalNumOrders = orderDao.countCourierOrders(courierId, targetOrderStatuses);
         int numPages = (int) Math.ceil((double) totalNumOrders / COURIER_ORDERS);
         return new EagerContentPage<>(orderDetailsItems, numPages, COURIER_ORDERS);
+    }
+
+    @Override
+    public List<CustomerOrderResponse> getCustomerOrders(AppUserEntity customer, List<OrderStatus> targetOrderStatuses) {
+        List<OrderEntity> orders = orderDao.readCustomerOrders(customer.getUserId(), targetOrderStatuses);
+        List<CustomerOrderResponse> ordersResp = orders.stream()
+                .map(OrderEntity_CustomerResponse::toOrderResponse)
+                .collect(Collectors.toList());
+        ordersResp.forEach(order -> deliverySlotDao.findSlotByOrder(order.getOrderId()).orElseThrow());
+        return ordersResp;
     }
 
     @Override
