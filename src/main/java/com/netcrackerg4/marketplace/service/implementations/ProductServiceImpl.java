@@ -18,6 +18,7 @@ import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import com.netcrackerg4.marketplace.util.Page;
 import com.netcrackerg4.marketplace.util.mappers.DiscountEntity_Dao;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -169,6 +170,20 @@ public class ProductServiceImpl implements IProductService {
             product.setAvailabilityDate(new Date());
             productDao.activateDeactivateProduct(product);
         }
+    }
+
+
+    @Override
+    @Scheduled(cron = "0 0 18 * * ?")
+  //  @Scheduled(fixedRate = 20000)
+    @Transactional
+    public void updatePopularNow() {
+        System.out.println("UPDATING POPULARS");
+        List<UUID> populars= productDao.popularNowIds(3);
+        productDao.clearPopularNow();
+        productDao.updatePopularNow(populars);
+        System.out.println(populars);
+
     }
 
     @Transactional

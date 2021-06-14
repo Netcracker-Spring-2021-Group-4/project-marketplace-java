@@ -168,6 +168,37 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
 
     @Override
+    public List<UUID> popularNowIds(int limit) {
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("limit", limit);
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+
+        return namedParameterJdbcTemplate.queryForList(productQueries.getPopularNow(),
+                namedParams, UUID.class
+        );
+    }
+
+    @Override
+    public void clearPopularNow() {
+        getJdbcTemplate().update(productQueries.getClearPopularNow());
+    }
+
+    @Override
+    public void updatePopularNow(List<UUID> ids) {
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("ids", ids);
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+
+        namedParameterJdbcTemplate.update(productQueries.getUpdatePopularNow(),
+                namedParams  );
+
+    }
+
+    @Override
     public Integer maxPrice() {
         return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
     }

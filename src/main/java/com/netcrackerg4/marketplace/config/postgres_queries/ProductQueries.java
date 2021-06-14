@@ -21,4 +21,7 @@ public class ProductQueries {
     private String productsPage;
     private String maxPrice;
     private String activateDeactivateProduct;
+    private String popularNow;
+    private String clearPopularNow;
+    private String updatePopularNow;
 }
