@@ -21,7 +21,8 @@ import org.springframework.context.annotation.Configuration;
         OrderQueries.class,
         AddressQueries.class,
         OrderItemQueries.class,
-        AdvLockQueries.class
+        AdvLockQueries.class,
+        AuctionQueries.class
 })
 public class DbQueryConfig {
     @Autowired
@@ -34,4 +35,6 @@ public class DbQueryConfig {
     private CartQueries postgresCartQueries;
     @Autowired
     private CategoryQueries postgresCategoryQueries;
+    @Autowired
+    private CategoryQueries postgresAuctionQueries;
 }
