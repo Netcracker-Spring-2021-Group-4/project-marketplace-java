@@ -62,7 +62,7 @@ public class OrderServiceImpl implements IOrderService {
 
     @PostConstruct
     private void initAutoUpdate() {
-        orderAutoUpdate.initSchedulers(orderAutoUpdate::updateSubmitted, orderAutoUpdate::updateInDelivery);
+        orderAutoUpdate.initSchedulers(orderAutoUpdate::updateSubmitted);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class OrderServiceImpl implements IOrderService {
         Optional<AppUserEntity> maybeCourier = deliverySlotDao.findFreeCourier(orderRequest.getDeliverySlot());
         AppUserEntity courier = maybeCourier.orElseThrow(() -> new IllegalStateException("This timeslot is already taken"));
 
-        Map<UUID, ProductEntity> loadedProducts = handleStocks(orderRequest.getProducts());
+        Map<UUID, ProductEntity> loadedProducts = handleStocksOrdered(orderRequest.getProducts());
 
         OrderEntity orderEntity = new OrderEntity();
         BeanUtils.copyProperties(orderRequest, orderEntity);
@@ -137,32 +137,40 @@ public class OrderServiceImpl implements IOrderService {
         mailService.notifyCourierGotDelivery(deliverySlot.getCourier().getEmail(), deliveryDetails);
     }
 
-    private Map<UUID, ProductEntity> handleStocks(Collection<OrderItemRequest> orderItems) {
-        Map<UUID, ProductEntity> productEntityMap = new HashMap<>(orderItems.size());
-        orderItems.stream().sorted(Comparator.comparing(OrderItemRequest::getProductId))
+    @Override
+    @Transactional
+    public void setOrderStatus(UUID orderId, OrderStatus newStatus, boolean notifyCourier) {
+        OrderEntity order = orderDao.read(orderId).orElseThrow();
+        if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FAILED)
+            throw new IllegalStateException("Status of cancelled or failed order cannot be changed.");
+        orderDao.updateStatus(orderId, newStatus);
+        if (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)
+            handleStocksReturn(order.getOrderItems());
+//        if (notifyCourier) {
+        // todo: optionally notify courier (if user cancelled order from their account)
+//        }
+    }
+
+    private void handleStocksReturn(Collection<OrderItemEntity> orderItems) {
+        orderItems.stream().sorted(Comparator.comparing(OrderItemEntity::getProductId))
                 .forEach(item -> advLockUtil.requestTransactionLock(item.getProductId().getMostSignificantBits()));
 
-        for (OrderItemRequest item : orderItems) {
+        for (OrderItemEntity item : orderItems) {
             ProductEntity product = productDao.read(item.getProductId()).orElseThrow();
-            productEntityMap.put(product.getProductId(), product);
-            if (product.getReserved() < item.getQuantity())
-                throw new IllegalStateException("There should have been more products reserved.");
-            product.setReserved(product.getReserved() - item.getQuantity());
-            product.setInStock(product.getInStock() - item.getQuantity());
+            product.setInStock(product.getInStock() + item.getQuantity());
             productDao.update(product);
         }
-        return productEntityMap;
+    }
+
+    @Override
+    public boolean courierOwnsOrder(UUID userId, UUID orderId) {
+        return orderDao.isAssignedToCourier(orderId, userId);
     }
 
     private int getProductPrice(UUID productId, Map<UUID, ProductEntity> productEntityMap) {
         Optional<DiscountEntity> maybeDiscount = discountDao.findActiveProductDiscount(productId);
         return maybeDiscount.map(DiscountEntity::getOfferedPrice)
                 .orElseGet(() -> productEntityMap.get(productId).getPrice());
-    }
-
-    @Override
-    public void setOrderStatus(UUID orderId, OrderStatus newStatus) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -181,5 +189,27 @@ public class OrderServiceImpl implements IOrderService {
         int totalNumOrders = orderDao.countCourierOrders(courierId, targetOrderStatuses);
         int numPages = (int) Math.ceil((double) totalNumOrders / COURIER_ORDERS);
         return new EagerContentPage<>(orderDetailsItems, numPages, COURIER_ORDERS);
+    }
+
+    @Override
+    public boolean customerOwnsOrder(UUID userId, UUID orderId) {
+        return orderDao.isMadeByCustomer(orderId, userId);
+    }
+
+    private Map<UUID, ProductEntity> handleStocksOrdered(Collection<OrderItemRequest> orderItems) {
+        Map<UUID, ProductEntity> productEntityMap = new HashMap<>(orderItems.size());
+        orderItems.stream().sorted(Comparator.comparing(OrderItemRequest::getProductId))
+                .forEach(item -> advLockUtil.requestTransactionLock(item.getProductId().getMostSignificantBits()));
+
+        for (OrderItemRequest item : orderItems) {
+            ProductEntity product = productDao.read(item.getProductId()).orElseThrow();
+            productEntityMap.put(product.getProductId(), product);
+            if (product.getReserved() < item.getQuantity())
+                throw new IllegalStateException("There should have been more products reserved.");
+            product.setReserved(product.getReserved() - item.getQuantity());
+            product.setInStock(product.getInStock() - item.getQuantity());
+            productDao.update(product);
+        }
+        return productEntityMap;
     }
 }

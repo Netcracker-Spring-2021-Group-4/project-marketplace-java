@@ -1,5 +1,6 @@
 package com.netcrackerg4.marketplace.controller.cart;
 
+import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.service.interfaces.ICartService;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ public class ShoppingCartAuthController {
     private final ICartService cartService;
 
     @GetMapping("/cart")
-    public CartInfoResponse getMyCart(Authentication auth) {
+    public ContentErrorListWrapper<CartInfoResponse> getMyCart(Authentication auth) {
         String email = auth.getName();
         return cartService.getCartInfoAuthorized(email);
     }

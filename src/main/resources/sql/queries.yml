@@ -315,6 +315,10 @@ custom:
         SELECT COALESCE(COUNT(order_id), 0)
         FROM prod_order
         WHERE customer_id=(:customer_id) AND status_id IN (:prod_status_ids);
+      update-status: >
+        UPDATE prod_order
+        SET status_id=?
+        WHERE order_id=?;
       update-status-within-slot: >
         UPDATE prod_order
         SET status_id=?
@@ -333,6 +337,14 @@ custom:
                                             WHERE datestamp=CURRENT_DATE AND time_end <= LOCALTIME OR datestamp < CURRENT_DATE
                                             )
         RETURNING order_id;
+      check-courier-assigned: >
+        SELECT COALESCE(COUNT(*), 0)
+        FROM dateslot
+        WHERE order_id=? AND courier_id=?;
+      check-customer-made: >
+        SELECT COALESCE(COUNT(*), 0)
+        FROM prod_order
+        WHERE order_id=? AND customer_id=?;
 
     order-item:
       create-order-item: >
