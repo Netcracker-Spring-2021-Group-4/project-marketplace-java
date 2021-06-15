@@ -3,6 +3,8 @@ package com.netcrackerg4.marketplace.repository.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netcrackerg4.marketplace.config.postgres_queries.AuctionQueries;
+import com.netcrackerg4.marketplace.model.domain.CategoryEntity;
+import com.netcrackerg4.marketplace.model.domain.auction.AuctionTypeEntity;
 import com.netcrackerg4.marketplace.model.dto.auction.AuctionDto;
 import com.netcrackerg4.marketplace.repository.interfaces.IAuctionDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,8 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -47,5 +51,21 @@ public class AuctionDaoImpl extends JdbcDaoSupport implements IAuctionDao {
             return Optional.empty();
         }
         return name;
+    }
+
+    @Override
+    public List<AuctionTypeEntity> getTypes() {
+        List<AuctionTypeEntity> list;
+        try{
+            list = getJdbcTemplate().query(queries.getFetchTypes(),
+                    (rs, row) -> AuctionTypeEntity.builder()
+                            .typeId(rs.getInt("type_id"))
+                            .name(rs.getString("auction_type_name"))
+                            .build());
+        } catch (EmptyResultDataAccessException e) {
+            list = new ArrayList<>();
+        }
+
+        return list;
     }
 }

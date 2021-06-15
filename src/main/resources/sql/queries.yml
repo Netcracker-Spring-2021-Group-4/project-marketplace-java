@@ -417,3 +417,6 @@ custom:
         SELECT auction_type_name
         FROM auction_type
         WHERE type_id = ?
+      fetch-types: >
+        SELECT type_id, auction_type_name
+        FROM auction_type;
