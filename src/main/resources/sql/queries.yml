@@ -400,3 +400,16 @@ custom:
         SELECT product_category_name
         FROM product INNER JOIN product_category USING(category_id)
         WHERE product_id = ?;
+
+    auction:
+      create: >
+        INSERT INTO auction (starts_at, start_price, product_quantity, product_id, json_details, is_active, type_id)
+        VALUES
+        (?, ?, ?, ?, to_json(?), ?, ?);
+      fetch-type-by-id: >
+        SELECT auction_type_name
+        FROM auction_type
+        WHERE type_id = ?
+      fetch-types: >
+        SELECT type_id, auction_type_name
+        FROM auction_type;
