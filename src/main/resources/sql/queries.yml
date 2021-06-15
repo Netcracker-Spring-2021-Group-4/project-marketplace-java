@@ -99,13 +99,13 @@ custom:
                 (SELECT offered_price
                  FROM discount
                  WHERE product.product_id=discount.product_id
-                 AND starts_at<now() AND ends_at>now())
+                 AND starts_at<now() AND ends_at>now()), popular_now
                FROM product
                WHERE is_active=true
                LIMIT (:limit) OFFSET (:offset);
 
       products-with-filters-order-by-price-asc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -121,7 +121,7 @@ custom:
 
 
       products-with-filters-order-by-price-desc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -137,7 +137,7 @@ custom:
 
 
       products-with-filters-order-by-name: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -154,7 +154,7 @@ custom:
 
 
       products-with-filters-order-by-date: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
