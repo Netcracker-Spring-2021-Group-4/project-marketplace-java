@@ -25,5 +25,5 @@ public class CourierDeliveryResponse {
     private String building;
     private int flat;
     private OrderStatus statusName;
-    // todo: add customer's comment
+    private String comment;
 }
