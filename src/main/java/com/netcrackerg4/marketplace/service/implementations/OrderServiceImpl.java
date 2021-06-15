@@ -12,6 +12,7 @@ import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
 import com.netcrackerg4.marketplace.model.dto.order.OrderItemRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
+import com.netcrackerg4.marketplace.model.dto.timestamp.DateTimeSlot;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.model.response.CustomerOrderResponse;
@@ -199,7 +200,10 @@ public class OrderServiceImpl implements IOrderService {
         List<CustomerOrderResponse> ordersResp = orders.stream()
                 .map(OrderEntity_CustomerResponse::toOrderResponse)
                 .collect(Collectors.toList());
-        ordersResp.forEach(order -> deliverySlotDao.findSlotByOrder(order.getOrderId()).orElseThrow());
+        ordersResp.forEach(order -> {
+            DateTimeSlot slot = deliverySlotDao.findSlotByOrder(order.getOrderId()).orElseThrow();
+            order.setDeliverySlot(slot);
+        });
         return ordersResp;
     }
 
