@@ -44,6 +44,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -202,7 +203,9 @@ public class OrderServiceImpl implements IOrderService {
                 .collect(Collectors.toList());
         ordersResp.forEach(order -> {
             DateTimeSlot slot = deliverySlotDao.findSlotByOrder(order.getOrderId()).orElseThrow();
-            order.setDeliverySlot(slot);
+            order.setDeliveryDate(slot.getDeliveryDate().atStartOfDay().toEpochSecond(ZoneOffset.ofHours(3)) * 1000);
+            order.setTimeStart(LocalDate.now().atTime(slot.getTimeStart()).toEpochSecond(ZoneOffset.ofHours(3)) * 1000);
+            order.setTimeEnd(LocalDate.now().atTime(slot.getTimeEnd()).toEpochSecond(ZoneOffset.ofHours(3)) * 1000);
         });
         return ordersResp;
     }

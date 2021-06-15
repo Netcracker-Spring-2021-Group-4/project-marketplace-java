@@ -20,7 +20,7 @@ public class OrderRequest {
     @Pattern(regexp = ValidationConstants.PHONE_PATTERN, message = ValidationDefaultMessage.WRONG_FORMAT_PHONE_NUMBER)
     private String phoneNumber;
     @NotNull
-    @Future(message = "address must be specified to be in future")
+    @Future(message = "delivery slot must be specified to be in future")
     private LocalDateTime deliverySlot;
     @NotNull
     private AddressDto address;
