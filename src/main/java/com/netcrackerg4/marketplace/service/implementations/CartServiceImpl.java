@@ -270,4 +270,13 @@ public class CartServiceImpl implements ICartService {
             throw new IllegalStateException(String.format("Product with id %s is not available now",
                     product.getProductId()));
     }
+
+    @Override
+    public ContentErrorListWrapper<CartInfoResponse> getCartInfoByOrderId(UUID orderId) {
+        List<CartItemDto> cartItems = cartItemDao.getCartItemsByOrderId(orderId);
+        return getCartInfoResponse(cartItems);
+
+//        return getCartInfoResponse(cartItems);
+    }
+
 }
