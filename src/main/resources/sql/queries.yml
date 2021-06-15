@@ -241,6 +241,10 @@ custom:
         SELECT product_id, quantity
         FROM cart_item
         WHERE customer_id = ?;
+      find-cart-items-by-order-id: >
+        SELECT product_id, quantity
+        FROM order_item
+        WHERE order_id = ?;
       reset-cart: >
         DELETE FROM cart_item
         WHERE customer_id=?;
