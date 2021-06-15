@@ -9,4 +9,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class AuctionQueries {
     private String create;
     private String fetchTypeById;
+    private String fetchTypes;
 }
