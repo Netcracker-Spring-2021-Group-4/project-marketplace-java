@@ -69,7 +69,7 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
                     .lastName(rs.getString("last_name"))
                     .status(orderStatusIds.inverse().get(rs.getInt("status_id")))
                     .address(addressDao.read(rs.getObject("address_id", UUID.class)).orElseThrow())
-                    .customer(userDao.read(rs.getObject("customer_id", UUID.class)).orElseThrow())
+                    .customer(userDao.read(rs.getObject("customer_id", UUID.class)).orElse(null))
                     .build(), key);
             if (coreOrder == null) return Optional.empty();
 
