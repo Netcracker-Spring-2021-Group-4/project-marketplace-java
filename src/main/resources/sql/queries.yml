@@ -3,10 +3,6 @@ custom:
     advisory-lock:
       capture-transactional: >
         SELECT pg_advisory_xact_lock(?);
-    #      capture-sessional: >
-    #        SELECT pg_advisory_lock(?);
-    #      release-sessional: >
-    #        SELECT pg_advisory_unlock(?);
     user:
       get-by-email: >
         SELECT user_id, email, password, first_name, last_name, phone_number, status_name, role_name
@@ -202,11 +198,11 @@ custom:
       find-active-product-discount: >
         SELECT discount_id, offered_price, starts_at, ends_at
         FROM discount
-        WHERE product_id = ? AND NOW() < ends_at AND NOW() > starts_at;
+        WHERE product_id = ? AND SELECT (NOW() AT TIME ZONE 'EETDST') < ends_at AND SELECT (NOW() AT TIME ZONE 'EETDST') > starts_at;
       find-unexpired-discounts: >
         SELECT discount_id, offered_price, starts_at, ends_at
         FROM discount
-        WHERE product_id = ? AND NOW() < ends_at;
+        WHERE product_id = ? AND SELECT (NOW() AT TIME ZONE 'EETDST') < ends_at;
       check-period: >
         SELECT COUNT(discount_id)
         FROM discount
@@ -385,8 +381,6 @@ custom:
         SELECT city, street, building, flat, customer_id
         FROM address
         WHERE address_id=?;
-
-
 
     category:
       find-by-id: >

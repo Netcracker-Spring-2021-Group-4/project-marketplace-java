@@ -19,6 +19,6 @@ public class DiscountEntity_Dao {
     }
 
     private Timestamp map(LocalDateTime value) {
-        return Timestamp.from(value.toInstant(ZoneOffset.UTC));
+        return Timestamp.from(value.toInstant(ZoneOffset.ofHours(3)));
     }
 }
