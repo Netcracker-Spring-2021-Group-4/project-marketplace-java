@@ -26,6 +26,8 @@ public class ValidationDefaultMessage {
             "Auction must start in the future";
     public static final String WRONG_FORMAT_AUCTION_START_PRICE =
             "Auction must start at price at least 100$";
+    public static final String WRONG_FORMAT_AUCTION_START_PRICE_MAX =
+            "Auction start price cannot be bigger than $120 567";
     public static final String WRONG_FORMAT_AUCTION_PRODUCT_QUANTITY =
             "Auction must offer more than 3 items of the given product";
 }
