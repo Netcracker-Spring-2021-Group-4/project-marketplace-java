@@ -77,112 +77,91 @@ custom:
         WHERE is_active=true
       active-products-filtered-size: >
         SELECT COUNT(product.product_id)
-              FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
-              WHERE is_active=true
-              AND ((
-              offered_price IS NULL
-              AND price>=(:minPrice) AND price<=(:maxPrice)
-              )
-              OR ( starts_at<now() AND ends_at>now()
-              AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
-              )
-              AND product_name ILIKE (:name_query)
-              AND category_id IN (:category_ids);
+        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
+        WHERE is_active=true
+          AND ( CASE
+                WHEN offered_price IS NULL
+                    THEN price BETWEEN (:minPrice) AND (:maxPrice)
+                ELSE offered_price BETWEEN (:minPrice) AND (:maxPrice)
+                END)
+          AND product_name ILIKE (:name_query)
+          AND category_id IN (:category_ids);
       max-price: >
         SELECT MAX(price)
         FROM product
         WHERE is_active=true;
       products-page: >
-         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price
-               FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,
+                (SELECT offered_price
+                 FROM discount
+                 WHERE product.product_id=discount.product_id
+                 AND starts_at<now() AND ends_at>now())
+               FROM product
                WHERE is_active=true
-               AND ((offered_price IS NULL)
-               OR ( starts_at<now() AND ends_at>now()))
                LIMIT (:limit) OFFSET (:offset);
 
       products-with-filters-order-by-price-asc: >
-          SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price,
-          CASE
-          WHEN offered_price IS NULL THEN price
-          ELSE offered_price
-          END as newPrice
-          FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
-          WHERE is_active=true
-          AND ((
-          offered_price IS NULL
-          AND price>=(:minPrice) AND price<=(:maxPrice)
-          )
-          OR ( starts_at<now() AND ends_at>now()
-          AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
-
-          )
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
+        WHERE is_active=true
+          AND ( CASE
+                WHEN offered_price IS NULL
+                    THEN price BETWEEN (:minPrice) AND (:maxPrice)
+                ELSE offered_price BETWEEN (:minPrice) AND (:maxPrice)
+                END)
           AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
-          ORDER BY newPrice ASC
-          LIMIT (:limit) OFFSET (:offset);
+        ORDER BY (CASE WHEN offered_price IS NULL THEN price ELSE offered_price END) ASC
+        LIMIT (:limit) OFFSET (:offset);
 
 
 
       products-with-filters-order-by-price-desc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,offered_price,
-               CASE
-                   WHEN offered_price IS NULL THEN price
-                   ELSE offered_price
-               END as newPrice
-        FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
-          AND ((
-                       offered_price IS NULL
-                       AND price>=(:minPrice) AND price<=(:maxPrice)
-                   )
-            OR ( starts_at<now() AND ends_at>now()
-                AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
-
-            )
+          AND ( CASE
+                WHEN offered_price IS NULL
+                    THEN price BETWEEN (:minPrice) AND (:maxPrice)
+                ELSE offered_price BETWEEN (:minPrice) AND (:maxPrice)
+                END)
           AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
-        ORDER BY newPrice DESC
+        ORDER BY (CASE WHEN offered_price IS NULL THEN price ELSE offered_price END) DESC
         LIMIT (:limit) OFFSET (:offset);
 
 
 
       products-with-filters-order-by-name: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,
-        category_id,offered_price
-                  FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
-                  WHERE is_active=true
-                  AND ((
-        			  offered_price IS NULL
-        			  AND price>=(:minPrice) AND price<=(:maxPrice)
-        			  )
-        				  OR ( starts_at<now() AND ends_at>now()
-        						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
+        WHERE is_active=true
+          AND ( CASE
+                WHEN offered_price IS NULL
+                    THEN price BETWEEN (:minPrice) AND (:maxPrice)
+                ELSE offered_price BETWEEN (:minPrice) AND (:maxPrice)
+                END)
+          AND product_name ILIKE (:name_query)
+          AND category_id IN (:category_ids)
+        ORDER BY product_name DESC
+        LIMIT (:limit) OFFSET (:offset);
 
-        				  )
-        		  AND product_name ILIKE (:name_query)
-        		  AND category_id IN (:category_ids)
-                  ORDER BY product_name
-        		  LIMIT (:limit) OFFSET (:offset);
 
 
 
       products-with-filters-order-by-date: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,
-                  category_id,offered_price
-                  FROM product LEFT OUTER JOIN discount ON product.product_id = discount.product_id
-                  WHERE is_active=true
-                  AND ((
-        			  offered_price IS NULL
-        			  AND price>=(:minPrice) AND price<=(:maxPrice)
-        			  )
-        				  OR ( starts_at<now() AND ends_at>now()
-        						AND offered_price >= (:minPrice) AND offered_price<=(:maxPrice))
-
-        				  )
-        		  AND product_name ILIKE (:name_query)
-        		  AND category_id IN (:category_ids)
-                  ORDER BY availability_date
-        		  LIMIT (:limit) OFFSET (:offset);
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
+        WHERE is_active=true
+          AND ( CASE
+                WHEN offered_price IS NULL
+                    THEN price BETWEEN (:minPrice) AND (:maxPrice)
+                ELSE offered_price BETWEEN (:minPrice) AND (:maxPrice)
+                END)
+          AND product_name ILIKE (:name_query)
+          AND category_id IN (:category_ids)
+        ORDER BY availability_date
+        LIMIT (:limit) OFFSET (:offset);
 
       activate-deactivate-product: >
         UPDATE product
@@ -400,3 +379,16 @@ custom:
         SELECT product_category_name
         FROM product INNER JOIN product_category USING(category_id)
         WHERE product_id = ?;
+
+    auction:
+      create: >
+        INSERT INTO auction (starts_at, start_price, product_quantity, product_id, json_details, is_active, type_id)
+        VALUES
+        (?, ?, ?, ?, to_json(?), ?, ?);
+      fetch-type-by-id: >
+        SELECT auction_type_name
+        FROM auction_type
+        WHERE type_id = ?
+      fetch-types: >
+        SELECT type_id, auction_type_name
+        FROM auction_type;
