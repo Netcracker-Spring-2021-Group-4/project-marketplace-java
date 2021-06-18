@@ -8,12 +8,17 @@ import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
+import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
+import com.netcrackerg4.marketplace.model.dto.ContentErrorWrapper;
 import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
 import com.netcrackerg4.marketplace.model.dto.order.OrderItemRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
+import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
+import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
+import com.netcrackerg4.marketplace.model.response.CartProductInfo;
 import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
@@ -21,9 +26,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
-import com.netcrackerg4.marketplace.service.interfaces.IMailService;
-import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
-import com.netcrackerg4.marketplace.service.interfaces.IOrderStatusAutoUpdate;
+import com.netcrackerg4.marketplace.service.interfaces.*;
 import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
@@ -59,6 +62,8 @@ public class OrderServiceImpl implements IOrderService {
     private final IMailService mailService;
     private final IAdvLockUtil advLockUtil;
     private final IOrderStatusAutoUpdate orderAutoUpdate;
+    private final IProductService productService;
+    private final ICategoryService categoryService;
 
     @PostConstruct
     private void initAutoUpdate() {
@@ -189,6 +194,66 @@ public class OrderServiceImpl implements IOrderService {
         int totalNumOrders = orderDao.countCourierOrders(courierId, targetOrderStatuses);
         int numPages = (int) Math.ceil((double) totalNumOrders / COURIER_ORDERS);
         return new EagerContentPage<>(orderDetailsItems, numPages, COURIER_ORDERS);
+    }
+    @Override
+    public ContentErrorListWrapper<CartInfoResponse> getOrderedProducts(UUID orderId) {
+        List<CartItemDto> cartItems = cartItemDao.getCartItemsByOrderId(orderId);
+
+        List<ContentErrorWrapper<CartProductInfo>> mapperResults = cartItems.stream()
+                .map(this::orderedProductInfoMapper).collect(Collectors.toList());
+        var productInfos = mapperResults.stream()
+                .map(ContentErrorWrapper::getContent)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        int summaryPrice = productInfos.stream().mapToInt(CartProductInfo::getTotalPrice).sum();
+        int summaryPriceWithoutDiscount = productInfos.stream().mapToInt(CartProductInfo::getTotalPriceWithoutDiscount).sum();
+
+        var content = CartInfoResponse.builder()
+                .content(productInfos)
+                .summaryPrice(summaryPrice)
+                .summaryPriceWithoutDiscount(summaryPriceWithoutDiscount)
+                .build();
+        var errors = mapperResults.stream()
+                .map(ContentErrorWrapper::getError)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return new ContentErrorListWrapper<>(content, errors);
+    }
+
+    private ContentErrorWrapper<CartProductInfo> orderedProductInfoMapper(CartItemDto cartItem) {
+        var result = new ContentErrorWrapper<CartProductInfo>();
+        UUID productId = cartItem.getProductId();
+        int quantity = cartItem.getQuantity();
+
+        var product = productService.findProductById(productId).orElseThrow();
+
+        var categoryName = categoryService.findNameById(product.getCategoryId());
+        var productInfo =
+                CartProductInfo.builder()
+                        .productId(productId)
+                        .name(product.getName())
+                        .description(product.getDescription())
+                        .imageUrl(product.getImageUrl())
+                        .price(product.getPrice())
+                        .quantity(quantity)
+                        .category(categoryName);
+        int totalPriceWithoutDiscount = product.getPrice() * quantity;
+        productInfo.totalPriceWithoutDiscount(totalPriceWithoutDiscount);
+
+        productService.findActiveProductDiscount(cartItem.getProductId()).ifPresentOrElse(
+                discount -> {
+                    int offeredPrice = discount.getOfferedPrice();
+                    productInfo
+                            .discount(offeredPrice)
+                            .totalPrice(offeredPrice * quantity);
+                },
+                () -> productInfo
+                        .discount(-1)
+                        .totalPrice(totalPriceWithoutDiscount)
+        );
+        var content = productInfo.build();
+        result.setContent(content);
+        return result;
     }
 
     @Override

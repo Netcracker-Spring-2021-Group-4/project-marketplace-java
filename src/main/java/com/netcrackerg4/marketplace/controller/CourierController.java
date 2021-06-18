@@ -60,7 +60,7 @@ public class CourierController {
     }
 
     @GetMapping("/orders/{orderId}")
-    public ContentErrorListWrapper<CartInfoResponse> getCartInfo(@PathVariable UUID orderId) {
-        return cartService.getCartInfoByOrderId(orderId);
+    public ContentErrorListWrapper<CartInfoResponse> getOrderedProducts(@PathVariable UUID orderId) {
+        return orderService.getOrderedProducts(orderId);
     }
 }

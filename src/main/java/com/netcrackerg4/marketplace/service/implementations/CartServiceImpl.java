@@ -8,10 +8,7 @@ import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
 import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.model.response.CartProductInfo;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
-import com.netcrackerg4.marketplace.service.interfaces.ICartService;
-import com.netcrackerg4.marketplace.service.interfaces.ICategoryService;
-import com.netcrackerg4.marketplace.service.interfaces.IProductService;
-import com.netcrackerg4.marketplace.service.interfaces.IUserService;
+import com.netcrackerg4.marketplace.service.interfaces.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -271,12 +268,6 @@ public class CartServiceImpl implements ICartService {
                     product.getProductId()));
     }
 
-    @Override
-    public ContentErrorListWrapper<CartInfoResponse> getCartInfoByOrderId(UUID orderId) {
-        List<CartItemDto> cartItems = cartItemDao.getCartItemsByOrderId(orderId);
-        return getCartInfoResponse(cartItems);
 
-//        return getCartInfoResponse(cartItems);
-    }
 
 }

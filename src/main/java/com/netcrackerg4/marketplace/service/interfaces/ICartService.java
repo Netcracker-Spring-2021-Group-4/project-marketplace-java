@@ -17,5 +17,4 @@ public interface ICartService {
     ContentErrorListWrapper<CartInfoResponse> getCartInfoNonAuthorized(List<CartItemDto> cartItems);
     void makeCartReservation(List<CartItemDto> cartItems);
     void cancelCartReservation(List<CartItemDto> cartItems);
-    ContentErrorListWrapper<CartInfoResponse> getCartInfoByOrderId(UUID orderId);
 }
