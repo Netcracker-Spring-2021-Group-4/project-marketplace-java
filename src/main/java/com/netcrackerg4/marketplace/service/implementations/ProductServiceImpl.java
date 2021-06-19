@@ -174,20 +174,16 @@ public class ProductServiceImpl implements IProductService {
 
 
     @Override
-  //  @Scheduled(cron = "0 0 13 * * ?")
-    @Scheduled(fixedRate = 20000)
+    @Scheduled(cron = "0 0 13 * * ?")
+  //  @Scheduled(fixedRate = 20000)
     @Transactional
     public void updatePopularNow() {
-        System.out.println("UPDATING POPULARS");
         productDao.clearPopularNow();
 
         if(getAmountOfPopularProducts()==0)
             return;
         List<UUID> populars= productDao.popularNowIds(getAmountOfPopularProducts());
         productDao.updatePopularNow(populars);
-
-
-        System.out.println(populars);
     }
 
     @Transactional
