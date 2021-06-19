@@ -4,6 +4,7 @@ import com.netcrackerg4.marketplace.constants.ValidationConstants;
 import com.netcrackerg4.marketplace.constants.ValidationDefaultMessage;
 import lombok.Data;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -21,6 +22,7 @@ public class NewProductDto {
     private String description;
 
     @Min(value=1,message="The price must be greater than 0")
+    @Max(value = 23598, message = "The price must be less than 23598")
     private int price;
 
     @Min(value=0,message="Must be equal or greater than 0")
