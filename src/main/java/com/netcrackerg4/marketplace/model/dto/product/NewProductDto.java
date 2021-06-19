@@ -22,7 +22,7 @@ public class NewProductDto {
     private String description;
 
     @Min(value=1,message="The price must be greater than 0")
-    @Max(value = 23598, message = "The price must be less than 23598")
+    @Max(value = 2359800, message = "The price must be less than 2359800")
     private int price;
 
     @Min(value=0,message="Must be equal or greater than 0")

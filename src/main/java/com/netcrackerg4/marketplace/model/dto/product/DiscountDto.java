@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class DiscountDto {
     @Min(value = 1, message = "minimal price is '0.01'")
-    @Max(value = 23598,message = "maximal price is '23598'")
+    @Max(value = 2359800,message = "maximal price is '2359800'")
     private int offeredPrice;
     @Future(message = "beginning of a new discount cannot be in a past")
     private LocalDateTime startsAt;
