@@ -174,16 +174,20 @@ public class ProductServiceImpl implements IProductService {
 
 
     @Override
-    @Scheduled(cron = "0 0 18 * * ?")
-  //  @Scheduled(fixedRate = 20000)
+  //  @Scheduled(cron = "0 0 13 * * ?")
+    @Scheduled(fixedRate = 20000)
     @Transactional
     public void updatePopularNow() {
         System.out.println("UPDATING POPULARS");
-        List<UUID> populars= productDao.popularNowIds(3);
         productDao.clearPopularNow();
-        productDao.updatePopularNow(populars);
-        System.out.println(populars);
 
+        if(getAmountOfPopularProducts()==0)
+            return;
+        List<UUID> populars= productDao.popularNowIds(getAmountOfPopularProducts());
+        productDao.updatePopularNow(populars);
+
+
+        System.out.println(populars);
     }
 
     @Transactional
@@ -210,4 +214,16 @@ public class ProductServiceImpl implements IProductService {
     }
 
 
+    private int getAmountOfPopularProducts(){
+        int all = productDao.findAllSize();
+        if(all<9)
+            return 0;
+        if(all<21)
+            return 3;
+        if(all<60)
+            return 6;
+        if(all<100)
+            return 9;
+        return 20;
+    }
 }
