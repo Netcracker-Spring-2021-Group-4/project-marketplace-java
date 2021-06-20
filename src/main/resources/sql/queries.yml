@@ -177,11 +177,11 @@ custom:
       find-active-product-discount: >
         SELECT discount_id, offered_price, starts_at, ends_at
         FROM discount
-        WHERE product_id = ? AND SELECT (NOW() AT TIME ZONE 'EETDST') < ends_at AND SELECT (NOW() AT TIME ZONE 'EETDST') > starts_at;
+        WHERE product_id = ? AND NOW() < ends_at AND NOW() > starts_at;
       find-unexpired-discounts: >
         SELECT discount_id, offered_price, starts_at, ends_at
         FROM discount
-        WHERE product_id = ? AND SELECT (NOW() AT TIME ZONE 'EETDST') < ends_at;
+        WHERE product_id = ? AND NOW()< ends_at;
       check-period: >
         SELECT COUNT(discount_id)
         FROM discount
