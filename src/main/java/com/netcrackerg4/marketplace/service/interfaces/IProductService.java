@@ -31,4 +31,6 @@ public interface IProductService {
     void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto);
     void removeDiscount(UUID discountId);
     void activateDeactivateProduct(UUID productId);
+
+    void updatePopularNow();
 }

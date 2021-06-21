@@ -95,13 +95,13 @@ custom:
                 (SELECT offered_price
                  FROM discount
                  WHERE product.product_id=discount.product_id
-                 AND starts_at<now() AND ends_at>now())
+                 AND starts_at<now() AND ends_at>now()), popular_now
                FROM product
                WHERE is_active=true
                LIMIT (:limit) OFFSET (:offset);
 
       products-with-filters-order-by-price-asc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -117,7 +117,7 @@ custom:
 
 
       products-with-filters-order-by-price-desc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -133,7 +133,7 @@ custom:
 
 
       products-with-filters-order-by-name: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -143,14 +143,14 @@ custom:
                 END)
           AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
-        ORDER BY product_name DESC
+        ORDER BY product_name
         LIMIT (:limit) OFFSET (:offset);
 
 
 
 
       products-with-filters-order-by-date: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -160,7 +160,7 @@ custom:
                 END)
           AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
-        ORDER BY availability_date
+        ORDER BY availability_date DESC
         LIMIT (:limit) OFFSET (:offset);
 
       activate-deactivate-product: >
@@ -172,6 +172,20 @@ custom:
         SELECT product_id, product_name, description, image_url, price, category_id
         FROM product
         WHERE product_id = ?
+      popular-now: >
+        SELECT product_id
+        FROM order_item INNER JOIN prod_order ON order_item.order_id = prod_order.order_id
+        WHERE placed_at > 'now'::timestamp - '1 month'::interval
+        GROUP BY product_id
+        ORDER BY COUNT(product_id) DESC
+        LIMIT (:limit);
+      clear-popular-now: >
+        UPDATE product
+        SET popular_now = FALSE;
+      update-popular-now: >
+        UPDATE product
+        SET popular_now = TRUE
+        WHERE product_id IN (:ids);
 
     discount:
       find-active-product-discount: >

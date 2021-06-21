@@ -18,6 +18,7 @@ import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import com.netcrackerg4.marketplace.util.Page;
 import com.netcrackerg4.marketplace.util.mappers.DiscountEntity_Dao;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -171,6 +172,20 @@ public class ProductServiceImpl implements IProductService {
         }
     }
 
+
+    @Override
+    @Scheduled(cron = "0 0 13 * * ?")
+  //  @Scheduled(fixedRate = 20000)
+    @Transactional
+    public void updatePopularNow() {
+        productDao.clearPopularNow();
+
+        if(getAmountOfPopularProducts()==0)
+            return;
+        List<UUID> populars= productDao.popularNowIds(getAmountOfPopularProducts());
+        productDao.updatePopularNow(populars);
+    }
+
     @Transactional
     @Override
     public Page<ProductResponse> findProducts(ProductSearchFilter searchFilter, int pageSize, int pageN) {
@@ -195,4 +210,16 @@ public class ProductServiceImpl implements IProductService {
     }
 
 
+    private int getAmountOfPopularProducts(){
+        int all = productDao.findAllSize();
+        if(all<9)
+            return 0;
+        if(all<21)
+            return 3;
+        if(all<60)
+            return 6;
+        if(all<100)
+            return 9;
+        return 20;
+    }
 }

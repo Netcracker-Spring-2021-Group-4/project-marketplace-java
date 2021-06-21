@@ -145,6 +145,7 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     public void setOrderStatus(UUID orderId, OrderStatus newStatus, boolean notifyCourier) {
         OrderEntity order = orderDao.read(orderId).orElseThrow();
+
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FAILED)
             throw new IllegalStateException("Status of cancelled or failed order cannot be changed.");
         orderDao.updateStatus(orderId, newStatus);
