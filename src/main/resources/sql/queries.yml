@@ -147,7 +147,7 @@ custom:
                 END)
           AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
-        ORDER BY product_name DESC
+        ORDER BY product_name
         LIMIT (:limit) OFFSET (:offset);
 
 
@@ -164,7 +164,7 @@ custom:
                 END)
           AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
-        ORDER BY availability_date
+        ORDER BY availability_date DESC
         LIMIT (:limit) OFFSET (:offset);
 
       activate-deactivate-product: >
