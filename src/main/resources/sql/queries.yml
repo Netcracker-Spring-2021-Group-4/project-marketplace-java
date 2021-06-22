@@ -190,6 +190,25 @@ custom:
         UPDATE product
         SET popular_now = TRUE
         WHERE product_id IN (:ids);
+      products-support: >
+        SELECT COUNT(order_id)::decimal/(SELECT COUNT(order_id)
+                            FROM prod_order) AS support
+        FROM prod_order
+        WHERE ( (:prodY) IN (SELECT product_id
+                            FROM order_item
+                            WHERE prod_order.order_id=order_item.order_id)
+           AND  (:prodX) IN  (SELECT product_id
+                          FROM order_item
+                          WHERE prod_order.order_id=order_item.order_id));
+      product-frequency: >
+        SELECT COUNT(order_id)::decimal/(SELECT COUNT(order_id)
+                                         FROM prod_order) AS frequency
+        FROM prod_order
+        WHERE (:x) IN (SELECT product_id
+                       FROM order_item
+                       WHERE prod_order.order_id=order_item.order_id);
+
+
 
     discount:
       find-active-product-discount: >

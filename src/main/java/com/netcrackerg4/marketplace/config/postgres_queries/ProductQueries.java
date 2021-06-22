@@ -24,4 +24,7 @@ public class ProductQueries {
     private String popularNow;
     private String clearPopularNow;
     private String updatePopularNow;
+
+    private String productsSupport;
+    private String productFrequency;
 }
