@@ -23,5 +23,7 @@ public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID>
      List<UUID> popularNowIds(int limit);
      void clearPopularNow();
      void updatePopularNow(List<UUID> ids);
+     double getProductsSupport(UUID productX, UUID productY);
+     double getProductFrequency(UUID productId);
 
 }

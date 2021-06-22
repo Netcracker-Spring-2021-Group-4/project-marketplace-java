@@ -164,13 +164,14 @@ public class ProductServiceImpl implements IProductService {
             .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
         if(product.getIsActive()) {
             product.setReserved(0);
-            productDao.activateDeactivateProduct(product);
         }
         else{
             product.setAvailabilityDate(new Date());
-            productDao.activateDeactivateProduct(product);
         }
+        productDao.activateDeactivateProduct(product);
     }
+
+
 
 
     @Override

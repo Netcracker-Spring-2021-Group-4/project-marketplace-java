@@ -128,7 +128,8 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public int findAllSize() {
-        return getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(),Integer.class);
+        Integer numFound= getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(),Integer.class);
+        return numFound!=null?numFound:0;
     }
 
     @Override
@@ -142,9 +143,10 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 
-        return namedParameterJdbcTemplate.queryForObject(productQueries.getActiveProductsFilteredSize(),
-                namedParams, Integer.class
-        );
+        Integer numFound = namedParameterJdbcTemplate.queryForObject(productQueries.getActiveProductsFilteredSize(),
+                namedParams, Integer.class);
+
+        return numFound!=null?numFound:0;
 
     }
 
@@ -199,6 +201,33 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
 
     @Override
+    public double getProductsSupport(UUID productX, UUID productY) {
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("prodX", productX);
+            addValue("prodY", productY);
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+
+        Double support= namedParameterJdbcTemplate.queryForObject(productQueries.getProductsSupport(),
+                namedParams, Double.class);
+        return support!=null?support:0;
+    }
+
+    @Override
+    public double getProductFrequency(UUID productId) {
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("productId", productId);
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+
+        Double frequency= namedParameterJdbcTemplate.queryForObject(productQueries.getProductFrequency(),
+                namedParams, Double.class);
+        return frequency!=null?frequency:0;
+    }
+
+    @Override
     public Integer maxPrice() {
         return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
     }
@@ -208,5 +237,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     public void delete(UUID key) {
         throw new UnsupportedOperationException();
     }
+
+
 
 }
