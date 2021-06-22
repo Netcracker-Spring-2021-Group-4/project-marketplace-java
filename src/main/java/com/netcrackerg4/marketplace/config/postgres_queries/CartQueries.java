@@ -15,4 +15,6 @@ public class CartQueries {
     private String cancelReservation;
     private String removeFromCart;
     private String resetCart;
+    private String findCartItemsByOrderId;
+
 }

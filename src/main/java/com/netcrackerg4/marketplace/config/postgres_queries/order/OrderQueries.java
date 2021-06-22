@@ -13,6 +13,7 @@ public class OrderQueries {
 
     private String findCourierOrders;
     private String findCustomerOrders;
+    private String findOrderDetails;
 
     private String checkCourierAssigned;
     private String checkCustomerMade;

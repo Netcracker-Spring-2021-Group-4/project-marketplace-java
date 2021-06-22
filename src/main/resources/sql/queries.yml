@@ -95,13 +95,13 @@ custom:
                 (SELECT offered_price
                  FROM discount
                  WHERE product.product_id=discount.product_id
-                 AND starts_at<now() AND ends_at>now())
+                 AND starts_at<now() AND ends_at>now()), popular_now
                FROM product
                WHERE is_active=true
                LIMIT (:limit) OFFSET (:offset);
 
       products-with-filters-order-by-price-asc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -117,7 +117,7 @@ custom:
 
 
       products-with-filters-order-by-price-desc: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -133,7 +133,7 @@ custom:
 
 
       products-with-filters-order-by-name: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -143,14 +143,14 @@ custom:
                 END)
           AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
-        ORDER BY product_name DESC
+        ORDER BY product_name
         LIMIT (:limit) OFFSET (:offset);
 
 
 
 
       products-with-filters-order-by-date: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
         WHERE is_active=true
           AND ( CASE
@@ -160,7 +160,7 @@ custom:
                 END)
           AND product_name ILIKE (:name_query)
           AND category_id IN (:category_ids)
-        ORDER BY availability_date
+        ORDER BY availability_date DESC
         LIMIT (:limit) OFFSET (:offset);
 
       activate-deactivate-product: >
@@ -172,16 +172,30 @@ custom:
         SELECT product_id, product_name, description, image_url, price, category_id
         FROM product
         WHERE product_id = ?
+      popular-now: >
+        SELECT product_id
+        FROM order_item INNER JOIN prod_order ON order_item.order_id = prod_order.order_id
+        WHERE placed_at > 'now'::timestamp - '1 month'::interval
+        GROUP BY product_id
+        ORDER BY COUNT(product_id) DESC
+        LIMIT (:limit);
+      clear-popular-now: >
+        UPDATE product
+        SET popular_now = FALSE;
+      update-popular-now: >
+        UPDATE product
+        SET popular_now = TRUE
+        WHERE product_id IN (:ids);
 
     discount:
       find-active-product-discount: >
         SELECT discount_id, offered_price, starts_at, ends_at
         FROM discount
-        WHERE product_id = ? AND NOW() < ends_at AND NOW() > starts_at;
+        WHERE product_id = ? AND (NOW() AT TIME ZONE 'EETDST') < ends_at AND (NOW() AT TIME ZONE 'EETDST') > starts_at;
       find-unexpired-discounts: >
         SELECT discount_id, offered_price, starts_at, ends_at
         FROM discount
-        WHERE product_id = ? AND NOW()< ends_at;
+        WHERE product_id = ? AND (NOW() AT TIME ZONE 'EETDST') < ends_at;
       check-period: >
         SELECT COUNT(discount_id)
         FROM discount
@@ -237,6 +251,10 @@ custom:
         SELECT product_id, quantity
         FROM cart_item
         WHERE customer_id = ?;
+      find-cart-items-by-order-id: >
+        SELECT product_id, quantity
+        FROM order_item
+        WHERE order_id = ?;
       reset-cart: >
         DELETE FROM cart_item
         WHERE customer_id=?;
@@ -277,7 +295,7 @@ custom:
         FROM dateslot INNER JOIN timeslot USING (timeslot_id)
         WHERE order_id=?;
       courier-orders: >
-        SELECT order_id, time_start, time_end, phone_number, first_name, last_name, status_name, city,street,building,flat
+        SELECT order_id, time_start, time_end, phone_number, first_name, last_name, status_name, city,street,building,flat,comment
         FROM (((prod_order INNER JOIN dateslot USING (order_id)) INNER JOIN address using (address_id)) INNER JOIN order_status USING (status_id)) INNER JOIN timeslot USING (timeslot_id)
         WHERE courier_id=(:courier_id) AND datestamp =(:date)
         ORDER BY time_start;
@@ -298,6 +316,10 @@ custom:
         FROM prod_order INNER JOIN dateslot USING (order_id)
         WHERE courier_id=(:courier_id) AND status_id IN (:prod_status_ids)
         LIMIT (:limit) OFFSET (:offset);
+      find-order-details: >
+        SELECT  order_id, placed_at, phone_number, comment, first_name, last_name, status_id, address_id, customer_id
+        FROM prod_order
+        WHERE order_id=(:order_id)
       count-courier-orders-num: >
         SELECT COALESCE(COUNT(order_id), 0) AS temp
         FROM prod_order INNER JOIN dateslot USING (order_id)

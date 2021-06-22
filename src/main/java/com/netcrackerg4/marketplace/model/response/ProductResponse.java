@@ -26,6 +26,6 @@ public class ProductResponse {
         private Integer inStock;
         private Integer categoryId;
         private Integer discount;
-
+        private Boolean popularNow;
 
 }

@@ -8,6 +8,14 @@ import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
+
+import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
+import com.netcrackerg4.marketplace.model.dto.ContentErrorWrapper;
+import com.netcrackerg4.marketplace.model.dto.order.*;
+import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
+import com.netcrackerg4.marketplace.model.enums.OrderStatus;
+import com.netcrackerg4.marketplace.model.response.OrderInfoResponse;
+import com.netcrackerg4.marketplace.model.response.ОrderProductInfo;
 import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
 import com.netcrackerg4.marketplace.model.dto.order.OrderItemRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
@@ -16,6 +24,7 @@ import com.netcrackerg4.marketplace.model.dto.timestamp.DateTimeSlot;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.model.response.CustomerOrderResponse;
+
 import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
@@ -23,9 +32,8 @@ import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
-import com.netcrackerg4.marketplace.service.interfaces.IMailService;
-import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
-import com.netcrackerg4.marketplace.service.interfaces.IOrderStatusAutoUpdate;
+import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderItemDao;
+import com.netcrackerg4.marketplace.service.interfaces.*;
 import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
@@ -56,6 +64,7 @@ public class OrderServiceImpl implements IOrderService {
 
     private final IDeliverySlotDao deliverySlotDao;
     private final ICartItemDao cartItemDao;
+    private final IOrderItemDao orderItemDao;
     private final IOrderDao orderDao;
     private final IProductDao productDao;
     private final IDiscountDao discountDao;
@@ -63,6 +72,8 @@ public class OrderServiceImpl implements IOrderService {
     private final IMailService mailService;
     private final IAdvLockUtil advLockUtil;
     private final IOrderStatusAutoUpdate orderAutoUpdate;
+    private final IProductService productService;
+    private final ICategoryService categoryService;
 
     @PostConstruct
     private void initAutoUpdate() {
@@ -145,6 +156,7 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     public void setOrderStatus(UUID orderId, OrderStatus newStatus, boolean notifyCourier) {
         OrderEntity order = orderDao.read(orderId).orElseThrow();
+
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FAILED)
             throw new IllegalStateException("Status of cancelled or failed order cannot be changed.");
         orderDao.updateStatus(orderId, newStatus);
@@ -193,6 +205,61 @@ public class OrderServiceImpl implements IOrderService {
         int totalNumOrders = orderDao.countCourierOrders(courierId, targetOrderStatuses);
         int numPages = (int) Math.ceil((double) totalNumOrders / COURIER_ORDERS);
         return new EagerContentPage<>(orderDetailsItems, numPages, COURIER_ORDERS);
+    }
+    @Override
+    public ContentErrorListWrapper<OrderInfoResponse> getOrderDetail(UUID orderId) {
+        List<OrderItemEntity> orderItems = orderItemDao.readItemsOfOrder(orderId);
+
+        List<ContentErrorWrapper<ОrderProductInfo>> mapperResults = orderItems.stream()
+                .map(this::orderedProductInfoMapper).collect(Collectors.toList());
+        var productInfos = mapperResults.stream()
+                .map(ContentErrorWrapper::getContent)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        int summaryPrice = productInfos.stream().mapToInt(ОrderProductInfo::getTotalPrice).sum();
+
+        OrderEntity order = orderDao.read(orderId).orElseThrow();
+        var content = OrderInfoResponse.builder()
+                .orderId(orderId)
+                .placedAt(order.getPlacedAt())
+                .phoneNumber(order.getPhoneNumber())
+                .firstName(order.getFirstName())
+                .lastName(order.getLastName())
+                .city(order.getAddress().getCity())
+                .street(order.getAddress().getStreet())
+                .building(order.getAddress().getBuilding())
+                .flat(order.getAddress().getFlat())
+                .statusName(order.getStatus())
+                .content(productInfos)
+                .summaryPrice(summaryPrice)
+                .comment(order.getComment())
+                .build();
+        var errors = mapperResults.stream()
+                .map(ContentErrorWrapper::getError)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        return new ContentErrorListWrapper<>(content, errors);
+    }
+    private ContentErrorWrapper<ОrderProductInfo> orderedProductInfoMapper(OrderItemEntity orderItem) {
+        var result = new ContentErrorWrapper<ОrderProductInfo>();
+        UUID productId = orderItem.getProductId();
+        int quantity = orderItem.getQuantity();
+
+        var product = productService.findProductById(productId).orElseThrow();
+        var productInfo =
+                ОrderProductInfo.builder()
+                        .productId(productId)
+                        .name(product.getName())
+                        .imageUrl(product.getImageUrl())
+                        .price(orderItem.getPricePerProduct())
+                        .quantity(quantity);
+            int totalPrice = orderItem.getPricePerProduct() * quantity;
+            productInfo.totalPrice(totalPrice);
+
+
+        var content = productInfo.build();
+        result.setContent(content);
+        return result;
     }
 
     @Override

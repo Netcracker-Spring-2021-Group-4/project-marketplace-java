@@ -16,4 +16,5 @@ public interface ICartItemDao {
     int reserveProduct(int quantity, UUID productId);
     int cancelReservation(int quantity, UUID productId);
     void resetCustomerCart(UUID customerId);
+    List<CartItemDto> getCartItemsByOrderId(UUID orderId);
 }
