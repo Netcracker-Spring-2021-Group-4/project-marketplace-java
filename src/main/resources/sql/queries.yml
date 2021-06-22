@@ -306,6 +306,10 @@ custom:
         FROM prod_order INNER JOIN dateslot USING (order_id)
         WHERE courier_id=(:courier_id) AND status_id IN (:prod_status_ids)
         LIMIT (:limit) OFFSET (:offset);
+      find-order-details: >
+        SELECT  order_id, placed_at, phone_number, comment, first_name, last_name, status_id, address_id, customer_id
+        FROM prod_order
+        WHERE order_id=(:order_id)
       count-courier-orders-num: >
         SELECT COALESCE(COUNT(order_id), 0) AS temp
         FROM prod_order INNER JOIN dateslot USING (order_id)

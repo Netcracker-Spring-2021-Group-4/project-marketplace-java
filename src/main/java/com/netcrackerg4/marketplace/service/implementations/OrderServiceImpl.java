@@ -10,15 +10,11 @@ import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
 import com.netcrackerg4.marketplace.model.dto.ContentErrorWrapper;
-import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
-import com.netcrackerg4.marketplace.model.dto.order.OrderItemRequest;
-import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
-import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
-import com.netcrackerg4.marketplace.model.dto.product.CartItemDto;
+import com.netcrackerg4.marketplace.model.dto.order.*;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
-import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
-import com.netcrackerg4.marketplace.model.response.CartProductInfo;
+import com.netcrackerg4.marketplace.model.response.OrderInfoResponse;
+import com.netcrackerg4.marketplace.model.response.ОrderProductInfo;
 import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
@@ -26,6 +22,7 @@ import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
+import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderItemDao;
 import com.netcrackerg4.marketplace.service.interfaces.*;
 import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
@@ -55,6 +52,7 @@ public class OrderServiceImpl implements IOrderService {
 
     private final IDeliverySlotDao deliverySlotDao;
     private final ICartItemDao cartItemDao;
+    private final IOrderItemDao orderItemDao;
     private final IOrderDao orderDao;
     private final IProductDao productDao;
     private final IDiscountDao discountDao;
@@ -196,22 +194,32 @@ public class OrderServiceImpl implements IOrderService {
         return new EagerContentPage<>(orderDetailsItems, numPages, COURIER_ORDERS);
     }
     @Override
-    public ContentErrorListWrapper<CartInfoResponse> getOrderedProducts(UUID orderId) {
-        List<CartItemDto> cartItems = cartItemDao.getCartItemsByOrderId(orderId);
+    public ContentErrorListWrapper<OrderInfoResponse> getOrderDetail(UUID orderId) {
+        List<OrderItemEntity> orderItems = orderItemDao.readItemsOfOrder(orderId);
 
-        List<ContentErrorWrapper<CartProductInfo>> mapperResults = cartItems.stream()
+        List<ContentErrorWrapper<ОrderProductInfo>> mapperResults = orderItems.stream()
                 .map(this::orderedProductInfoMapper).collect(Collectors.toList());
         var productInfos = mapperResults.stream()
                 .map(ContentErrorWrapper::getContent)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
-        int summaryPrice = productInfos.stream().mapToInt(CartProductInfo::getTotalPrice).sum();
-        int summaryPriceWithoutDiscount = productInfos.stream().mapToInt(CartProductInfo::getTotalPriceWithoutDiscount).sum();
+        int summaryPrice = productInfos.stream().mapToInt(ОrderProductInfo::getTotalPrice).sum();
 
-        var content = CartInfoResponse.builder()
+        OrderEntity order = orderDao.read(orderId).orElseThrow();
+        var content = OrderInfoResponse.builder()
+                .orderId(orderId)
+                .placedAt(order.getPlacedAt())
+                .phoneNumber(order.getPhoneNumber())
+                .firstName(order.getFirstName())
+                .lastName(order.getLastName())
+                .city(order.getAddress().getCity())
+                .street(order.getAddress().getStreet())
+                .building(order.getAddress().getBuilding())
+                .flat(order.getAddress().getFlat())
+                .statusName(order.getStatus())
                 .content(productInfos)
                 .summaryPrice(summaryPrice)
-                .summaryPriceWithoutDiscount(summaryPriceWithoutDiscount)
+                .comment(order.getComment())
                 .build();
         var errors = mapperResults.stream()
                 .map(ContentErrorWrapper::getError)
@@ -219,38 +227,23 @@ public class OrderServiceImpl implements IOrderService {
                 .collect(Collectors.toList());
         return new ContentErrorListWrapper<>(content, errors);
     }
-
-    private ContentErrorWrapper<CartProductInfo> orderedProductInfoMapper(CartItemDto cartItem) {
-        var result = new ContentErrorWrapper<CartProductInfo>();
-        UUID productId = cartItem.getProductId();
-        int quantity = cartItem.getQuantity();
+    private ContentErrorWrapper<ОrderProductInfo> orderedProductInfoMapper(OrderItemEntity orderItem) {
+        var result = new ContentErrorWrapper<ОrderProductInfo>();
+        UUID productId = orderItem.getProductId();
+        int quantity = orderItem.getQuantity();
 
         var product = productService.findProductById(productId).orElseThrow();
-
-        var categoryName = categoryService.findNameById(product.getCategoryId());
         var productInfo =
-                CartProductInfo.builder()
+                ОrderProductInfo.builder()
                         .productId(productId)
                         .name(product.getName())
-                        .description(product.getDescription())
                         .imageUrl(product.getImageUrl())
-                        .price(product.getPrice())
-                        .quantity(quantity)
-                        .category(categoryName);
-        int totalPriceWithoutDiscount = product.getPrice() * quantity;
-        productInfo.totalPriceWithoutDiscount(totalPriceWithoutDiscount);
+                        .price(orderItem.getPricePerProduct())
+                        .quantity(quantity);
+            int totalPrice = orderItem.getPricePerProduct() * quantity;
+            productInfo.totalPrice(totalPrice);
 
-        productService.findActiveProductDiscount(cartItem.getProductId()).ifPresentOrElse(
-                discount -> {
-                    int offeredPrice = discount.getOfferedPrice();
-                    productInfo
-                            .discount(offeredPrice)
-                            .totalPrice(offeredPrice * quantity);
-                },
-                () -> productInfo
-                        .discount(-1)
-                        .totalPrice(totalPriceWithoutDiscount)
-        );
+
         var content = productInfo.build();
         result.setContent(content);
         return result;

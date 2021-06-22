@@ -6,7 +6,7 @@ import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
-import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
+import com.netcrackerg4.marketplace.model.response.OrderInfoResponse;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 
 import java.time.LocalDate;
@@ -26,6 +26,6 @@ public interface IOrderService {
 
     boolean customerOwnsOrder(UUID userId, UUID orderId);
 
-    ContentErrorListWrapper<CartInfoResponse> getOrderedProducts(UUID orderId);
+    ContentErrorListWrapper<OrderInfoResponse> getOrderDetail(UUID orderId);
 
 }
