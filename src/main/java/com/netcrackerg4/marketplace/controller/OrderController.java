@@ -61,7 +61,7 @@ public class OrderController {
             if (customer != null && customer.getRole() != UserRole.ROLE_CUSTOMER)
                 throw new IllegalStateException("Only customers can make orders.");
         } else if (orderRequest.getFirstName() == null || orderRequest.getLastName() == null)
-            throw new IllegalStateException("Customer must either be authenticated or provide his full name.");
+            throw new IllegalStateException("Customer must provide his full name.");
         orderService.makeOrder(orderRequest, customer);
     }
 }

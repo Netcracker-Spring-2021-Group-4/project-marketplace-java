@@ -7,10 +7,7 @@ import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.lang.Nullable;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Future;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,9 +21,9 @@ public class OrderRequest {
     private LocalDateTime deliverySlot;
     @NotNull
     private AddressDto address;
-    @Nullable
+    @NotBlank
     private String firstName;
-    @Nullable
+    @NotBlank
     private String lastName;
     @Nullable
     private String comment;
