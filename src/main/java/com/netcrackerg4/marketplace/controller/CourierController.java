@@ -4,8 +4,8 @@ import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
-import com.netcrackerg4.marketplace.model.response.CartInfoResponse;
 import com.netcrackerg4.marketplace.model.response.CourierDeliveryResponse;
+import com.netcrackerg4.marketplace.model.response.OrderInfoResponse;
 import com.netcrackerg4.marketplace.service.interfaces.ICartService;
 import com.netcrackerg4.marketplace.service.interfaces.ICourierService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
@@ -58,9 +58,8 @@ public class CourierController {
             throw new IllegalStateException("you are not assigned to this delivery");
         orderService.setOrderStatus(orderId, orderStatus, false);
     }
-
     @GetMapping("/orders/{orderId}")
-    public ContentErrorListWrapper<CartInfoResponse> getOrderedProducts(@PathVariable UUID orderId) {
-        return orderService.getOrderedProducts(orderId);
+    public ContentErrorListWrapper<OrderInfoResponse> getOrderDetails(@PathVariable UUID orderId) {
+        return orderService.getOrderDetail(orderId);
     }
 }
