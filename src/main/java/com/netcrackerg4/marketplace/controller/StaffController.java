@@ -48,6 +48,9 @@ public class StaffController {
 
     @PostMapping("/find")
     EagerContentPage<UserAdminView> findEmployees(@RequestBody @Valid UserSearchFilter userFilter, @RequestParam @Min(0) int page) {
+        if (userFilter.getTargetRoles() == null) {
+            userFilter.setTargetRoles(List.of(UserRole.ROLE_COURIER, UserRole.ROLE_PRODUCT_MGR));
+        }
         return userService.findUsers(userFilter, page);
     }
 
