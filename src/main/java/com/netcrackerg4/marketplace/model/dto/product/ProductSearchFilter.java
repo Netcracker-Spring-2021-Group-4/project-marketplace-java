@@ -17,7 +17,7 @@ public class ProductSearchFilter {
     @Nullable
     private List<Integer> categoryIds;
     @Nullable
-    @Size(min = 2)
+    @Size(max = 20)
     private String nameQuery;
     @Min(0)
     private int minPrice;
