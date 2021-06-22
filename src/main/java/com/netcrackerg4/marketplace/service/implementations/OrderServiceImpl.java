@@ -8,6 +8,7 @@ import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
+
 import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
 import com.netcrackerg4.marketplace.model.dto.ContentErrorWrapper;
 import com.netcrackerg4.marketplace.model.dto.order.*;
@@ -15,6 +16,15 @@ import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.model.response.OrderInfoResponse;
 import com.netcrackerg4.marketplace.model.response.ОrderProductInfo;
+import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
+import com.netcrackerg4.marketplace.model.dto.order.OrderItemRequest;
+import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
+import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
+import com.netcrackerg4.marketplace.model.dto.timestamp.DateTimeSlot;
+import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
+import com.netcrackerg4.marketplace.model.enums.OrderStatus;
+import com.netcrackerg4.marketplace.model.response.CustomerOrderResponse;
+
 import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
@@ -27,6 +37,7 @@ import com.netcrackerg4.marketplace.service.interfaces.*;
 import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
+import com.netcrackerg4.marketplace.util.mappers.OrderEntity_CustomerResponse;
 import com.netcrackerg4.marketplace.util.mappers.OrderItemMapper;
 import com.netcrackerg4.marketplace.util.mappers.UserMapper;
 import lombok.AllArgsConstructor;
@@ -41,6 +52,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -144,6 +156,7 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     public void setOrderStatus(UUID orderId, OrderStatus newStatus, boolean notifyCourier) {
         OrderEntity order = orderDao.read(orderId).orElseThrow();
+
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FAILED)
             throw new IllegalStateException("Status of cancelled or failed order cannot be changed.");
         orderDao.updateStatus(orderId, newStatus);
@@ -247,6 +260,21 @@ public class OrderServiceImpl implements IOrderService {
         var content = productInfo.build();
         result.setContent(content);
         return result;
+    }
+
+    @Override
+    public List<CustomerOrderResponse> getCustomerOrders(AppUserEntity customer, List<OrderStatus> targetOrderStatuses) {
+        List<OrderEntity> orders = orderDao.readCustomerOrders(customer.getUserId(), targetOrderStatuses);
+        List<CustomerOrderResponse> ordersResp = orders.stream()
+                .map(OrderEntity_CustomerResponse::toOrderResponse)
+                .collect(Collectors.toList());
+        ordersResp.forEach(order -> {
+            DateTimeSlot slot = deliverySlotDao.findSlotByOrder(order.getOrderId()).orElseThrow();
+            order.setDeliveryDate(slot.getDeliveryDate().atStartOfDay().toEpochSecond(ZoneOffset.ofHours(3)) * 1000);
+            order.setTimeStart(LocalDate.now().atTime(slot.getTimeStart()).toEpochSecond(ZoneOffset.ofHours(3)) * 1000);
+            order.setTimeEnd(LocalDate.now().atTime(slot.getTimeEnd()).toEpochSecond(ZoneOffset.ofHours(3)) * 1000);
+        });
+        return ordersResp;
     }
 
     @Override

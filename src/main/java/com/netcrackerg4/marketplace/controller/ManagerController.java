@@ -42,14 +42,8 @@ public class ManagerController {
         productService.updateProductPicture(id, multipartFile);
     }
 
-    @PutMapping("/products/{productId}/discounts/{discountId}")
-    void editDiscount(@PathVariable UUID productId, @PathVariable UUID discountId,
-                      @RequestBody @Valid DiscountDto discountDto) {
-        productService.editDiscount(productId, discountId, discountDto);
-    }
-
     @PatchMapping("/products/{productId}/activate-deactivate")
-    void activateDeactivateProduct(@PathVariable("productId") UUID productId){
+    void activateDeactivateProduct(@PathVariable("productId") UUID productId) {
         productService.activateDeactivateProduct(productId);
     }
 
@@ -58,6 +52,12 @@ public class ManagerController {
         if (discountDto.getStartsAt().isAfter(discountDto.getEndsAt()))
             throw new IllegalStateException("start time is after end time");
         productService.addDiscount(productId, discountDto);
+    }
+
+    @PutMapping("/products/{productId}/discounts/{discountId}")
+    void editDiscount(@PathVariable UUID productId, @PathVariable UUID discountId,
+                      @RequestBody @Valid DiscountDto discountDto) {
+        productService.editDiscount(productId, discountId, discountDto);
     }
 
     @GetMapping("/products/{productId}/unexpired-discounts")

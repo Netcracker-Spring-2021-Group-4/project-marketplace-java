@@ -46,9 +46,6 @@ public class DeliverySlotDaoImpl extends JdbcDaoSupport implements IDeliverySlot
         super.setDataSource(dataSource);
     }
 
-
-
-
     @PostConstruct
     private void initTimeslots() {
         timeslots = new HashSet<>(getJdbcTemplate().query(deliverySlotQueries.getReadAllTimeslots(),

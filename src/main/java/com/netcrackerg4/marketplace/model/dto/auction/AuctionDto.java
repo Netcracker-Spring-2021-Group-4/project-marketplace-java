@@ -8,6 +8,7 @@ import lombok.experimental.Delegate;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Future;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class AuctionDto {
     @Future(message = ValidationDefaultMessage.WRONG_FORMAT_AUCTION_STARTS_AT)
     private LocalDateTime startsAt;
     @Min(value= 100_00, message = ValidationDefaultMessage.WRONG_FORMAT_AUCTION_START_PRICE)
+    @Max(value = 120_567_00, message = ValidationDefaultMessage.WRONG_FORMAT_AUCTION_START_PRICE_MAX)
     private int startPrice;
     @Min(value= 3, message = ValidationDefaultMessage.WRONG_FORMAT_AUCTION_PRODUCT_QUANTITY)
     private int productQuantity;

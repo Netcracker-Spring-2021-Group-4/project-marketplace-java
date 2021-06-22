@@ -69,7 +69,7 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
                     .lastName(rs.getString("last_name"))
                     .status(orderStatusIds.inverse().get(rs.getInt("status_id")))
                     .address(addressDao.read(rs.getObject("address_id", UUID.class)).orElseThrow())
-                    .customer(userDao.read(rs.getObject("customer_id", UUID.class)).orElseThrow())
+                    .customer(userDao.read(rs.getObject("customer_id", UUID.class)).orElse(null))
                     .build(), key);
             if (coreOrder == null) return Optional.empty();
 
@@ -99,10 +99,20 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
             addValue("limit", pageSize);
             addValue("offset", pageSize * pageNo);
         }};
-        return doReadOrders(orderQueries.getFindCourierOrders(), namedParams, true);
+        return doReadOrders(orderQueries.getFindCourierOrders(), namedParams);
     }
 
-    private List<OrderEntity> doReadOrders(String query, MapSqlParameterSource params, boolean canHaveNames) {
+    @Override
+    public List<OrderEntity> readCustomerOrders(UUID customerId, List<OrderStatus> orderStatuses) {
+        List<Integer> statusIds = orderStatuses.stream().map(orderStatusIds::get).collect(Collectors.toList());
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("customer_id", customerId);
+            addValue("prod_status_ids", statusIds);
+        }};
+        return doReadOrders(orderQueries.getFindCustomerOrders(), namedParams);
+    }
+
+    private List<OrderEntity> doReadOrders(String query, MapSqlParameterSource params) {
         NamedParameterJdbcTemplate namedJdbc = new NamedParameterJdbcTemplate(getJdbcTemplate());
         List<String> errors = new ArrayList<>(0);
         try {
@@ -114,10 +124,8 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
                         .comment(rs.getString("comment"))
                         .status(orderStatusIds.inverse().get(rs.getInt("status_id")));
 
-                if (canHaveNames) {
-                    orderBuilder.firstName(rs.getString("first_name"));
-                    orderBuilder.lastName(rs.getString("last_name"));
-                }
+                orderBuilder.firstName(rs.getString("first_name"));
+                orderBuilder.lastName(rs.getString("last_name"));
 
                 UUID addressId = rs.getObject("address_id", UUID.class);
                 Optional<AddressEntity> maybeAddress = addressDao.read(addressId);
@@ -163,18 +171,6 @@ public class OrderDaoImpl extends JdbcDaoSupport implements IOrderDao {
         } catch (EmptyResultDataAccessException e) {
             throw new IllegalStateException("error counting number of courier's orders", e);
         }
-    }
-
-    @Override
-    public List<OrderEntity> readCustomerOrders(UUID customerId, List<OrderStatus> orderStatuses, int pageSize, int pageNo) {
-        List<Integer> statusIds = orderStatuses.stream().map(orderStatusIds::get).collect(Collectors.toList());
-        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
-            addValue("customer_id", customerId);
-            addValue("prod_status_ids", statusIds);
-            addValue("limit", pageSize);
-            addValue("offset", pageSize * pageNo);
-        }};
-        return doReadOrders(orderQueries.getFindCourierOrders(), namedParams, false);
     }
 
     @Override
