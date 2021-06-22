@@ -8,6 +8,7 @@ import com.netcrackerg4.marketplace.model.response.ProductResponse;
 
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,7 +24,8 @@ public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID>
      List<UUID> popularNowIds(int limit);
      void clearPopularNow();
      void updatePopularNow(List<UUID> ids);
-     double getProductsSupport(UUID productX, UUID productY);
-     double getProductFrequency(UUID productId);
+     int getProductsSupport(UUID productX, UUID productY);
+     int getProductFrequency(UUID productId);
 
+     Map<UUID,Integer> getAllProductsSupport();
 }

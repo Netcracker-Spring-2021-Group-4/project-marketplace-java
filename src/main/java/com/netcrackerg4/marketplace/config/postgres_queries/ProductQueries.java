@@ -27,4 +27,5 @@ public class ProductQueries {
 
     private String productsSupport;
     private String productFrequency;
+    private String allProductSupport;
 }

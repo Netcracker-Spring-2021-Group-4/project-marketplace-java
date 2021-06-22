@@ -191,8 +191,7 @@ custom:
         SET popular_now = TRUE
         WHERE product_id IN (:ids);
       products-support: >
-        SELECT COUNT(order_id)::decimal/(SELECT COUNT(order_id)
-                            FROM prod_order) AS support
+        SELECT COUNT(order_id) AS support
         FROM prod_order
         WHERE ( (:prodY) IN (SELECT product_id
                             FROM order_item
@@ -200,9 +199,12 @@ custom:
            AND  (:prodX) IN  (SELECT product_id
                           FROM order_item
                           WHERE prod_order.order_id=order_item.order_id));
+      all-product-support: >
+          SELECT product.product_id, COUNT(order_id)
+          FROM product INNER JOIN order_item oi on product.product_id = oi.product_id
+          GROUP BY product.product_id;
       product-frequency: >
-        SELECT COUNT(order_id)::decimal/(SELECT COUNT(order_id)
-                                         FROM prod_order) AS frequency
+        SELECT COUNT(order_id)
         FROM prod_order
         WHERE (:productId) IN (SELECT product_id
                        FROM order_item

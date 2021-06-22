@@ -16,9 +16,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.sql.ResultSet;
+import java.util.*;
 
 @Repository
 @AllArgsConstructor
@@ -201,7 +200,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
 
     @Override
-    public double getProductsSupport(UUID productX, UUID productY) {
+    public int getProductsSupport(UUID productX, UUID productY) {
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("prodX", productX);
             addValue("prodY", productY);
@@ -209,22 +208,33 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 
-        Double support= namedParameterJdbcTemplate.queryForObject(productQueries.getProductsSupport(),
-                namedParams, Double.class);
+        Integer support= namedParameterJdbcTemplate.queryForObject(productQueries.getProductsSupport(),
+                namedParams, Integer.class);
         return support!=null?support:0;
     }
 
     @Override
-    public double getProductFrequency(UUID productId) {
+    public int getProductFrequency(UUID productId) {
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("productId", productId);
         }};
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 
-        Double frequency= namedParameterJdbcTemplate.queryForObject(productQueries.getProductFrequency(),
-                namedParams, Double.class);
+        Integer frequency= namedParameterJdbcTemplate.queryForObject(productQueries.getProductFrequency(),
+                namedParams, Integer.class);
         return frequency!=null?frequency:0;
+    }
+
+    @Override
+    public Map<UUID, Integer> getAllProductsSupport() {
+
+       return  getJdbcTemplate().query(productQueries.getAllProductSupport(), (ResultSet rs) -> {
+            Map<UUID,Integer> results = new HashMap<>();
+            while (rs.next()) {
+                results.put(UUID.fromString(rs.getString("product_id")), rs.getInt("count"));
+            }
+            return results;});
     }
 
     @Override

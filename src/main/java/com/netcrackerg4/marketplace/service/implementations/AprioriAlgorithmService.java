@@ -1,13 +1,61 @@
 package com.netcrackerg4.marketplace.service.implementations;
 
-import java.util.List;
-import java.util.UUID;
+import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
+import lombok.AllArgsConstructor;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+@AllArgsConstructor
 public class AprioriAlgorithmService {
 
     private static final int MIN_SUPPORT=2;
     private static final double MIN_CONFIDENCE=0.6;
 
+
+    private final IProductDao productDao;
+
+    public void algorithm(){
+
+      List<UUID> products = new ArrayList<>(productDao.getAllProductsSupport().entrySet().stream()
+              .filter(x -> x.getValue() >= MIN_SUPPORT)
+              .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()))
+              .keySet());
+      if(products.isEmpty()) return;
+
+
+
+        Map<UUID,Set<UUID>> recommends = new HashMap<>();
+        for (int i = 0; i < products .size(); i++) {
+            for (int j = 0; j < products.size(); j++) {
+                if(j==i) continue;
+
+                int support = productDao.getProductsSupport(products.get(i), products.get(j));
+                if (support < MIN_SUPPORT)
+                    continue;
+                int supportA = productDao.getProductFrequency(products.get(i));
+
+                if((double)support/supportA>=MIN_CONFIDENCE){
+                    if(recommends.get(products.get(i)).isEmpty())
+                       recommends.put(products.get(i), Collections.singleton(products.get(j)));
+                    else
+                        recommends.get(products.get(i)).add(products.get(j));
+                };
+            }
+            }
+        }
+
+   //   if(recommendations.isEmpty()) return;
+
+       // for (Map.Entry<UUID[], Integer> entry : recommendations.entrySet()) {
+        //  double confidence = entry.getValue()/entry.getKey()[0]
+     // }
+
+
+
+
+
+    }
 
 /*
     private void calculateFrequentItemsets(List<UUID> itemsets) throws Exception
@@ -72,6 +120,5 @@ public class AprioriAlgorithmService {
         itemsets = frequentCandidates;
     }
  */
-}
 
 
