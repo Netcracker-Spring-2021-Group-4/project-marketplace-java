@@ -49,7 +49,7 @@ public class ManagerController {
 
     @PostMapping("/products/{productId}/discounts")
     void createDiscount(@PathVariable UUID productId, @RequestBody @Valid DiscountDto discountDto) {
-        if (discountDto.getStartsAt().isAfter(discountDto.getEndsAt()))
+        if (discountDto.getStartsAt().after(discountDto.getEndsAt()))
             throw new IllegalStateException("start time is after end time");
         productService.addDiscount(productId, discountDto);
     }

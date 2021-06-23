@@ -13,12 +13,8 @@ public class DiscountEntity_Dao {
     public DiscountEntity toDiscountEntity(DiscountDto discountDto) {
         return DiscountEntity.builder()
                 .offeredPrice(discountDto.getOfferedPrice())
-                .startsAt(map(discountDto.getStartsAt()))
-                .endsAt(map(discountDto.getEndsAt()))
+                .startsAt(discountDto.getStartsAt())
+                .endsAt(discountDto.getEndsAt())
                 .build();
-    }
-
-    private Timestamp map(LocalDateTime value) {
-        return Timestamp.from(value.toInstant(ZoneOffset.ofHours(3)));
     }
 }
