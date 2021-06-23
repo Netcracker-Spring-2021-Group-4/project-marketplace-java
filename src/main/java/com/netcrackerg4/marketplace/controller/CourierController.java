@@ -29,14 +29,11 @@ public class CourierController {
     private final ICourierService courierService;
     private final IOrderService orderService;
     private final IUserService userService;
-    private final ICartService cartService;
 
     @GetMapping("{date}")
     List<CourierDeliveryResponse> getCourierOrders(@PathVariable
                                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                                                            LocalDate date) {
-        if (date.isBefore(LocalDate.now()))
-            throw new IllegalStateException("You can not see your past deliveries");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         return courierService.getDayTimeslots(date, email);
