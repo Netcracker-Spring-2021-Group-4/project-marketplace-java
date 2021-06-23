@@ -183,7 +183,11 @@ public class ProductServiceImpl implements IProductService {
 
         if(getAmountOfPopularProducts()==0)
             return;
+        
         List<UUID> populars= productDao.popularNowIds(getAmountOfPopularProducts());
+        if(populars.size() < getAmountOfPopularProducts())
+            return;
+
         productDao.updatePopularNow(populars);
     }
 

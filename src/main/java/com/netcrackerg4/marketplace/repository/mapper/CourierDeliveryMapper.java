@@ -23,6 +23,7 @@ public  class CourierDeliveryMapper implements RowMapper<CourierDeliveryResponse
                 .street(rs.getString("street"))
                 .building(rs.getString("building"))
                 .flat(rs.getInt("flat"))
+                .comment(rs.getString("comment"))
                 .statusName(OrderStatus.valueOf(rs.getString("status_name")))
                 .build();
                 }

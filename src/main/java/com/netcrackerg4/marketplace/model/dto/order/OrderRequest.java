@@ -7,10 +7,7 @@ import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.lang.Nullable;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Future;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,13 +17,13 @@ public class OrderRequest {
     @Pattern(regexp = ValidationConstants.PHONE_PATTERN, message = ValidationDefaultMessage.WRONG_FORMAT_PHONE_NUMBER)
     private String phoneNumber;
     @NotNull
-    @Future(message = "address must be specified to be in future")
+    @Future(message = "delivery slot must be specified to be in future")
     private LocalDateTime deliverySlot;
     @NotNull
     private AddressDto address;
-    @Nullable
+    @NotBlank
     private String firstName;
-    @Nullable
+    @NotBlank
     private String lastName;
     @Nullable
     private String comment;
