@@ -201,16 +201,15 @@ public class OrderServiceImpl implements IOrderService {
         int numPages = (int) Math.ceil((double) totalNumOrders / COURIER_ORDERS);
         return new EagerContentPage<>(orderDetailsItems, numPages, COURIER_ORDERS);
     }
+
     @Override
     public OrderInfoResponse getOrderDetail(UUID orderId) {
         List<OrderItemEntity> orderItems = orderItemDao.readItemsOfOrder(orderId);
-
         List<ОrderProductInfo> mapperResults = orderItems.stream()
                 .map(this::orderedProductInfoMapper).collect(Collectors.toList());
         int summaryPrice = mapperResults.stream().mapToInt(ОrderProductInfo::getTotalPrice).sum();
-
         OrderEntity order = orderDao.read(orderId).orElseThrow();
-        return  OrderInfoResponse.builder()
+        return OrderInfoResponse.builder()
                 .orderId(orderId)
                 .placedAt(order.getPlacedAt())
                 .phoneNumber(order.getPhoneNumber())
@@ -226,23 +225,19 @@ public class OrderServiceImpl implements IOrderService {
                 .comment(order.getComment())
                 .build();
     }
+
     private ОrderProductInfo orderedProductInfoMapper(OrderItemEntity orderItem) {
         UUID productId = orderItem.getProductId();
         int quantity = orderItem.getQuantity();
-
         var product = productService.findProductById(productId).orElseThrow();
-        var productInfo =
-                ОrderProductInfo.builder()
-                        .productId(productId)
-                        .name(product.getName())
-                        .imageUrl(product.getImageUrl())
-                        .price(orderItem.getPricePerProduct())
-                        .quantity(quantity);
-            int totalPrice = orderItem.getPricePerProduct() * quantity;
-            productInfo.totalPrice(totalPrice);
-
-        return productInfo.build();
-
+        return ОrderProductInfo.builder()
+                .productId(productId)
+                .name(product.getName())
+                .imageUrl(product.getImageUrl())
+                .price(orderItem.getPricePerProduct())
+                .quantity(quantity)
+                .totalPrice(orderItem.getPricePerProduct() * quantity)
+                .build();
     }
 
     @Override
