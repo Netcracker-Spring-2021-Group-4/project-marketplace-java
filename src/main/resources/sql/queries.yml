@@ -91,14 +91,19 @@ custom:
         FROM product
         WHERE is_active=true;
       products-page: >
-         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id,
-                (SELECT offered_price
-                 FROM discount
-                 WHERE product.product_id=discount.product_id
-                 AND starts_at<now() AND ends_at>now()), popular_now
-               FROM product
-               WHERE is_active=true
-               LIMIT (:limit) OFFSET (:offset);
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now,
+               CASE
+                   WHEN product.in_stock=0
+                   THEN -1
+                    ELSE (SELECT  COUNT(order_id)
+                   FROM order_item
+                   WHERE product.product_id=order_item.product_id
+            )
+                   END AS popularity
+        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
+        WHERE is_active=true
+        ORDER BY popularity DESC
+        LIMIT (:limit) OFFSET (:offset);
 
       products-with-filters-order-by-price-asc: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
@@ -146,9 +151,6 @@ custom:
         ORDER BY product_name
         LIMIT (:limit) OFFSET (:offset);
 
-
-
-
       products-with-filters-order-by-date: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
@@ -162,6 +164,29 @@ custom:
           AND category_id IN (:category_ids)
         ORDER BY availability_date DESC
         LIMIT (:limit) OFFSET (:offset);
+
+      products-with-filters-order-by-popularity: >
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now,
+               CASE
+                   WHEN product.in_stock=0
+                   THEN -1
+                    ELSE (SELECT  COUNT(order_id)
+                   FROM order_item
+                   WHERE product.product_id=order_item.product_id
+            )
+                   END AS popularity
+        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
+        WHERE is_active=true
+          AND ( CASE
+                    WHEN offered_price IS NULL
+                        THEN price BETWEEN (:minPrice) AND (:maxPrice)
+                    ELSE offered_price BETWEEN (:minPrice) AND (:maxPrice)
+            END)
+          AND product_name ILIKE (:name_query)
+          AND category_id IN (:category_ids)
+        ORDER BY popularity DESC
+        LIMIT (:limit) OFFSET (:offset);
+
 
       activate-deactivate-product: >
         UPDATE product

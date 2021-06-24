@@ -117,7 +117,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
                 sqlQuery=productQueries.getProductsWithFiltersOrderByName();
                 break;
             default:
-                sqlQuery=productQueries.getProductsWithFiltersOrderByDate();
+                sqlQuery=productQueries.getProductsWithFiltersOrderByPopularity();
         }
 
         return namedParameterJdbcTemplate. query(sqlQuery,

@@ -175,8 +175,8 @@ public class ProductServiceImpl implements IProductService {
 
 
     @Override
-    @Scheduled(cron = "0 0 13 * * ?")
-  //  @Scheduled(fixedRate = 20000)
+  //  @Scheduled(cron = "0 0 13 * * ?")
+    @Scheduled(fixedRate = 20000)
     @Transactional
     public void updatePopularNow() {
         productDao.clearPopularNow();
