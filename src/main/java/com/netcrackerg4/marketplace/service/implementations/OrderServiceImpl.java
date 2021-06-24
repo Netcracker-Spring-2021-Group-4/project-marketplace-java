@@ -9,9 +9,6 @@ import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 
-import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
-import com.netcrackerg4.marketplace.model.dto.ContentErrorWrapper;
-import com.netcrackerg4.marketplace.model.dto.order.*;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.model.response.OrderInfoResponse;
@@ -21,8 +18,6 @@ import com.netcrackerg4.marketplace.model.dto.order.OrderItemRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.DateTimeSlot;
-import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
-import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.model.response.CustomerOrderResponse;
 
 import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
@@ -207,19 +202,15 @@ public class OrderServiceImpl implements IOrderService {
         return new EagerContentPage<>(orderDetailsItems, numPages, COURIER_ORDERS);
     }
     @Override
-    public ContentErrorListWrapper<OrderInfoResponse> getOrderDetail(UUID orderId) {
+    public OrderInfoResponse getOrderDetail(UUID orderId) {
         List<OrderItemEntity> orderItems = orderItemDao.readItemsOfOrder(orderId);
 
-        List<ContentErrorWrapper<ОrderProductInfo>> mapperResults = orderItems.stream()
+        List<ОrderProductInfo> mapperResults = orderItems.stream()
                 .map(this::orderedProductInfoMapper).collect(Collectors.toList());
-        var productInfos = mapperResults.stream()
-                .map(ContentErrorWrapper::getContent)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        int summaryPrice = productInfos.stream().mapToInt(ОrderProductInfo::getTotalPrice).sum();
+        int summaryPrice = mapperResults.stream().mapToInt(ОrderProductInfo::getTotalPrice).sum();
 
         OrderEntity order = orderDao.read(orderId).orElseThrow();
-        var content = OrderInfoResponse.builder()
+        return  OrderInfoResponse.builder()
                 .orderId(orderId)
                 .placedAt(order.getPlacedAt())
                 .phoneNumber(order.getPhoneNumber())
@@ -230,18 +221,12 @@ public class OrderServiceImpl implements IOrderService {
                 .building(order.getAddress().getBuilding())
                 .flat(order.getAddress().getFlat())
                 .statusName(order.getStatus())
-                .content(productInfos)
+                .content(mapperResults)
                 .summaryPrice(summaryPrice)
                 .comment(order.getComment())
                 .build();
-        var errors = mapperResults.stream()
-                .map(ContentErrorWrapper::getError)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        return new ContentErrorListWrapper<>(content, errors);
     }
-    private ContentErrorWrapper<ОrderProductInfo> orderedProductInfoMapper(OrderItemEntity orderItem) {
-        var result = new ContentErrorWrapper<ОrderProductInfo>();
+    private ОrderProductInfo orderedProductInfoMapper(OrderItemEntity orderItem) {
         UUID productId = orderItem.getProductId();
         int quantity = orderItem.getQuantity();
 
@@ -256,10 +241,8 @@ public class OrderServiceImpl implements IOrderService {
             int totalPrice = orderItem.getPricePerProduct() * quantity;
             productInfo.totalPrice(totalPrice);
 
+        return productInfo.build();
 
-        var content = productInfo.build();
-        result.setContent(content);
-        return result;
     }
 
     @Override

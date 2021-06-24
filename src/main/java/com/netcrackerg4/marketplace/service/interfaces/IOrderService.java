@@ -32,6 +32,6 @@ public interface IOrderService {
 
     boolean customerOwnsOrder(UUID userId, UUID orderId);
 
-    ContentErrorListWrapper<OrderInfoResponse> getOrderDetail(UUID orderId);
+    OrderInfoResponse getOrderDetail(UUID orderId);
 
 }
