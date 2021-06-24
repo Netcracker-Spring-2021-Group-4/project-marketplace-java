@@ -1,7 +1,6 @@
 package com.netcrackerg4.marketplace.controller;
 
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
-import com.netcrackerg4.marketplace.model.dto.ContentErrorListWrapper;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
 import com.netcrackerg4.marketplace.model.enums.UserRole;
@@ -34,7 +33,7 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ContentErrorListWrapper<OrderInfoResponse> getOrderDetails(@PathVariable UUID orderId,
+    public OrderInfoResponse getOrderDetails(@PathVariable UUID orderId,
                                                                       @Nullable Principal principal) {
         if (principal == null) throw new IllegalStateException("Unauthorized access is forbidden.");
         AppUserEntity user = userService.findByEmail(principal.getName())
@@ -42,12 +41,14 @@ public class OrderController {
         // product managers and admin can see all orders
         switch (user.getRole()) {
             case ROLE_CUSTOMER:
-                if (!orderService.customerOwnsOrder(user.getUserId(), orderId))
+                if (!orderService.customerOwnsOrder(user.getUserId(), orderId)){
                     throw new IllegalStateException("You can only see your own orders.");
+                }
                 break;
             case ROLE_COURIER:
-                if (!orderService.courierOwnsOrder(user.getUserId(), orderId))
+                if (!orderService.courierOwnsOrder(user.getUserId(), orderId)){
                     throw new IllegalStateException("You can only see orders assigned to you.");
+                }
                 break;
         }
         return orderService.getOrderDetail(orderId);
