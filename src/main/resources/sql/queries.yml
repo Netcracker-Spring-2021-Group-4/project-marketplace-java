@@ -135,8 +135,6 @@ custom:
         ORDER BY (CASE WHEN offered_price IS NULL THEN price ELSE offered_price END) DESC
         LIMIT (:limit) OFFSET (:offset);
 
-
-
       products-with-filters-order-by-name: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
         FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
@@ -187,7 +185,6 @@ custom:
         ORDER BY popularity DESC
         LIMIT (:limit) OFFSET (:offset);
 
-
       activate-deactivate-product: >
         UPDATE product
         SET is_active = CASE WHEN is_active = true THEN false ELSE true END, availability_date = ?, reserved = ?
@@ -224,12 +221,25 @@ custom:
           SELECT product.product_id, COUNT(order_id)
           FROM product INNER JOIN order_item oi on product.product_id = oi.product_id
           GROUP BY product.product_id;
-      product-frequency: >
-        SELECT COUNT(order_id)
-        FROM prod_order
-        WHERE (:productId) IN (SELECT product_id
-                       FROM order_item
-                       WHERE prod_order.order_id=order_item.order_id);
+      product-recommendations: >
+        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
+        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
+        WHERE product.product_id IN (
+            SELECT other_product_id
+            FROM product_recommendation
+            WHERE product_id=(:product_id)
+            ORDER BY lift
+            )
+        AND is_active
+        LIMIT (:limit);
+      insert-recommendation: >
+        INSERT INTO  product_recommendation (product_id,other_product_id,lift)
+        VALUES (?,?,?);
+      delete-recommendations: >
+        DELETE FROM product_recommendation;
+
+
+
 
 
 

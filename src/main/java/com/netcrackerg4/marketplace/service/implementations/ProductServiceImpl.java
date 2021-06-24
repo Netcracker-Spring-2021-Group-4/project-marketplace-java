@@ -175,8 +175,8 @@ public class ProductServiceImpl implements IProductService {
 
 
     @Override
-  //  @Scheduled(cron = "0 0 13 * * ?")
-    @Scheduled(fixedRate = 20000)
+    @Scheduled(cron = "0 0 13 * * ?")
+  //  @Scheduled(fixedRate = 20000)
     @Transactional
     public void updatePopularNow() {
         productDao.clearPopularNow();
@@ -189,6 +189,15 @@ public class ProductServiceImpl implements IProductService {
             return;
 
         productDao.updatePopularNow(populars);
+    }
+
+    @Override
+    public List<ProductResponse> getSuggestionsForProductBuyWith(UUID productId) {
+         findProductById(productId)
+                .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
+
+
+        return productDao.usuallyBuyThisProductWith(productId,6);
     }
 
     @Transactional

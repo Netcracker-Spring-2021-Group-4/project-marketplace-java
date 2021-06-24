@@ -32,4 +32,5 @@ public interface IProductService {
     void removeDiscount(UUID discountId);
     void activateDeactivateProduct(UUID productId);
     void updatePopularNow();
+    List<ProductResponse> getSuggestionsForProductBuyWith(UUID productId);
 }

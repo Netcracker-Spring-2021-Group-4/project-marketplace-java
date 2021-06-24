@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.RecommendationEntity;
 import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
@@ -9,14 +10,18 @@ import com.netcrackerg4.marketplace.repository.mapper.ProductResponseMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.net.URL;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -213,18 +218,41 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         return support!=null?support:0;
     }
 
+    @Transactional
     @Override
-    public int getProductFrequency(UUID productId) {
+    public void updateRecommendations(List<RecommendationEntity> recommends) {
+        if(recommends.isEmpty())
+            throw new IllegalStateException("THERE is NOTHING TO UPDATE");
+
+        getJdbcTemplate().update(productQueries.getDeleteRecommendations());
+        getJdbcTemplate().batchUpdate(productQueries.getInsertRecommendation(), new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setObject(1, recommends.get(i).getProductA());
+                ps.setObject(2, recommends.get(i).getProductB());
+                ps.setDouble(3, recommends.get(i).getLift());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return recommends.size();
+            }
+        });
+
+    }
+
+    @Override
+    public List<ProductResponse> usuallyBuyThisProductWith(UUID productId, int amount) {
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
-            addValue("productId", productId);
+            addValue("product_id", productId);
+            addValue("limit", amount);
         }};
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 
-        Integer frequency= namedParameterJdbcTemplate.queryForObject(productQueries.getProductFrequency(),
-                namedParams, Integer.class);
-        return frequency!=null?frequency:0;
+        return namedParameterJdbcTemplate.query(productQueries.getProductRecommendations(), namedParams, new ProductResponseMapper());
     }
+
 
     @Override
     public Map<UUID, Integer> getAllProductsSupport() {

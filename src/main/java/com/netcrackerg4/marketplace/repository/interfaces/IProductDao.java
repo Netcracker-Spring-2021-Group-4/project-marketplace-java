@@ -3,6 +3,7 @@ package com.netcrackerg4.marketplace.repository.interfaces;
 
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 
+import com.netcrackerg4.marketplace.model.domain.product.RecommendationEntity;
 import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 
@@ -25,7 +26,9 @@ public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID>
      void clearPopularNow();
      void updatePopularNow(List<UUID> ids);
      int getProductsSupport(UUID productX, UUID productY);
-     int getProductFrequency(UUID productId);
+
+     void updateRecommendations(List<RecommendationEntity> recommends);
+     List<ProductResponse> usuallyBuyThisProductWith(UUID productId, int amount);
 
      Map<UUID,Integer> getAllProductsSupport();
 }
