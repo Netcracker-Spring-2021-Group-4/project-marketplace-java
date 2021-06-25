@@ -17,11 +17,24 @@ public class ProductQueries {
     private String productsWithFiltersOrderByPriceDesc;
     private String productsWithFiltersOrderByName;
     private String productsWithFiltersOrderByDate;
+    private String productsWithFiltersOrderByPopularity;
     private String productForComparisonById;
     private String productsPage;
     private String maxPrice;
     private String activateDeactivateProduct;
+
+
+    //Move to SuggestionsProductQueries ??
     private String popularNow;
     private String clearPopularNow;
     private String updatePopularNow;
+
+    private String productsSupport;
+    private String productFrequency;
+    private String allProductSupport;
+
+    private String  productRecommendations;
+    private String  insertRecommendation;
+    private String  deleteRecommendations;
+
 }

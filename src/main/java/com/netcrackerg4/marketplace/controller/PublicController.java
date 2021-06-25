@@ -65,5 +65,10 @@ public class PublicController {
     }
 
 
+    @GetMapping("/products/{id}/buy-with")
+    public List<ProductResponse> findSuggestionsBuyWith(@PathVariable("id") UUID productId){
+        return productService.getSuggestionsForProductBuyWith(productId);
+    }
+
 
 }

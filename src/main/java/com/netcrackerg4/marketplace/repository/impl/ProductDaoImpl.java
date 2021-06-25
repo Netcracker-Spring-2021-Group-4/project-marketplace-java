@@ -2,6 +2,7 @@ package com.netcrackerg4.marketplace.repository.impl;
 
 import com.netcrackerg4.marketplace.config.postgres_queries.ProductQueries;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
+import com.netcrackerg4.marketplace.model.domain.product.RecommendationEntity;
 import com.netcrackerg4.marketplace.model.enums.SortingOptions;
 import com.netcrackerg4.marketplace.model.response.ProductResponse;
 import com.netcrackerg4.marketplace.repository.interfaces.IProductDao;
@@ -9,16 +10,19 @@ import com.netcrackerg4.marketplace.repository.mapper.ProductResponseMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Repository
 @AllArgsConstructor
@@ -118,7 +122,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
                 sqlQuery=productQueries.getProductsWithFiltersOrderByName();
                 break;
             default:
-                sqlQuery=productQueries.getProductsWithFiltersOrderByDate();
+                sqlQuery=productQueries.getProductsWithFiltersOrderByPopularity();
         }
 
         return namedParameterJdbcTemplate. query(sqlQuery,
@@ -128,7 +132,8 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Override
     public int findAllSize() {
-        return getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(),Integer.class);
+        Integer numFound= getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(),Integer.class);
+        return numFound!=null?numFound:0;
     }
 
     @Override
@@ -142,9 +147,10 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 
-        return namedParameterJdbcTemplate.queryForObject(productQueries.getActiveProductsFilteredSize(),
-                namedParams, Integer.class
-        );
+        Integer numFound = namedParameterJdbcTemplate.queryForObject(productQueries.getActiveProductsFilteredSize(),
+                namedParams, Integer.class);
+
+        return numFound!=null?numFound:0;
 
     }
 
@@ -199,6 +205,67 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     }
 
     @Override
+    public int getProductsSupport(UUID productX, UUID productY) {
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("prodX", productX);
+            addValue("prodY", productY);
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+
+        Integer support= namedParameterJdbcTemplate.queryForObject(productQueries.getProductsSupport(),
+                namedParams, Integer.class);
+        return support!=null?support:0;
+    }
+
+    @Transactional
+    @Override
+    public void updateRecommendations(List<RecommendationEntity> recommends) {
+        if(recommends.isEmpty())
+            throw new IllegalStateException("THERE is NOTHING TO UPDATE");
+
+        getJdbcTemplate().update(productQueries.getDeleteRecommendations());
+        getJdbcTemplate().batchUpdate(productQueries.getInsertRecommendation(), new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setObject(1, recommends.get(i).getProductA());
+                ps.setObject(2, recommends.get(i).getProductB());
+                ps.setDouble(3, recommends.get(i).getLift());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return recommends.size();
+            }
+        });
+
+    }
+
+    @Override
+    public List<ProductResponse> usuallyBuyThisProductWith(UUID productId, int amount) {
+        MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
+            addValue("product_id", productId);
+            addValue("limit", amount);
+        }};
+
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
+
+        return namedParameterJdbcTemplate.query(productQueries.getProductRecommendations(), namedParams, new ProductResponseMapper());
+    }
+
+
+    @Override
+    public Map<UUID, Integer> getAllProductsSupport() {
+
+       return  getJdbcTemplate().query(productQueries.getAllProductSupport(), (ResultSet rs) -> {
+            Map<UUID,Integer> results = new HashMap<>();
+            while (rs.next()) {
+                results.put(UUID.fromString(rs.getString("product_id")), rs.getInt("count"));
+            }
+            return results;});
+    }
+
+    @Override
     public Integer maxPrice() {
         return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
     }
@@ -208,5 +275,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     public void delete(UUID key) {
         throw new UnsupportedOperationException();
     }
+
+
 
 }

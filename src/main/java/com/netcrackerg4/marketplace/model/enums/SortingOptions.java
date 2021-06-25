@@ -4,5 +4,6 @@ public enum SortingOptions {
     PRICE_ASC,
     PRICE_DESC,
     NAME,
-    DATE
+    DATE,
+    POPULARITY
 }

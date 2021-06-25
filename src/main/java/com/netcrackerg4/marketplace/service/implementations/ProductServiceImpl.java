@@ -18,7 +18,6 @@ import com.netcrackerg4.marketplace.service.interfaces.IS3Service;
 import com.netcrackerg4.marketplace.util.Page;
 import com.netcrackerg4.marketplace.util.mappers.DiscountEntity_Dao;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -164,30 +163,22 @@ public class ProductServiceImpl implements IProductService {
             .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
         if(product.getIsActive()) {
             product.setReserved(0);
-            productDao.activateDeactivateProduct(product);
         }
         else{
             product.setAvailabilityDate(new Date());
-            productDao.activateDeactivateProduct(product);
         }
+        productDao.activateDeactivateProduct(product);
     }
 
 
+
+
     @Override
-    @Scheduled(cron = "0 0 13 * * ?")
-  //  @Scheduled(fixedRate = 20000)
-    @Transactional
-    public void updatePopularNow() {
-        productDao.clearPopularNow();
+    public List<ProductResponse> getSuggestionsForProductBuyWith(UUID productId) {
+         findProductById(productId)
+                .orElseThrow(() -> new IllegalStateException("There is no product with such id."));
 
-        if(getAmountOfPopularProducts()==0)
-            return;
-        
-        List<UUID> populars= productDao.popularNowIds(getAmountOfPopularProducts());
-        if(populars.size() < getAmountOfPopularProducts())
-            return;
-
-        productDao.updatePopularNow(populars);
+        return productDao.usuallyBuyThisProductWith(productId,6);
     }
 
     @Transactional
@@ -214,16 +205,5 @@ public class ProductServiceImpl implements IProductService {
     }
 
 
-    private int getAmountOfPopularProducts(){
-        int all = productDao.findAllSize();
-        if(all<9)
-            return 0;
-        if(all<21)
-            return 3;
-        if(all<60)
-            return 6;
-        if(all<100)
-            return 9;
-        return 20;
-    }
+
 }
