@@ -6,13 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
+
 @AllArgsConstructor
 @Data
 @Service
-public class AprioriAlgorithmService {
+public class SuggestionsAutoUpdateService {
 
     private static final int MIN_SUPPORT=2;
     private static final double MIN_CONFIDENCE=0.6;
@@ -20,8 +23,14 @@ public class AprioriAlgorithmService {
 
     private final IProductDao productDao;
 
-     @Scheduled(fixedRate = 200000)
-    public void algorithm(){
+    @PostConstruct
+    public void onStartup() {
+    updateUsuallyBuyWithSuggestion();
+    updatePopularNow();
+    }
+
+    @Scheduled(cron="00 00 00 * * ?")
+    public void updateUsuallyBuyWithSuggestion(){
 
       Map<UUID,Integer> productsMap = productDao.getAllProductsSupport().entrySet().stream()
                  .filter(x -> x.getValue() >= MIN_SUPPORT)
@@ -56,11 +65,39 @@ public class AprioriAlgorithmService {
 
 
 
+    @Scheduled(cron = "00 00 00 * * ?")
+    @Transactional
+    public void updatePopularNow() {
 
+        productDao.clearPopularNow();
 
+        if(getAmountOfPopularProducts()==0)
+            return;
 
+        List<UUID> populars= productDao.popularNowIds(getAmountOfPopularProducts());
+        if(populars.size() < getAmountOfPopularProducts())
+            return;
 
+        productDao.updatePopularNow(populars);
     }
+
+
+
+
+    private int getAmountOfPopularProducts(){
+        int all = productDao.findAllSize();
+        if(all<9)
+            return 0;
+        if(all<21)
+            return 3;
+        if(all<60)
+            return 6;
+        if(all<100)
+            return 9;
+        return 20;
+    }
+
+}
 
 
 

@@ -22,13 +22,14 @@ public interface IProductDao extends AbstractCrudRepository<ProductEntity, UUID>
      int findAllFilteredSize(String query, List<Integer> categories, int from, int to);
      void activateDeactivateProduct(ProductEntity product);
      Optional<ProductResponse> findProductForComparison(UUID id);
-     List<UUID> popularNowIds(int limit);
-     void clearPopularNow();
-     void updatePopularNow(List<UUID> ids);
-     int getProductsSupport(UUID productX, UUID productY);
-
-     void updateRecommendations(List<RecommendationEntity> recommends);
      List<ProductResponse> usuallyBuyThisProductWith(UUID productId, int amount);
 
      Map<UUID,Integer> getAllProductsSupport();
+     int getProductsSupport(UUID productX, UUID productY);
+     void updateRecommendations(List<RecommendationEntity> recommends);
+     void clearPopularNow();
+     void updatePopularNow(List<UUID> ids);
+     List<UUID> popularNowIds(int limit);
+
+
 }

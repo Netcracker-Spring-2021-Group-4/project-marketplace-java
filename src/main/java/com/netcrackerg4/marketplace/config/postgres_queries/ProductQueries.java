@@ -22,6 +22,9 @@ public class ProductQueries {
     private String productsPage;
     private String maxPrice;
     private String activateDeactivateProduct;
+
+
+    //Move to SuggestionsProductQueries ??
     private String popularNow;
     private String clearPopularNow;
     private String updatePopularNow;
@@ -31,7 +34,7 @@ public class ProductQueries {
     private String allProductSupport;
 
     private String  productRecommendations;
-    private String insertRecommendation;
-    private String deleteRecommendations;
+    private String  insertRecommendation;
+    private String  deleteRecommendations;
 
 }
