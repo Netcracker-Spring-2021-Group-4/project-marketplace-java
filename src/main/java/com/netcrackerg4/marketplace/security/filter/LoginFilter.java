@@ -52,6 +52,4 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader("access-control-expose-headers", "Authorization");
         response.addHeader("Authorization", "Bearer " + token);
     }
-
-    // review: unsuccessfulAuthentication?
 }

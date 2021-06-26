@@ -84,7 +84,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     public void confirmSignup(String tokenValue) throws InvalidTokenException {
         UUID token = UUID.fromString(tokenValue);
-        TokenEntity tokenEntity = tokenDao.read(token);
+        TokenEntity tokenEntity = tokenDao.read(token).orElseThrow();
         if (tokenEntity.isActivated()) throw new InvalidTokenException("Attempt to reuse activated token.");
         userDao.updateStatus(tokenEntity.getUserEmail(), UserStatus.ACTIVE);
         tokenDao.setActivated(token);
@@ -111,7 +111,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public void validatePasswordToken(String tokenValue) {
-        TokenEntity token = tokenDao.read(UUID.fromString(tokenValue));
+        TokenEntity token = tokenDao.read(UUID.fromString(tokenValue)).orElseThrow(() -> new InvalidTokenException("Token not found."));
         doTokenValidation(token);
     }
 
@@ -127,7 +127,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     private String doResetPassword(String tokenValue, CharSequence newPassword) {
-        TokenEntity token = tokenDao.read(UUID.fromString(tokenValue));
+        TokenEntity token = tokenDao.read(UUID.fromString(tokenValue)).orElseThrow();
         doTokenValidation(token);
         AppUserEntity userEntity = userDao.findByEmail(token.getUserEmail())
                 .orElseThrow(() -> new IllegalStateException("User with such email not found."));

@@ -8,18 +8,16 @@ import com.netcrackerg4.marketplace.model.domain.order.TimeslotEntity;
 import com.netcrackerg4.marketplace.model.domain.product.DiscountEntity;
 import com.netcrackerg4.marketplace.model.domain.product.ProductEntity;
 import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
-
-import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
-import com.netcrackerg4.marketplace.model.enums.OrderStatus;
-import com.netcrackerg4.marketplace.model.response.OrderInfoResponse;
-import com.netcrackerg4.marketplace.model.response.ОrderProductInfo;
 import com.netcrackerg4.marketplace.model.dto.order.DeliveryDetails;
 import com.netcrackerg4.marketplace.model.dto.order.OrderItemRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderRequest;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.dto.timestamp.DateTimeSlot;
+import com.netcrackerg4.marketplace.model.dto.timestamp.StatusTimestampDto;
+import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.model.response.CustomerOrderResponse;
-
+import com.netcrackerg4.marketplace.model.response.OrderInfoResponse;
+import com.netcrackerg4.marketplace.model.response.ОrderProductInfo;
 import com.netcrackerg4.marketplace.repository.interfaces.IAdvLockUtil;
 import com.netcrackerg4.marketplace.repository.interfaces.ICartItemDao;
 import com.netcrackerg4.marketplace.repository.interfaces.IDiscountDao;
@@ -158,7 +156,7 @@ public class OrderServiceImpl implements IOrderService {
         if (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)
             handleStocksReturn(order.getOrderItems());
 //        if (notifyCourier) {
-        // todo: optionally notify courier (if user cancelled order from their account)
+        // optionally: notify courier (if user cancelled order from their account)
 //        }
     }
 

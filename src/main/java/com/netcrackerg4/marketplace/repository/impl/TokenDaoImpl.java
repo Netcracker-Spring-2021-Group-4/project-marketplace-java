@@ -5,11 +5,13 @@ import com.netcrackerg4.marketplace.model.domain.user.TokenEntity;
 import com.netcrackerg4.marketplace.repository.interfaces.ITokenDao;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -29,12 +31,15 @@ public class TokenDaoImpl extends JdbcDaoSupport implements ITokenDao {
     }
 
     @Override
-    public TokenEntity read(UUID token) {
-        // TODO: handle empty EmptyResultDataAccessException
-        return getJdbcTemplate().queryForObject(tokenQueries.getReadToken(), (rs, row) ->
-                        new TokenEntity(rs.getObject("token", UUID.class), rs.getString("user_email"),
-                                rs.getTimestamp("expired_at").toInstant(), rs.getBoolean("is_activated")),
-                token);
+    public Optional<TokenEntity> read(UUID token) {
+        try {
+            return Optional.ofNullable(getJdbcTemplate().queryForObject(tokenQueries.getReadToken(), (rs, row) ->
+                            new TokenEntity(rs.getObject("token", UUID.class), rs.getString("user_email"),
+                                    rs.getTimestamp("expired_at").toInstant(), rs.getBoolean("is_activated")),
+                    token));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

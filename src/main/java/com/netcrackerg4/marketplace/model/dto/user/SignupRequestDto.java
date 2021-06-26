@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 @Data
-// todo: "Once the account is created the user will receive an email with a link for password creation" password must be sent separately, current version is temporary, convenience for testing
 public class SignupRequestDto {
     @NotNull
     @Email(message = ValidationDefaultMessage.WRONG_FORMAT_EMAIL)
