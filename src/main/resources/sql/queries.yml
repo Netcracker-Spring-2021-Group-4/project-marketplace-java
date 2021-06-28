@@ -447,8 +447,9 @@ custom:
       categories-with-amount-of-product: >
         SELECT product_category.category_id, product_category_name, count(product_id) as amount_of_products
         FROM product_category left outer join product p on product_category.category_id = p.category_id
-        WHERE is_active
-        group by product_category.category_id;
+        WHERE is_active OR is_active IS NULL
+        group by product_category.category_id
+        ORDER BY amount_of_products DESC;
       categories-ids: >
         SELECT category_id FROM product_category;
       get-all: >
