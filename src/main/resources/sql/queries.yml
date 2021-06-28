@@ -90,20 +90,6 @@ custom:
         SELECT MAX(price)
         FROM product
         WHERE is_active=true;
-      products-page: >
-        SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now,
-               CASE
-                   WHEN product.in_stock=0
-                   THEN -1
-                    ELSE (SELECT  COUNT(order_id)
-                   FROM order_item
-                   WHERE product.product_id=order_item.product_id
-            )
-                   END AS popularity
-        FROM product LEFT OUTER JOIN discount d on product.product_id = d.product_id AND now() BETWEEN starts_at AND ends_at
-        WHERE is_active=true
-        ORDER BY popularity DESC
-        LIMIT (:limit) OFFSET (:offset);
 
       products-with-filters-order-by-price-asc: >
         SELECT product.product_id,product_name, image_url,description,price,in_stock,category_id, offered_price, popular_now
