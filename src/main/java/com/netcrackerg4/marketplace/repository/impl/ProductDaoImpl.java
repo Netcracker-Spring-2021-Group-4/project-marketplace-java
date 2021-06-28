@@ -121,6 +121,9 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
             case NAME:
                 sqlQuery=productQueries.getProductsWithFiltersOrderByName();
                 break;
+            case DATE:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByDate();
+                break;
             default:
                 sqlQuery=productQueries.getProductsWithFiltersOrderByPopularity();
         }
