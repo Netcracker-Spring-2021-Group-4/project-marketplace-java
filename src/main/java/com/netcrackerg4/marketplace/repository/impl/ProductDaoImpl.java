@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import javax.validation.constraints.NotEmpty;
 import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -209,9 +210,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
     @Transactional
     @Override
-    public void updateRecommendations(List<RecommendationEntity> recommends) {
-        if(recommends.isEmpty())
-            throw new IllegalStateException("THERE is NOTHING TO UPDATE");
+    public void updateRecommendations(@NotEmpty List<RecommendationEntity> recommends) {
 
         getJdbcTemplate().update(productQueries.getDeleteRecommendations());
         getJdbcTemplate().batchUpdate(productQueries.getInsertRecommendation(), new BatchPreparedStatementSetter() {

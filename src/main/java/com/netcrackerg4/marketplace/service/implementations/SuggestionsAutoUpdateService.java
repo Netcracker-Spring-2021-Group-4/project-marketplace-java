@@ -58,6 +58,8 @@ public class SuggestionsAutoUpdateService {
                 }
             }
             }
+        if(recommendations.isEmpty())
+            return;
         productDao.updateRecommendations(recommendations);
       
 
