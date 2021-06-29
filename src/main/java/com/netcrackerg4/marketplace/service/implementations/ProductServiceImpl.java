@@ -88,13 +88,6 @@ public class ProductServiceImpl implements IProductService {
         productDao.updatePicture(id,url);
     }
 
-
-
-    @Override
-    public Page<ProductResponse> findProducts(int page, int size) {
-        return new Page<>(productDao.findAll(page, size), productDao.findAllSize());
-    }
-
     @Override
     public FilterInfo getFilterInfo() {
 
@@ -191,7 +184,7 @@ public class ProductServiceImpl implements IProductService {
         int from = searchFilter.getMinPrice();
         int to = searchFilter.getMaxPrice()==0 ? productDao.maxPrice() : searchFilter.getMaxPrice();
         String query = searchFilter.getNameQuery() != null ? searchFilter.getNameQuery() : "";
-        SortingOptions sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():SortingOptions.DATE;
+        SortingOptions sortOption = searchFilter.getSortOption() !=null? searchFilter.getSortOption():SortingOptions.POPULARITY;
         List<ProductResponse> content = productDao.findProductsWithFilters(query,categoryIds,from,to,sortOption,pageSize,pageN);
         int size = productDao.findAllFilteredSize(query, categoryIds,from,to);
         return new Page<>(content,size);

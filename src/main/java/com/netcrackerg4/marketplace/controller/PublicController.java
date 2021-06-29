@@ -33,11 +33,7 @@ public class PublicController {
         return  productService.findProducts(filter,page,size);
     }
 
-    @GetMapping("/product-page")
-    public Page<ProductResponse> getProductPage(@RequestParam @Min(0) int page, @RequestParam @Min(1) int size)
-    {
-        return  productService.findProducts(page,size);
-    }
+
     @GetMapping("/filter-info")
     public FilterInfo getFilterInfo(){
         return  productService.getFilterInfo();

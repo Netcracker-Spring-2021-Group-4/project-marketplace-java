@@ -83,20 +83,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
 
 
-    @Override
-    public List<ProductResponse> findAll(int p, int s) {
-        MapSqlParameterSource namedParams = new MapSqlParameterSource() {
-            {
-                addValue("limit", s);
-                addValue("offset", p * s);
-            }
-        };
-        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
-        return namedParameterJdbcTemplate.query(productQueries.getProductsPage(),
-                namedParams, new ProductResponseMapper()
-        );
-
-    }
 
       public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageN, int pageSize) {
 
@@ -120,6 +106,9 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
                 break;
             case NAME:
                 sqlQuery=productQueries.getProductsWithFiltersOrderByName();
+                break;
+            case DATE:
+                sqlQuery=productQueries.getProductsWithFiltersOrderByDate();
                 break;
             default:
                 sqlQuery=productQueries.getProductsWithFiltersOrderByPopularity();
