@@ -23,7 +23,7 @@ public class OrderInfoResponse {
     private String city;
     private String street;
     private String building;
-    private int flat;
+    private Integer flat;
     private OrderStatus statusName;
     private String comment;
     private List<ОrderProductInfo> content;
