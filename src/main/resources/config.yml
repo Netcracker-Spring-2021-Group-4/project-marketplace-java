@@ -24,8 +24,8 @@ custom:
     password-confirmation-url: /first-password
     password-reset-url: /new-password
   pagination:
-    user-search: 2
-    courier-orders: 2
+    user-search: 15
+    courier-orders: 15
 
 cloud:
   aws:
