@@ -39,8 +39,8 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     @Override
     public void create(ProductEntity item) {
         getJdbcTemplate().update(productQueries.getCreateProduct(), item.getProductId(), item.getName(),
-                item.getImageUrl(),item.getDescription(), item.getPrice(),item.getInStock(),item.getReserved(),
-                item.getAvailabilityDate(),item.getIsActive(),
+                item.getImageUrl(), item.getDescription(), item.getPrice(), item.getInStock(), item.getReserved(),
+                item.getAvailabilityDate(), item.getIsActive(),
                 item.getCategoryId());
     }
 
@@ -50,19 +50,19 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         try {
             product = Optional.ofNullable(
                     getJdbcTemplate().queryForObject(productQueries.getFindProductById(),
-                        (rs, rowNum) -> ProductEntity.builder()
-                                .productId(UUID.fromString(rs.getString("product_id")))
-                                .name(rs.getString("product_name"))
-                                .description(rs.getString("description"))
-                                .imageUrl(rs.getString("image_url"))
-                                .price(rs.getInt("price"))
-                                .inStock(rs.getInt("in_stock"))
-                                .reserved(rs.getInt("reserved"))
-                                .availabilityDate(rs.getDate("availability_date"))
-                                .isActive(rs.getBoolean("is_active"))
-                                .categoryId(rs.getInt("category_id"))
-                                .build()
-                    , key)
+                            (rs, rowNum) -> ProductEntity.builder()
+                                    .productId(UUID.fromString(rs.getString("product_id")))
+                                    .name(rs.getString("product_name"))
+                                    .description(rs.getString("description"))
+                                    .imageUrl(rs.getString("image_url"))
+                                    .price(rs.getInt("price"))
+                                    .inStock(rs.getInt("in_stock"))
+                                    .reserved(rs.getInt("reserved"))
+                                    .availabilityDate(rs.getDate("availability_date"))
+                                    .isActive(rs.getBoolean("is_active"))
+                                    .categoryId(rs.getInt("category_id"))
+                                    .build()
+                            , key)
             );
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -73,19 +73,17 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     @Override
     public void update(ProductEntity updItem) {
         getJdbcTemplate().update(productQueries.getUpdateProductInfo(), updItem.getName(),
-                updItem.getDescription(),updItem.getPrice(), updItem.getInStock(),updItem.getReserved(),
-                updItem.getCategoryId(),updItem.getProductId());
+                updItem.getDescription(), updItem.getPrice(), updItem.getInStock(), updItem.getReserved(),
+                updItem.getCategoryId(), updItem.getProductId());
     }
 
     @Override
     public void updatePicture(UUID key, URL url) {
-        getJdbcTemplate().update(productQueries.getUpdateProductPicture(), url.toString(),key);
+        getJdbcTemplate().update(productQueries.getUpdateProductPicture(), url.toString(), key);
     }
 
 
-
-
-      public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageN, int pageSize) {
+    public List<ProductResponse> findProductsWithFilters(String query, List<Integer> categories, int from, int to, SortingOptions sortBy, int pageN, int pageSize) {
 
         MapSqlParameterSource namedParams = new MapSqlParameterSource() {{
             addValue("category_ids", categories);
@@ -98,32 +96,32 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
         String sqlQuery;
-        switch (sortBy){
+        switch (sortBy) {
             case PRICE_ASC:
-                sqlQuery=productQueries.getProductsWithFiltersOrderByPriceAsc();
+                sqlQuery = productQueries.getProductsWithFiltersOrderByPriceAsc();
                 break;
             case PRICE_DESC:
-                sqlQuery=productQueries.getProductsWithFiltersOrderByPriceDesc();
+                sqlQuery = productQueries.getProductsWithFiltersOrderByPriceDesc();
                 break;
             case NAME:
-                sqlQuery=productQueries.getProductsWithFiltersOrderByName();
+                sqlQuery = productQueries.getProductsWithFiltersOrderByName();
                 break;
             case DATE:
-                sqlQuery=productQueries.getProductsWithFiltersOrderByDate();
+                sqlQuery = productQueries.getProductsWithFiltersOrderByDate();
                 break;
             default:
-                sqlQuery=productQueries.getProductsWithFiltersOrderByPopularity();
+                sqlQuery = productQueries.getProductsWithFiltersOrderByPopularity();
         }
 
-        return namedParameterJdbcTemplate. query(sqlQuery,
+        return namedParameterJdbcTemplate.query(sqlQuery,
                 namedParams, new ProductResponseMapper()
         );
     }
 
     @Override
     public int findAllSize() {
-        Integer numFound= getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(),Integer.class);
-        return numFound!=null?numFound:0;
+        Integer numFound = getJdbcTemplate().queryForObject(productQueries.getActiveProductsSize(), Integer.class);
+        return numFound != null ? numFound : 0;
     }
 
     @Override
@@ -140,14 +138,14 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         Integer numFound = namedParameterJdbcTemplate.queryForObject(productQueries.getActiveProductsFilteredSize(),
                 namedParams, Integer.class);
 
-        return numFound!=null?numFound:0;
+        return numFound != null ? numFound : 0;
 
     }
 
     @Override
     public void activateDeactivateProduct(ProductEntity product) {
         getJdbcTemplate().update(productQueries.getActivateDeactivateProduct(), product.getAvailabilityDate(), product.getReserved(), product.getProductId());
-}
+    }
 
     public Optional<ProductResponse> findProductForComparison(UUID id) {
         Optional<ProductResponse> product;
@@ -190,7 +188,7 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 
         namedParameterJdbcTemplate.update(productQueries.getUpdatePopularNow(),
-                namedParams  );
+                namedParams);
 
     }
 
@@ -203,9 +201,9 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
 
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(getJdbcTemplate());
 
-        Integer support= namedParameterJdbcTemplate.queryForObject(productQueries.getProductsSupport(),
+        Integer support = namedParameterJdbcTemplate.queryForObject(productQueries.getProductsSupport(),
                 namedParams, Integer.class);
-        return support!=null?support:0;
+        return support != null ? support : 0;
     }
 
     @Transactional
@@ -245,17 +243,18 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     @Override
     public Map<UUID, Integer> getAllProductsSupport() {
 
-       return  getJdbcTemplate().query(productQueries.getAllProductSupport(), (ResultSet rs) -> {
-            Map<UUID,Integer> results = new HashMap<>();
+        return getJdbcTemplate().query(productQueries.getAllProductSupport(), (ResultSet rs) -> {
+            Map<UUID, Integer> results = new HashMap<>();
             while (rs.next()) {
                 results.put(UUID.fromString(rs.getString("product_id")), rs.getInt("count"));
             }
-            return results;});
+            return results;
+        });
     }
 
     @Override
     public Integer maxPrice() {
-        return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(),Integer.class);
+        return getJdbcTemplate().queryForObject(productQueries.getMaxPrice(), Integer.class);
     }
 
 
@@ -263,7 +262,6 @@ public class ProductDaoImpl extends JdbcDaoSupport implements IProductDao {
     public void delete(UUID key) {
         throw new UnsupportedOperationException();
     }
-
 
 
 }

@@ -66,7 +66,6 @@ public class OrderServiceImpl implements IOrderService {
     private final IAdvLockUtil advLockUtil;
     private final IOrderStatusAutoUpdate orderAutoUpdate;
     private final IProductService productService;
-    private final ICategoryService categoryService;
 
     @PostConstruct
     private void initAutoUpdate() {
