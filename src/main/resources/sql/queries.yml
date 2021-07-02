@@ -183,7 +183,7 @@ custom:
       popular-now: >
         SELECT product_id
         FROM order_item INNER JOIN prod_order ON order_item.order_id = prod_order.order_id
-        WHERE placed_at > 'now'::timestamp - '1 month'::interval
+        WHERE placed_at > 'now'::timestamp - '1 week'::interval
         GROUP BY product_id
         ORDER BY COUNT(product_id) DESC
         LIMIT (:limit);
