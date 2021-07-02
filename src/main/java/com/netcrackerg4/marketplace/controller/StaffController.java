@@ -11,15 +11,17 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/admin/staff")
 @RequiredArgsConstructor
 public class StaffController {
     private final IUserService userService;
+    private final Set<UserRole> staffRoles = new HashSet<>() {{
+        add(UserRole.ROLE_COURIER);
+        add(UserRole.ROLE_PRODUCT_MGR);
+    }};
 
     @GetMapping("/{id}")
     public UserInfoResponse getMyProfile(@PathVariable("id") UUID stafferId) {
@@ -50,6 +52,8 @@ public class StaffController {
     EagerContentPage<UserAdminView> findEmployees(@RequestBody @Valid UserSearchFilter userFilter, @RequestParam @Min(0) int page) {
         if (userFilter.getTargetRoles() == null) {
             userFilter.setTargetRoles(List.of(UserRole.ROLE_COURIER, UserRole.ROLE_PRODUCT_MGR));
+        } else if (!staffRoles.containsAll(userFilter.getTargetRoles())) {
+            throw new IllegalStateException("Admin can only get access to staffers.");
         }
         return userService.findUsers(userFilter, page);
     }

@@ -52,7 +52,7 @@ public class OrderStatusAutoUpdateImpl implements IOrderStatusAutoUpdate {
                 ? nextSlotStart.get().toSecondOfDay() - LocalTime.now().toSecondOfDay()
                 : LocalTime.MAX.toSecondOfDay() - LocalTime.now().toSecondOfDay() + firstSlot.getTimeStart().toLocalTime().toSecondOfDay();
 
-        inDeliveryScheduler.scheduleAtFixedRate(updSubmitted, submittedDelay, period, TimeUnit.SECONDS);
+        inDeliveryScheduler.scheduleAtFixedRate(updSubmitted, submittedDelay + 5, period, TimeUnit.SECONDS);
     }
 
     @Override

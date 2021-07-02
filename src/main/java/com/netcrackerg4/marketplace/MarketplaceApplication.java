@@ -12,9 +12,9 @@ import java.util.TimeZone;
 public class MarketplaceApplication {
 
     @PostConstruct
-    public void init(){
+    public void init() {
         // Setting Spring Boot SetTimeZone
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC+3"));
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Kiev"));
     }
 
     public static void main(String[] args) {
