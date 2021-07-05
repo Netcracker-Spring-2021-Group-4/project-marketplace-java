@@ -261,9 +261,9 @@ custom:
 
     token:
       create-token: >
-        INSERT INTO confirmation_token (token, user_email, expired_at) VALUES (?, ?, ?);
+        INSERT INTO confirmation_token (token, user_email, expired_at, is_for_password) VALUES (?, ?, ?, ?);
       read-token: >
-        SELECT token, user_email, expired_at, is_activated FROM confirmation_token WHERE token=?
+        SELECT token, user_email, expired_at, is_activated, is_for_password FROM confirmation_token WHERE token=?
       activate-token: >
         UPDATE confirmation_token
         SET is_activated = true
