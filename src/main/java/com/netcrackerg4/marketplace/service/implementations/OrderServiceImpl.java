@@ -159,9 +159,6 @@ public class OrderServiceImpl implements IOrderService {
         if (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED) {
             handleStocksReturn(order.getOrderItems());
         }
-//        if (notifyCourier) {
-        // todo: notify courier (if user cancelled order from their account)
-//        }
     }
 
     private void handleStocksReturn(Collection<OrderItemEntity> orderItems) {
