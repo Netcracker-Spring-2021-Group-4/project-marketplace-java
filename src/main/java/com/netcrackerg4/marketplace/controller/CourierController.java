@@ -4,7 +4,6 @@ import com.netcrackerg4.marketplace.model.domain.user.AppUserEntity;
 import com.netcrackerg4.marketplace.model.dto.order.OrderResponse;
 import com.netcrackerg4.marketplace.model.enums.OrderStatus;
 import com.netcrackerg4.marketplace.model.response.CourierDeliveryResponse;
-import com.netcrackerg4.marketplace.service.interfaces.ICartService;
 import com.netcrackerg4.marketplace.service.interfaces.ICourierService;
 import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
 import com.netcrackerg4.marketplace.service.interfaces.IUserService;
@@ -51,7 +50,7 @@ public class CourierController {
                 .orElseThrow(() -> new IllegalStateException("Could not find such courier."));
         if (!orderService.courierOwnsOrder(courier.getUserId(), orderId))
             throw new IllegalStateException("you are not assigned to this delivery");
-        orderService.setOrderStatus(orderId, orderStatus, false);
+        orderService.setOrderStatus(orderId, orderStatus);
     }
 
 }

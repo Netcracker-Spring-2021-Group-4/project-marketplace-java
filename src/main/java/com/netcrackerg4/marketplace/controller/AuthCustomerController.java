@@ -59,7 +59,7 @@ public class AuthCustomerController {
                 .orElseThrow(() -> new IllegalStateException("could not find such user"));
         if (!orderService.customerOwnsOrder(customer.getUserId(), orderId))
             throw new IllegalStateException("you did not make this order");
-        orderService.setOrderStatus(orderId, OrderStatus.CANCELLED, true);
+        orderService.setOrderStatus(orderId, OrderStatus.CANCELLED);
     }
 
     @GetMapping("/orders")

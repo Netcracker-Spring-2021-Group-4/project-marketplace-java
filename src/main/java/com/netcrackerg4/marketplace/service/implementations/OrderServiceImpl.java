@@ -149,7 +149,7 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     @Transactional
-    public void setOrderStatus(UUID orderId, OrderStatus newStatus, boolean notifyCourier) {
+    public void setOrderStatus(UUID orderId, OrderStatus newStatus) {
         OrderEntity order = orderDao.read(orderId).orElseThrow();
 
         if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FAILED) {
