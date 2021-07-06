@@ -38,7 +38,6 @@ public class UserServiceImpl implements IUserService {
     private final IMailService mailService;
     private final ITokenDao tokenDao;
 
-    // should return minimal data set to build UserDetails
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         return findByEmail(s).orElseThrow(() -> new IllegalStateException("User with such email not found.")); // mock
@@ -60,23 +59,13 @@ public class UserServiceImpl implements IUserService {
                 .role(role)
                 .build();
         userDao.create(userEntity);
-        switch (activationType) {
-            case EMAIL: {
-                UUID token = UUID.randomUUID();
-                tokenDao.create(new TokenEntity(token, signupRequest.getEmail(),
-                        Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false));
-                mailService.sendConfirmSignupLetter(signupRequest.getEmail(), signupRequest.getFirstName(),
-                        signupRequest.getLastName(), token, AccountActivation.EMAIL);
-                break;
-            }
-            case PASSWORD_RESET: {
-                UUID token = UUID.randomUUID();
-                tokenDao.create(new TokenEntity(token, signupRequest.getEmail(),
-                        Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false));
-                mailService.sendConfirmSignupLetter(signupRequest.getEmail(), signupRequest.getFirstName(),
-                        signupRequest.getLastName(), token, AccountActivation.PASSWORD_RESET);
-                break;
-            }
+
+        if (activationType != AccountActivation.NONE) {
+            UUID token = UUID.randomUUID();
+            tokenDao.create(new TokenEntity(token, signupRequest.getEmail(),
+                    Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false, false));
+            mailService.sendConfirmSignupLetter(signupRequest.getEmail(), signupRequest.getFirstName(),
+                    signupRequest.getLastName(), token, activationType);
         }
     }
 
@@ -85,12 +74,16 @@ public class UserServiceImpl implements IUserService {
     public void confirmSignup(String tokenValue) throws InvalidTokenException {
         UUID token = UUID.fromString(tokenValue);
         TokenEntity tokenEntity = tokenDao.read(token).orElseThrow();
-        if (tokenEntity.isActivated()) throw new InvalidTokenException("Attempt to reuse activated token.");
+        if (tokenEntity.isActivated()) {
+            throw new InvalidTokenException("Attempt to reuse activated token.");
+        }
+        if (tokenEntity.isForPassword()) {
+            throw new InvalidTokenException("Token meant for password change cannot be user for account activation.");
+        }
         userDao.updateStatus(tokenEntity.getUserEmail(), UserStatus.ACTIVE);
         tokenDao.setActivated(token);
     }
 
-    // should return fully initialized AppUserEntity
     @Override
     public Optional<AppUserEntity> findByEmail(String email) {
         Optional<AppUserEntity> maybeUser = userDao.findByEmail(email);
@@ -99,12 +92,21 @@ public class UserServiceImpl implements IUserService {
         return maybeUser;
     }
 
+    @Transactional
+    @Override
+    public void updateStatus(ChangeStatusDto changeStatus) {
+        String email = changeStatus.getEmail();
+        userDao.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
+        userDao.updateStatus(email, changeStatus.getUserStatus());
+    }
+
     @Override
     public void requestPasswordReset(String email) {
         if (userDao.findByEmail(email).isEmpty())
             throw new IllegalStateException("There is no user with such email: " + email);
         TokenEntity resetToken = new TokenEntity(UUID.randomUUID(), email,
-                Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false);
+                Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false, true);
         tokenDao.create(resetToken);
         mailService.sendPasswordResetEmail(email, resetToken.getTokenValue());
     }
@@ -115,28 +117,16 @@ public class UserServiceImpl implements IUserService {
         doTokenValidation(token);
     }
 
-    private void doTokenValidation(TokenEntity token) {
-        if (token.isActivated()) throw new InvalidTokenException("Attempt to reuse activated token.");
-        if (token.getExpiresAt().isBefore(Instant.now())) throw new InvalidTokenException("Token is already expired.");
-    }
-
     @Override
     @Transactional
     public void resetPassword(String tokenValue, CharSequence newPassword) {
         doResetPassword(tokenValue, newPassword);
     }
 
-    private String doResetPassword(String tokenValue, CharSequence newPassword) {
-        TokenEntity token = tokenDao.read(UUID.fromString(tokenValue)).orElseThrow();
-        doTokenValidation(token);
-        AppUserEntity userEntity = userDao.findByEmail(token.getUserEmail())
-                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
-        String oldEnpass = userEntity.getPassword();
-        if (passwordEncoder.matches(newPassword, oldEnpass)) throw new IllegalStateException("Your previous password is the same");
-        String enpass = passwordEncoder.encode(newPassword);
-        userDao.updatePassword(token.getUserEmail(), enpass);
-        tokenDao.setActivated(token.getTokenValue());
-        return userEntity.getEmail();
+    private void doTokenValidation(TokenEntity token) {
+        if (token.isActivated()) throw new InvalidTokenException("Attempt to reuse activated token.");
+        if (token.getExpiresAt().isBefore(Instant.now())) throw new InvalidTokenException("Token is already expired.");
+        if (!token.isForPassword()) throw new InvalidTokenException("Token not meant for password change.");
     }
 
     @Override
@@ -193,13 +183,18 @@ public class UserServiceImpl implements IUserService {
         userDao.update(userEntity);
     }
 
-    @Transactional
-    @Override
-    public void updateStatus(ChangeStatusDto changeStatus) {
-        String email = changeStatus.getEmail();
-        userDao.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User with such email not found."));
-        userDao.updateStatus(email,changeStatus.getUserStatus());
+    private String doResetPassword(String tokenValue, CharSequence newPassword) {
+        TokenEntity token = tokenDao.read(UUID.fromString(tokenValue)).orElseThrow();
+        doTokenValidation(token);
+        AppUserEntity userEntity = userDao.findByEmail(token.getUserEmail())
+                .orElseThrow(() -> new IllegalStateException("User with such email not found."));
+        String oldEnpass = userEntity.getPassword();
+        if (passwordEncoder.matches(newPassword, oldEnpass))
+            throw new IllegalStateException("Your previous password is the same");
+        String enpass = passwordEncoder.encode(newPassword);
+        userDao.updatePassword(token.getUserEmail(), enpass);
+        tokenDao.setActivated(token.getTokenValue());
+        return userEntity.getEmail();
     }
 
     @Override

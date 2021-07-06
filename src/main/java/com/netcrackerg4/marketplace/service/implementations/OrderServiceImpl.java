@@ -26,7 +26,10 @@ import com.netcrackerg4.marketplace.repository.interfaces.order.IAddressDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IDeliverySlotDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderDao;
 import com.netcrackerg4.marketplace.repository.interfaces.order.IOrderItemDao;
-import com.netcrackerg4.marketplace.service.interfaces.*;
+import com.netcrackerg4.marketplace.service.interfaces.IMailService;
+import com.netcrackerg4.marketplace.service.interfaces.IOrderService;
+import com.netcrackerg4.marketplace.service.interfaces.IOrderStatusAutoUpdate;
+import com.netcrackerg4.marketplace.service.interfaces.IProductService;
 import com.netcrackerg4.marketplace.util.AdvLockIdUtil;
 import com.netcrackerg4.marketplace.util.EagerContentPage;
 import com.netcrackerg4.marketplace.util.mappers.AddressMapper;
@@ -92,8 +95,8 @@ public class OrderServiceImpl implements IOrderService {
                 .findFirst().orElseThrow(() -> new IllegalStateException("Illegal timeslot selected"));
         advLockUtil.requestTransactionLock(AdvLockIdUtil.toLong(orderRequest.getDeliverySlot().toLocalDate().hashCode(),
                 orderRequest.getDeliverySlot().toLocalTime().hashCode()));
-        Optional<AppUserEntity> maybeCourier = deliverySlotDao.findFreeCourier(orderRequest.getDeliverySlot());
-        AppUserEntity courier = maybeCourier.orElseThrow(() -> new IllegalStateException("This timeslot is already taken"));
+        AppUserEntity courier = deliverySlotDao.findFreeCourier(orderRequest.getDeliverySlot())
+                .orElseThrow(() -> new IllegalStateException("This timeslot is already taken"));
 
         Map<UUID, ProductEntity> loadedProducts = handleStocksOrdered(orderRequest.getProducts());
 
@@ -137,8 +140,8 @@ public class OrderServiceImpl implements IOrderService {
         deliveryDetails.setDatestamp(orderRequest.getDeliverySlot().toLocalDate());
         deliveryDetails.setTimeStart(deliverySlot.getTimeslotEntity().getTimeStart().toLocalTime());
         deliveryDetails.setTimeEnd(deliverySlot.getTimeslotEntity().getTimeEnd().toLocalTime());
-        deliveryDetails.setCustomerFirstName(maybeCustomer != null ? maybeCustomer.getFirstName() : orderEntity.getFirstName());
-        deliveryDetails.setCustomerLastName(maybeCustomer != null ? maybeCustomer.getLastName() : orderEntity.getLastName());
+        deliveryDetails.setCustomerFirstName(orderEntity.getFirstName());
+        deliveryDetails.setCustomerLastName(orderEntity.getLastName());
         deliveryDetails.setOrderItems(orderEntity.getOrderItems());
 
         mailService.notifyCourierGotDelivery(deliverySlot.getCourier().getEmail(), deliveryDetails);
@@ -149,11 +152,13 @@ public class OrderServiceImpl implements IOrderService {
     public void setOrderStatus(UUID orderId, OrderStatus newStatus, boolean notifyCourier) {
         OrderEntity order = orderDao.read(orderId).orElseThrow();
 
-        if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FAILED)
+        if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.FAILED) {
             throw new IllegalStateException("Status of cancelled or failed order cannot be changed.");
+        }
         orderDao.updateStatus(orderId, newStatus);
-        if (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED)
+        if (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.FAILED) {
             handleStocksReturn(order.getOrderItems());
+        }
 //        if (notifyCourier) {
         // todo: notify courier (if user cancelled order from their account)
 //        }

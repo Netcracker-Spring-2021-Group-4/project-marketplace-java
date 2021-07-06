@@ -129,15 +129,22 @@ public class ProductServiceImpl implements IProductService {
     @Override
     @Transactional
     public void addDiscount(UUID productId, DiscountDto discountDto) {
+        validateDiscount(productId, discountDto.getOfferedPrice());
         DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountDto);
         discountEntity.setProductId(productId);
         discountEntity.setDiscountId(UUID.randomUUID());
         discountDao.create(discountEntity);
     }
 
+    private void validateDiscount(UUID productId, int offeredPrice) {
+        int currPrice = productDao.read(productId).orElseThrow().getPrice();
+        if (currPrice <= offeredPrice) throw new IllegalStateException("Discount must be... a discount");
+    }
+
     @Override
     @Transactional
     public void editDiscount(UUID productId, UUID discountId, DiscountDto discountDto) {
+        validateDiscount(productId, discountDto.getOfferedPrice());
         DiscountEntity discountEntity = discountMapper.toDiscountEntity(discountDto);
         discountEntity.setProductId(productId);
         discountEntity.setDiscountId(discountId);

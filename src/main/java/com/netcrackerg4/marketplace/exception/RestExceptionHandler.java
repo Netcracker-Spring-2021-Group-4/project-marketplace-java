@@ -41,7 +41,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> HandleActivatedTokenReuseConflict(InvalidTokenException ex, WebRequest req) {
         var body =
                 ErrorBody.builder()
-                        .message("Token already used")
+                        .message(ex.getMessage())
                         .build();
         return handleExceptionInternal(ex, body, new HttpHeaders(), HttpStatus.EXPECTATION_FAILED, req);
     }

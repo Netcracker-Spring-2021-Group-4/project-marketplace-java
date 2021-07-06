@@ -27,7 +27,7 @@ public class TokenDaoImpl extends JdbcDaoSupport implements ITokenDao {
     @Override
     public void create(TokenEntity tokenEntity) {
         getJdbcTemplate().update(tokenQueries.getCreateToken(), tokenEntity.getTokenValue(),
-                tokenEntity.getUserEmail(), new Timestamp(tokenEntity.getExpiresAt().toEpochMilli()));
+                tokenEntity.getUserEmail(), new Timestamp(tokenEntity.getExpiresAt().toEpochMilli()), tokenEntity.isForPassword());
     }
 
     @Override
@@ -35,7 +35,8 @@ public class TokenDaoImpl extends JdbcDaoSupport implements ITokenDao {
         try {
             return Optional.ofNullable(getJdbcTemplate().queryForObject(tokenQueries.getReadToken(), (rs, row) ->
                             new TokenEntity(rs.getObject("token", UUID.class), rs.getString("user_email"),
-                                    rs.getTimestamp("expired_at").toInstant(), rs.getBoolean("is_activated")),
+                                    rs.getTimestamp("expired_at").toInstant(), rs.getBoolean("is_activated"),
+                                    rs.getBoolean("is_for_password")),
                     token));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
