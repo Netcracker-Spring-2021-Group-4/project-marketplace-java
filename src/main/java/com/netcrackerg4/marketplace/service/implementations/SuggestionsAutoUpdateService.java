@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class SuggestionsAutoUpdateService {
 
     private static final int MIN_SUPPORT = 2;
-    private static final double MIN_CONFIDENCE = 0.6;
+    private static final double MIN_CONFIDENCE = 0.3;
 
 
     private final IProductDao productDao;
@@ -35,9 +35,9 @@ public class SuggestionsAutoUpdateService {
         Map<UUID, Integer> productsMap = productDao.getAllProductsSupport().entrySet().stream()
                 .filter(x -> x.getValue() >= MIN_SUPPORT)
                 .collect(Collectors.toMap(x -> x.getKey(), x -> x.getValue()));
+        if (productsMap.isEmpty()) return;
 
         List<UUID> products = new ArrayList<>(productsMap.keySet());
-        if (products.isEmpty()) return;
 
 
         List<RecommendationEntity> recommendations = new ArrayList<>();
