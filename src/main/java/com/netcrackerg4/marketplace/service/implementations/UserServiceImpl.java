@@ -63,7 +63,7 @@ public class UserServiceImpl implements IUserService {
         if (activationType != AccountActivation.NONE) {
             UUID token = UUID.randomUUID();
             tokenDao.create(new TokenEntity(token, signupRequest.getEmail(),
-                    Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false, false));
+                    Instant.now().plusSeconds(HOURS_TOKEN_VALID * 3600), false, activationType == AccountActivation.PASSWORD_RESET));
             mailService.sendConfirmSignupLetter(signupRequest.getEmail(), signupRequest.getFirstName(),
                     signupRequest.getLastName(), token, activationType);
         }
