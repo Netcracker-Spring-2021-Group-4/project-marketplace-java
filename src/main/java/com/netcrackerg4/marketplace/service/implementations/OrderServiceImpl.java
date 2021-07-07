@@ -267,8 +267,12 @@ public class OrderServiceImpl implements IOrderService {
         for (OrderItemRequest item : orderItems) {
             ProductEntity product = productDao.read(item.getProductId()).orElseThrow();
             productEntityMap.put(product.getProductId(), product);
-            if (product.getReserved() < item.getQuantity())
+            if (product.getReserved() < item.getQuantity()) {
                 throw new IllegalStateException("There should have been more products reserved.");
+            }
+            if (!product.getIsActive()) {
+                throw new IllegalStateException("Only active products can be ordered.");
+            }
             product.setReserved(product.getReserved() - item.getQuantity());
             product.setInStock(product.getInStock() - item.getQuantity());
             productDao.update(product);
